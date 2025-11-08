@@ -1,0 +1,1645 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>index.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="ib-link-%E6%93%8D%E4%BD%9C%E3%83%9E%E3%83%8B%E3%83%A5%E3%82%A2%E3%83%AB%E6%8A%BD%E5%87%BA%E7%89%88">IB-Link 操作マニュアル（抽出版）</h1>
+<blockquote>
+<p>この Markdown は PDF から自動抽出されたテキストと画像で構成されています。</p>
+</blockquote>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-1">ページ 1</h2>
+<p>IB-Link 操作マニュアル
+更新履歴
+2025/09/30 バージョン3.0対応
+2025/09/09 バージョン2.0対応
+2025/07/15 「IB-Link」表記修正
+2025/06/25 「利⽤者向け機能」「開発者向け機能」章分け
+2025/06/18  初版</p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-2">ページ 2</h2>
+<p>⽬次</p>
+<ol>
+<li>システム概要</li>
+<li>機能概要</li>
+<li>利⽤者向け機能
+3.1. モデル操作
+3.2. モデル選択と起動⼿順
+3.3. マルチモーダルモデル
+3.4. IB-Link 停⽌⼿順</li>
+<li>開発者向け機能
+4.1. チャットの使い⽅
+4.2. Runtime（ランタイム）設定
+4.3. Logs機能
+4.4. ドキュメント埋め込み
+4.5. ⾳声⽂字起こし
+4.6. データーベース
+4.7. API仕様
+1.システム概要
+⼤規模⾔語モデル（LLM）をPC上で実⾏・実験できるLLM利⽤アプリケーションです。
+2.機能概要
+利⽤者向け機能と開発者向け機能が⽤意されています。
+利⽤者向け機能 （D-アプリをご利⽤いただくための機能になります。）
+モデル操作
+起動・停⽌ （OS起動時に⾃動でIB-Linkは起動され利⽤可能状態になります。）
+開発者向け機能
+チャット
+Runtime(ランタイム)設定
+ログ操作
+ドキュメント埋め込み機能
+⾳声⽂字起こし
+データベース
+API</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-3">ページ 3</h2>
+<p>3.利⽤者向け機能
+3.1 モデル操作
+「Models」タブでは、利⽤するGGUF形式のLLMモデルを検索・選択・ダウンロードできます。
+初期状態 デフォルトのモデルが選択され、使⽤可能な状態になっています。
+最適なモデル選定 速度重視の軽量モデル／精度重視の⼤型モデルを簡単に切り替え、⽤途に合った
+LLMを試せます。
+モデルバージョン管理 旧版も併存させて⽐較しながら検証できるので、アップグレード判定がスムー
+ズ。</p>
+<ol>
+<li>Modelsタブを開く
+左側メニューから「Models」を選択すると、モデル管理画⾯が表⽰されます。
+右側にモデルの詳細情報が表⽰されます。
+モデルは C:\Users&lt;ユーザー名&gt;.iblink\Models に保存されます。</li>
+</ol>
+<p><img src="images/page-003_img-001.png" alt="図: ページ 3 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-4">ページ 4</h2>
+<ol start="2">
+<li>モデルを検索する
+上部の検索バーにモデル名を⼊⼒すると、該当する候補が⼀覧に表⽰されます。
+例︓Qwen3-0.6B と⼊⼒すると、該当するGGUFモデルがリストに出てきます。
+絞り込み可能です（部分⼀致）。</li>
+</ol>
+<p><img src="images/page-004_img-001.png" alt="図: ページ 4 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-5">ページ 5</h2>
+<ol start="3">
+<li>モデルの詳細を確認する
+任意のモデルをクリックすると、右側にモデル情報が表⽰されます。
+作成者、種類、ファイルサイズ、作成⽇、最終更新⽇などが確認可能です。
+複数のGGUFファイルがある場合、それぞれ選択できます。</li>
+</ol>
+<p><img src="images/page-005_img-001.png" alt="図: ページ 5 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-6">ページ 6</h2>
+<ol start="4">
+<li>モデルのダウンロード
+使⽤するGGUFファイルをプルダウンから選び、「Download Selected GGUF File」ボタンをクリックしま
+す。
+ダウンロードの進捗が画⾯下に表⽰されます（例︓5.6%）。
+複数ファイルがある場合は、任意の精度（例︓q5_k, q8_0など）を選択できます。</li>
+</ol>
+<p><img src="images/page-006_img-001.png" alt="図: ページ 6 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-7">ページ 7</h2>
+<ol start="5">
+<li>ダウンロード完了メッセージ
+ダウンロードが完了すると、モデルファイルが保存されたことと、UIへの通知メッセージが表⽰されます。
+保存先︓C:\Users&lt;ユーザー名&gt;.iblink\Models
+チャット画⾯でモデルが使⽤可能になります。</li>
+</ol>
+<p><img src="images/page-007_img-001.png" alt="図: ページ 7 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-8">ページ 8</h2>
+<p>3.2 モデル選択と起動⼿順
+ダウンロード済みのモデルを選択し、起動するための⼿順を解説します。</p>
+<ol>
+<li>現在のモデル確認とチャット初期状態
+IB-Linkが起動し、チャット画⾯でモデルが表⽰されている状態。
+右上のStop Serverをクリックするとサーバが停⽌します。
+Statusが Server stopped になれば停⽌状態になります。</li>
+</ol>
+<p><img src="images/page-008_img-001.png" alt="図: ページ 8 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-9">ページ 9</h2>
+<ol start="2">
+<li>サーバー停⽌後の状態
+StatusがServer stopped の場合は機能しません。
+モデルは選択済みでも、サーバーを起動しなければ使⽤できません。</li>
+</ol>
+<p><img src="images/page-009_img-001.png" alt="図: ページ 9 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-10">ページ 10</h2>
+<ol start="3">
+<li>モデル選択⼿順
+画⾯上部の Model: ドロップダウンをクリックし、使⽤したいモデル（例︓Qwenやtinyswallow）を選びま
+す。
+.gguf 形式のモデルファイルから選べます。</li>
+</ol>
+<p><img src="images/page-010_img-001.png" alt="図: ページ 10 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-11">ページ 11</h2>
+<ol start="4">
+<li>サーバー起動の必要メッセージ
+モデルを選んでも、サーバーを起動していないと以下のような警告が表⽰されます。
+To start chatting, either:
+Run the local server (click 'Run Server' button)
+Configure OpenAI API settings in the Runtime tab</li>
+</ol>
+<p><img src="images/page-011_img-001.png" alt="図: ページ 11 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-12">ページ 12</h2>
+<ol start="5">
+<li>サーバーを起動する
+右上の Run Server ボタンをクリックすると、ローカルモデルのロードが始まります。
+ステータス︓Loading model... → Server running になると起動完了になります。</li>
+</ol>
+<p><img src="images/page-012_img-001.png" alt="図: ページ 12 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-13">ページ 13</h2>
+<p>3.3 マルチモーダルモデル
+マルチモーダルモデルを使⽤する⼿順を記載します。
+⼿順</p>
+<ol>
+<li>Models でモデルを検索
+左側サイドバーで Models を開き、検索ボックスに次を⼊⼒します。
+ggml-org/gemma-3-4b-it-qat-gguf</li>
+<li>リポジトリを選択して内容を確認
+検索結果から ggml-org/gemma-3-4b-it-gguf を選択します。右側の Model Information に基本情報と利⽤
+可能な GGUF ファイルが表⽰されます。
+Available GGUF Files に以下の 2 つが⾒えることを確認します。
+gemma-3-4b-it-qat-Q4_0.gguf（約 2.35GB）
+mmproj-model-f16-4B.gguf（約 0.79GB）</li>
+</ol>
+<p><img src="images/page-013_img-001.png" alt="図: ページ 13 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-14">ページ 14</h2>
+<ol start="3">
+<li>Gemma 本体（Q4_0）をダウンロード
+gemma-3-4b-it-qat-Q4_0.gguf を選択し、右下の Download Selected GGUF File をクリック。進捗が下部
+に表⽰されます。
+ダウンロード完了メッセージが出るまで待ちます。</li>
+</ol>
+<p><img src="images/page-014_img-001.png" alt="図: ページ 14 画像 1"></p>
+<p><img src="images/page-014_img-002.png" alt="図: ページ 14 画像 2"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-15">ページ 15</h2>
+<ol start="4">
+<li>mmproj（投影モデル）をダウンロード
+続けて mmproj-model-f16-4B.gguf を選択して同様にダウンロードします。
+完了を確認します。</li>
+</ol>
+<p><img src="images/page-015_img-001.png" alt="図: ページ 15 画像 1"></p>
+<p><img src="images/page-015_img-002.png" alt="図: ページ 15 画像 2"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-16">ページ 16</h2>
+<ol start="5">
+<li>ローカルサーバーを停⽌
+左側サイドバーで Chat を開く。 右上の Stop Server をクリックしてサーバーを起動します。ステータスが
+Server stopped になることを確認する。
+上部の Model ドロップダウンから gemma-3-4b-it-qat-Q4_0.gguf を選択します。
+&lt;&gt;アイコンを押下して、詳細設定ページを開きます。
+Custom Arguments に mmproj を追加します︓</li>
+</ol>
+<p><img src="images/page-016_img-001.png" alt="図: ページ 16 画像 1"></p>
+<p><img src="images/page-016_img-002.png" alt="図: ページ 16 画像 2"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-17">ページ 17</h2>
+<p>追加ボタン（Add Custom Argument）を押し、名前に --mmproj、値に C:\Users&lt;ユーザー名</p>
+<blockquote>
+<p>.iblink\Modelsmmproj-model-f16-4B.gguf を⼊⼒
+（モデルと同じディレクトリにある前提・相対指定が可能です）
+Save Setting をクリック
+プレビュー（Command Preview）に --mmproj &quot;mmproj-model-f16-4B.gguf&quot; が含まれていることを確認
+します。</p>
+</blockquote>
+<ol start="6">
+<li>ローカルサーバーを起動
+右上の Run Server をクリックしてサーバーを起動します。ステータスが Server running になったら、下部
+の⼊⼒欄からチャットを開始できます。</li>
+<li>D-app再起動
+D-appを再起動してください。
+うまくいかないときは
+モデルが⾒つからない/読み込めない
+Download Location（….iblink\Models）にファイルがあるか確認
+モデル名の拡張⼦が .gguf で⼀致しているか確認
+mmproj が効いていない
+Custom Arguments に --mmproj mmproj-model-f16-4B.gguf が⼊っているか、Command
+Preview に反映されているか確認</li>
+</ol>
+<p><img src="images/page-017_img-001.png" alt="図: ページ 17 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-18">ページ 18</h2>
+<p>3.4 IB-Link 停⽌⼿順</p>
+<ol>
+<li>IB-Linkが起動中であることを確認
+IB-Link の画⾯右上にある Status: Server running を確認します。</li>
+<li>「Stop Server」ボタンをクリック
+上部の「Stop Server」ボタンをクリックして、ローカルサーバを停⽌します。</li>
+</ol>
+<p><img src="images/page-018_img-001.png" alt="図: ページ 18 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-19">ページ 19</h2>
+<ol start="3">
+<li>IB-Link停⽌を確認
+「Status」が Server stopped に変わっていることを確認します。</li>
+<li>タスクトレイから IB-Link を終了（必要に応じて）
+タスクバーのトレイアイコンから IB-Link を右クリックし、Exit を選択します。</li>
+</ol>
+<p><img src="images/page-019_img-001.png" alt="図: ページ 19 画像 1"></p>
+<p><img src="images/page-019_img-002.png" alt="図: ページ 19 画像 2"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-20">ページ 20</h2>
+<ol start="4">
+<li>開発者向け機能
+4.1 チャットの使い⽅</li>
+<li>チャットの新規作成
+左上の New Chat ボタンをクリックすると、新しい会話が作成されます。</li>
+</ol>
+<p><img src="images/page-020_img-001.png" alt="図: ページ 20 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-21">ページ 21</h2>
+<ol start="2">
+<li>メッセージの⼊⼒と送信
+下部のテキストボックスにメッセージを⼊⼒し、右側の ⻘い⽮印ボタン をクリックして送信します。</li>
+</ol>
+<p><img src="images/page-021_img-001.png" alt="図: ページ 21 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-22">ページ 22</h2>
+<ol start="3">
+<li>応答の確認
+アシスタントの返信が緑⾊の背景で表⽰されます。</li>
+</ol>
+<p><img src="images/page-022_img-001.png" alt="図: ページ 22 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-23">ページ 23</h2>
+<p>4.2 Runtime 設定
+Runtime タブでは、ローカルモデルの実⾏に必要な Llamaサーバー設定 と API設定 を構成できます。
+初期状態 デフォルトの Llama が選択され、使⽤可能な状態になっています。
+ハードウェアに合わせた最適化 ⾃PCの命令セットに合う Llama バイナリを選ぶことで推論速度を最⼤
+化できます。</p>
+<ol>
+<li>Llama Server 設定タブ
+ローカル実⾏⽤ Llama サーバーの .exe 実⾏パスを指定し、任意のバージョンを選択またはダウンロードで
+きます。</li>
+<li>操作⼿順</li>
+<li>llama-server.exe を指定
+Browse ボタンで任意のバイナリファイルを選択</li>
+<li>Select from Downloaded Servers から⾃動抽出されたバージョンを選択
+選択するとそのパスが有効になります</li>
+<li>必要に応じて Release Tag と Zip File Name を⼊⼒し、モデルをダウンロード可能
+例: b5085, llama-b5085-bin-win-avx2-x64</li>
+</ol>
+<p><img src="images/page-023_img-001.png" alt="図: ページ 23 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-24">ページ 24</h2>
+<ol start="3">
+<li>API Settings タブ
+APIを⽤いたチャットやレポート⽣成の設定ができます。</li>
+<li>設定内容︓
+項⽬
+説明
+API Key
+APIキー（例: sk-...）
+Model
+利⽤モデル（例: gpt-4, gpt-3.5-turbo）
+Base URL
+APIのエンドポイントURL（例: http://localhost:8080/v1）
+Temperature
+応答のランダム性（0.0 = 決定的, 2.0 = ランダム）
+Max Tokens
+応答トークンの最⼤数（例: 1000）
+操作ボタン︓
+Save Settings︓設定を保存
+Reset to Defaults︓デフォルトに戻す
+Test Connection︓API接続をテスト</li>
+<li>Embeddigs API タブ
+このタブは機能として提供しておりません。
+設定を変更いただかないようお願いいたします。
+注意事項
+設定変更後は再度 Run Server しないと反映されません。</li>
+</ol>
+<p><img src="images/page-024_img-001.png" alt="図: ページ 24 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-25">ページ 25</h2>
+<p>4.3 Logs機能
+Server Logs の確認
+上部タブから Server Logs を選択します。
+アプリ起動時の状態、モデルロード、OCR設定、バックグラウンドサービスの状態などが時系列で表
+⽰されます。
+例: APIキーの読込、ローカルサーバの起動、OCR対象ディレクトリ数、エラー/警告 等。
+API Logs の確認
+上部タブから API Logs を選択します。
+すべてのAPIログを⼀覧で確認できます。</p>
+<p><img src="images/page-025_img-001.png" alt="図: ページ 25 画像 1"></p>
+<p><img src="images/page-025_img-002.png" alt="図: ページ 25 画像 2"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-26">ページ 26</h2>
+<p>API の絞り込み（Filter API）</p>
+<ol>
+<li>画⾯上部の Filter API ドロップダウンをクリックします。</li>
+<li>All / Documents API / Embeddings API / Retriever API / Audio API などから対象を選択します。
+Documents API のログを⾒る
+Documents API を選択すると、ドキュメント処理（OCR、分割、チャンク数、進捗％、成功/失敗件
+数、ストレージ使⽤量など）の詳細が確認できます。
+例:
+「Processed file」「Strategy: Sync」「Chunks」「Progress」「Succeeded/Failed」 などの⾏で処
+理結果を確認</li>
+</ol>
+<p><img src="images/page-026_img-001.png" alt="図: ページ 26 画像 1"></p>
+<p><img src="images/page-026_img-002.png" alt="図: ページ 26 画像 2"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-27">ページ 27</h2>
+<p>OCR=True/False、分割戦略、チャンク数、実⾏時間、リソース使⽤量
+（Storage/DB/Embeddings/Processing）等
+Embeddings API のログを⾒る
+Embeddings API を選択すると、トークン化、推論時間、バッチサイズ、メモリ使⽤量、⽣成された
+埋め込み数などが確認できます。
+Retriever API のログを⾒る
+Retriever API を選択すると、問い合わせテキストに対する埋め込み⽣成、RDBクエリ（例: SELECT
+COUNT(*) FROM &quot;DocumentEmbeddings&quot;）実⾏、応答時間（ms）などが確認できます。
+共通操作（⾃動スクロール・差分のみ・保存/クリア）</p>
+<p><img src="images/page-027_img-001.png" alt="図: ページ 27 画像 1"></p>
+<p><img src="images/page-027_img-002.png" alt="図: ページ 27 画像 2"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-28">ページ 28</h2>
+<p>Auto-scroll: 新しいログが出ると⾃動で末尾へ追従します。⻑時間の監視に便利です。
+Changes Only: 変化のある⾏だけを表⽰してノイズを減らします。
+Status: 現在の稼働状態（例: Running (Healthy) (Standalone)）が表⽰されます。
+Refresh: 表⽰を更新します。
+Save Logs: 現在の表⽰内容をファイルに保存します（監査・共有⽤）。
+Clear Logs: 画⾯上のログ表⽰をクリアします（※サーバ側のログ消去とは異なる場合があります）。
+Start/Stop/Restart API: 埋め込みやリトリーバー等のAPIサービスの起動/停⽌/再起動を⾏います（権
+限・構成に依存）。
+トラブルシューティングのヒント
+エラーが出た時刻を基点に Server Logs と API Logs を併読し、原因箇所（起動直後・ドキュメント処
+理・埋め込み⽣成・検索処理など）を切り分けます。
+Filter API で対象を絞り、Changes Only をオンにして差分だけを追うと効率的です。</p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-29">ページ 29</h2>
+<p>4.4 ドキュメント埋め込み</p>
+<ol>
+<li>画⾯を開く</li>
+<li>IB-Link を起動し、左メニューから Embedding を開く。</li>
+<li>ルートフォルダを選択</li>
+<li>左 Document Library の Root Directory で Browse… をクリックし、埋め込み対象フォルダを選択。</li>
+<li>ツリーに出たファイルへチェック（Select All でも可）。</li>
+<li>スキャンPDFはツリー上部の OCR を有効化。</li>
+<li>埋め込み処理の開始</li>
+</ol>
+<p><img src="images/page-029_img-001.png" alt="図: ページ 29 画像 1"></p>
+<p><img src="images/page-029_img-002.png" alt="図: ページ 29 画像 2"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-30">ページ 30</h2>
+<ol>
+<li>Process をクリックして埋め込み開始。</li>
+<li>進捗は下部 Embedding Progress に表⽰。</li>
+<li>処理完了の確認</li>
+<li>「Processing Complete」ダイアログが出たら OK。</li>
+<li>Documents to embed が 100% で、Completed Files に並んでいることを確認。
+「Files processed: 0 (no new files needed processing)」は差分なし／対象外の意味。更新やOCR
+設定、選択状態を確認。</li>
+</ol>
+<p><img src="images/page-030_img-001.png" alt="図: ページ 30 画像 1"></p>
+<p><img src="images/page-030_img-002.png" alt="図: ページ 30 画像 2"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-31">ページ 31</h2>
+<ol start="5">
+<li>埋め込み済みドキュメントの選択</li>
+<li>右 Embedded Documents で Refresh。</li>
+<li>使いたいドキュメントにチェック（Select All も可）。不要なら Delete Selected。</li>
+<li>チャットで質問（検索）</li>
+<li>上部 Chat に移動。</li>
+</ol>
+<p><img src="images/page-031_img-001.png" alt="図: ページ 31 画像 1"></p>
+<p><img src="images/page-031_img-002.png" alt="図: ページ 31 画像 2"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-32">ページ 32</h2>
+<ol start="2">
+<li>右で選択したドキュメントを根拠に回答されるので、質問を⼊⼒して送信。</li>
+</ol>
+<p><img src="images/page-032_img-001.png" alt="図: ページ 32 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-33">ページ 33</h2>
+<p>4.5 データベース</p>
+<ol>
+<li>Database 画⾯を開く
+左メニューの Database を開きます。</li>
+<li>データベース接続を設定する</li>
+<li>画⾯上部の Setup Database Connection をクリック。</li>
+<li>表⽰されたダイアログに接続情報を⼊⼒します（例）
+Host: localhost
+Port: 5432
+Database: iblink
+Username: postgres
+Password: （PostgreSQL のパスワード）</li>
+<li>Test Connection を押して「Connection successful!」を確認。</li>
+<li>Setup Database を押して反映。</li>
+</ol>
+<p><img src="images/page-033_img-001.png" alt="図: ページ 33 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-34">ページ 34</h2>
+<p>接続後、Database Settings 画⾯の Connection Status が True になっていることを確認します。</p>
+<ol start="3">
+<li>タイムゾーン設定（任意）</li>
+<li>Time Zone Settings の Select Time Zone で Asia/Tokyo を選択。</li>
+<li>Apply Time Zone をクリックして保存。</li>
+<li>ストレージモード選択
+既定は Database Storage（バージョン3はデータベース必須）︓会話データを PostgreSQL に保存。
+JSON File Storage︓ポータビリティ重視のローカル JSON 保存。
+もし JSON から DB に移⾏する場合は Migrate JSON to Database を実⾏。</li>
+<li>SQL マイグレーション（必要に応じて）</li>
+</ol>
+<p><img src="images/page-034_img-001.png" alt="図: ページ 34 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-35">ページ 35</h2>
+<ol>
+<li>SQL Migration セクションで Browse SQL File をクリック。</li>
+<li>実⾏したい .sql ファイルを選択。</li>
+<li>Apply Migration を押して適⽤。</li>
+<li>診断の実⾏（動作確認）</li>
+<li>右下の Run Diagnostics をクリック。</li>
+<li>Status が Diagnostic completed、Connection Status が True であること、 必要なテーブルが検出され
+ていることを確認します。
+トラブルシューティング（要点）
+接続エラー時︓ホスト名/ポート、ユーザー名/パスワード、DB名の誤り、PostgreSQL 起動状況、
+Firewall を確認。
+マイグレーション失敗時︓エラーメッセージを確認し、DDL/制約（NOT NULL・FK など）や対象テー
+ブルの有無を⾒直す。
+タイムゾーン変更後は、⽇時の保存・表⽰が期待通りかをテストする。</li>
+</ol>
+<p><img src="images/page-035_img-001.png" alt="図: ページ 35 画像 1"></p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-36">ページ 36</h2>
+<p>4.6 API 仕様
+Documents API、Retriever API、Audio APIの仕様について記載します。
+Documents API
+概要
+Documents API は、ドキュメントの処理、埋め込み（embedding）⽣成、セマンティック検索を提供する
+RESTful API サービスです。 ドキュメントを⾮同期で処理し、意味的な類似検索のためのベクトル埋め込みを
+⽣成し、包括的なドキュメント管理機能を備えています。
+クイックスタート
+ベースURL
+http://localhost:8500/iblink/v1
+コンテンツタイプ
+すべてのリクエストには次を含める必要があります:
+Content-Type: application/json
+基本的な利⽤フロー</p>
+<ol>
+<li>ドキュメントを処理して埋め込みを作成（POST /documents/process）</li>
+<li>処理状況を確認（POST /documents/status）</li>
+<li>⾃然⾔語で検索（POST /documents/search）</li>
+<li>埋め込みを作成せずに内容を抽出（POST /documents/extract）
+サポートされるファイル形式
+ドキュメント
+Office: .docx, .xlsx, .pptx, .doc, .xls, .ppt
+PDF: .pdf（OCR対応）
+テキスト: .txt, .md, .rtf
+Web: .html, .htm, .xml, .json
+データ: .csv, .ipynb（Jupyter Notebook）
+フィード: .rss, .atom
+画像（OCR対応）
+.jpg, .jpeg, .png, .bmp, .tiff, .tif, .gif, .webp</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-37">ページ 37</h2>
+<p>API エンドポイント</p>
+<ol>
+<li>ドキュメント処理 (⾮同期)
+埋め込みを⾮同期で作成します。システムへのファイル取り込みの主要なエンドポイントです。
+POST /documents/process
+リクエスト例
+{
+&quot;files&quot;: [
+&quot;C:/documents/report.pdf&quot;,
+{
+&quot;file_path&quot;: &quot;C:/images/diagram.png&quot;,
+&quot;enable_ocr&quot;: true
+}
+],
+&quot;directories&quot;: [&quot;C:/documents/project&quot;],
+&quot;d_app_id&quot;: &quot;my-app-123&quot;,
+&quot;project_id&quot;: &quot;project-456&quot;,
+&quot;chunk_size&quot;: 500,
+&quot;chunk_overlap&quot;: 50,
+&quot;enable_ocr&quot;: false,
+&quot;batch_processing&quot;: true,
+&quot;duplicate_strategy&quot;: &quot;skip&quot;,
+&quot;force_update&quot;: false
+}
+主要パラメータ説明
+files : ファイルパスまたはファイル設定オブジェクトの配列
+directories : 再帰的に処理するディレクトリ⼀覧
+d_app_id : テナント識別⼦
+project_id : プロジェクト識別⼦
+chunk_size : 埋め込み⽣成時のテキスト分割サイズ
+chunk_overlap : チャンク間の重なり
+enable_ocr : OCRを有効化
+duplicate_strategy : 重複時の動作（skip/update/add/sync）
+レスポンス例（202 Accepted）
+{
+&quot;job_id&quot;: &quot;my-app-123_project-456_job_20250129_143022&quot;,
+&quot;status&quot;: &quot;queued&quot;,
+&quot;message&quot;: &quot;Document processing job created successfully&quot;,</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-38">ページ 38</h2>
+<p>&quot;status_url&quot;: &quot;/iblink/v1/documents/status&quot;,
+&quot;created_at&quot;: &quot;2025-01-29T14:30:22Z&quot;
+}</p>
+<ol start="2">
+<li>処理状況の確認
+ジョブの進捗やキュー状態を確認します。
+POST /documents/status
+リクエスト例
+{
+&quot;status_type&quot;: &quot;processing&quot;,
+&quot;job_id&quot;: &quot;my-app-123_project-456_job_20250129_143022&quot;,
+&quot;include_files&quot;: true
+}
+主な status_type
+processing : 特定ジョブの進捗
+queue : キューの状態
+quota : リソース使⽤量
+health : サービスの健全性
+dependency : 外部依存の状態
+jobs : すべてのジョブ⼀覧
+レスポンス例（処理中）
+{
+&quot;status_type&quot;: &quot;processing&quot;,
+&quot;status&quot;: &quot;processing&quot;,
+&quot;processing&quot;: {
+&quot;progress&quot;: 45,
+&quot;total_files&quot;: 10,
+&quot;processed_files&quot;: 4,
+&quot;current_file&quot;: &quot;document5.pdf&quot;,
+&quot;started_at&quot;: &quot;2025-01-29T14:30:23Z&quot;,
+&quot;estimated_completion&quot;: &quot;2025-01-29T14:35:00Z&quot;
+}
+}</li>
+<li>ドキュメント検索</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-39">ページ 39</h2>
+<p>処理済みのドキュメントを意味的類似度で検索します。
+POST /documents/search
+リクエスト例
+{
+&quot;query&quot;: &quot;How to configure authentication in the system?&quot;,
+&quot;d_app_id&quot;: &quot;my-app-123&quot;,
+&quot;project_id&quot;: &quot;project-456&quot;,
+&quot;directories&quot;: [&quot;C:/documents/guides&quot;],
+&quot;limit&quot;: 10,
+&quot;similarity_threshold&quot;: 0.7
+}
+レスポンス例
+{
+&quot;query&quot;: &quot;How to configure authentication in the system?&quot;,
+&quot;results&quot;: [
+{
+&quot;document_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440001&quot;,
+&quot;content&quot;: &quot;To configure authentication, first navigate to the Settings &gt;
+Security section...&quot;,
+&quot;similarity_score&quot;: 0.92,
+&quot;file_name&quot;: &quot;security-guide.pdf&quot;,
+&quot;file_path&quot;: &quot;C:/documents/guides/security-guide.pdf&quot;,
+&quot;page_range&quot;: &quot;12-13&quot;
+}
+],
+&quot;total_results&quot;: 2
+}</p>
+<ol start="4">
+<li>コンテンツ抽出
+埋め込みを⽣成せずにテキストを抽出します。
+POST /documents/extract
+リクエスト例</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-40">ページ 40</h2>
+<p>{
+&quot;files&quot;: [
+&quot;C:/documents/report.pdf&quot;,
+{
+&quot;file_path&quot;: &quot;C:/images/scan.jpg&quot;,
+&quot;enable_ocr&quot;: true
+}
+],
+&quot;d_app_id&quot;: &quot;my-app-123&quot;,
+&quot;project_id&quot;: &quot;project-456&quot;,
+&quot;include_metadata&quot;: true
+}
+レスポンス例
+{
+&quot;status&quot;: &quot;success&quot;,
+&quot;extracted_files&quot;: [
+{
+&quot;file_name&quot;: &quot;report.pdf&quot;,
+&quot;content&quot;: &quot;Annual Report 2024...&quot;,
+&quot;content_length&quot;: 8542,
+&quot;metadata&quot;: {
+&quot;file_type&quot;: &quot;.pdf&quot;,
+&quot;file_size&quot;: 2048576
+}
+}
+]
+}</p>
+<ol start="5">
+<li>ドキュメント⼀覧
+処理済みのドキュメントまたはプロジェクトIDの⼀覧を取得します。
+POST /documents/list
+リクエスト例（ドキュメント⼀覧）
+{
+&quot;list_type&quot;: &quot;documents&quot;,
+&quot;d_app_id&quot;: &quot;my-app-123&quot;,
+&quot;project_id&quot;: &quot;project-456&quot;,
+&quot;file_extension&quot;: &quot;.pdf&quot;
+}</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-41">ページ 41</h2>
+<p>レスポンス例
+{
+&quot;documents&quot;: [
+{
+&quot;document_id&quot;: &quot;550e8400-e29b-41d4-a716-446655440004&quot;,
+&quot;file_name&quot;: &quot;user-manual.pdf&quot;,
+&quot;file_size&quot;: 5242880,
+&quot;created_at&quot;: &quot;2025-01-28T09:30:00Z&quot;
+}
+],
+&quot;total_count&quot;: 2
+}</p>
+<ol start="6">
+<li>ドキュメント削除
+埋め込み済みのドキュメントを削除します。
+DELETE /documents/delete
+リクエスト例
+{
+&quot;d_app_id&quot;: &quot;my-app-123&quot;,
+&quot;project_id&quot;: &quot;project-456&quot;,
+&quot;file_paths&quot;: [&quot;C:/documents/old-doc.pdf&quot;],
+&quot;delete_all&quot;: false
+}
+レスポンス例
+{
+&quot;status&quot;: &quot;success&quot;,
+&quot;deleted_count&quot;: 3,
+&quot;message&quot;: &quot;Successfully deleted 3 document(s) with 45 total embeddings&quot;
+}</li>
+<li>サービス状態確認
+健康状態チェック</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-42">ページ 42</h2>
+<p>{
+&quot;status_type&quot;: &quot;health&quot;
+}
+キュー状態確認
+{
+&quot;status_type&quot;: &quot;queue&quot;,
+&quot;d_app_id&quot;: &quot;my-app-123&quot;
+}
+クオータ確認
+{
+&quot;status_type&quot;: &quot;quota&quot;,
+&quot;d_app_id&quot;: &quot;my-app-123&quot;
+}</p>
+<ol start="8">
+<li>API情報取得
+GET /documents/info
+レスポンス例
+{
+&quot;service&quot;: &quot;IB-Link Documents API (Standalone)&quot;,
+&quot;version&quot;: &quot;1.0.0&quot;,
+&quot;description&quot;: &quot;Enhanced document processing and embedding generation service&quot;,
+&quot;supported_file_types&quot;: [&quot;.pdf&quot;, &quot;.txt&quot;, &quot;.md&quot;, &quot;.docx&quot;, &quot;.xlsx&quot;, &quot;.pptx&quot;, ...],
+&quot;database&quot;: { &quot;provider&quot;: &quot;PostgreSQL with pgvector&quot; }
+}
+エラーハンドリング
+標準的なエラーレスポンス:
+{
+&quot;error&quot;: &quot;エラーの概要&quot;,
+&quot;message&quot;: &quot;詳細な説明&quot;,</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-43">ページ 43</h2>
+<p>&quot;timestamp&quot;: &quot;2025-01-29T15:20:00Z&quot;
+}
+よく使われるHTTPステータスコード
+200 OK: 成功
+202 Accepted: ⾮同期ジョブ作成成功
+400 Bad Request: パラメータ不備
+404 Not Found: ジョブ/ドキュメントが存在しない
+429 Too Many Requests: レート/キュー制限超過
+500 Internal Server Error: サーバー内部エラー
+503 Service Unavailable: 依存サービスが利⽤不可
+507 Insufficient Storage: 容量制限超過
+ベストプラクティス
+バッチ処理を推奨: 複数ファイルを⼀度に送信
+適切なチャンクサイズを選択: ⼩さい⽂書は 300〜500、⼤きい⽂書は 500〜1000
+ジョブ状態を定期的に確認: ポーリングを活⽤
+OCR は必要な場合のみ有効化: パフォーマンスを最適化
+重複戦略を活⽤: 更新時は update、完全同期は sync
+統合サンプル
+Python
+client = DocumentsAPIClient()</p>
+<p>result = client.process_documents(
+files=[&quot;report.pdf&quot;, &quot;guide.docx&quot;],
+d_app_id=&quot;my-app&quot;,
+project_id=&quot;docs&quot;
+)
+print(f&quot;Processed {result['successful_files']} files successfully&quot;)</p>
+<p>results = client.search(&quot;authentication&quot;, &quot;my-app&quot;)
+for r in results[&quot;results&quot;]:
+print(f&quot;Score: {r['similarity_score']} - {r['file_name']}&quot;)
+Node.js
+const client = new DocumentsAPIClient();</p>
+<p>const result = await client.processDocuments(
+['report.pdf', 'guide.docx'],</p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-44">ページ 44</h2>
+<p>'my-app',
+'docs'
+);
+console.log(<code>Processed ${result.successful_files} files successfully</code>);</p>
+<p>const searchResults = await client.search('authentication', 'my-app');
+searchResults.results.forEach(r =&gt; {
+console.log(<code>Score: ${r.similarity_score} - ${r.file_name}</code>);
+});
+設定例
+{
+&quot;ConnectionStrings&quot;: {
+&quot;DefaultConnection&quot;:
+&quot;Host=localhost;Database=iblink_documents;Username=postgres;Password=your_password
+&quot;
+},
+&quot;DocumentsApi&quot;: {
+&quot;ChunkSize&quot;: 500,
+&quot;EnableOcr&quot;: true
+},
+&quot;EmbeddingApi&quot;: {
+&quot;BaseUrl&quot;: &quot;http://localhost:5000&quot;,
+&quot;Model&quot;: &quot;cl_nagoya_ruri_v3_310m_optimized_onnx&quot;
+}
+}
+トラブルシューティング
+ジョブが進まない場合: ログ確認・依存サービスのヘルスチェック
+OCR が動作しない: Tesseract のデータやパスを確認
+検索結果が出ない: 埋め込み⽣成が完了しているか確認、しきい値を下げる
+容量制限超過: 古いドキュメントを削除または管理者に拡張を依頼
+パフォーマンス最適化
+10〜50ファイルを⼀括処理すると効率的
+OCRは必要なときだけ有効化
+低レイテンシの埋め込みAPI接続を確保
+結果キャッシュを活⽤
+セキュリティ
+d_app_id によるマルチテナント分離</p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-45">ページ 45</h2>
+<p>ディレクトリトラバーサル防⽌、SQLインジェクション対策
+データはローカルに保存、外部送信なし（埋め込みAPI先を除く）
+サポート
+logs/ ディレクトリのアプリログを確認
+ステータスエンドポイントで依存状況を確認
+提供されている cURL サンプルで動作確認</p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-46">ページ 46</h2>
+<p>Retriever API
+概要
+Retriever API は、ドキュメントの埋め込み（embedding）を活⽤したセマンティック検索およびドキュメン
+ト取得を⾏う独⽴型サービスです。 ベクトルベース検索とハイブリッド検索の両⽅をサポートし、類似度検
+索と全⽂検索を統合したインターフェースを提供します。
+主な機能
+ベクトルセマンティック検索: 埋め込みを使って意味的に類似したドキュメントを検索
+ハイブリッド検索: ベクトル類似度と全⽂検索を組み合わせて精度向上
+ハイブリッド RRF 検索: Reciprocal Rank Fusion を使って複数のランキング信号を統合
+マルチテナント対応: d_app_id と project_id によるデータ分離
+ドキュメントフィルタリング: ドキュメント ID やディレクトリパスで絞り込み可能
+PostgreSQL + pgvector: 効率的なベクトル演算を実現
+アーキテクチャ構成</p>
+<ol>
+<li>コントローラ層
+RetrieverController (src/IB-Link.RetrieverAPI/Controllers/RetrieverController.cs:13)
+メイン API エンドポイント: POST /iblink/v1/retriever
+ヘルスチェック: GET /iblink/v1/retriever/health
+API 情報: GET /iblink/v1/retriever/info</li>
+<li>サービス層
+CustomRetrieverService (src/IB-
+Link.RetrieverAPI/Services/CustomRetrieverService.cs:14)
+すべての検索モードのロジックを実装
+DB クエリ管理と結果の整形を担当
+EmbeddingService (src/IB-Link.RetrieverAPI/Services/EmbeddingService.cs:9)
+外部の埋め込み API を使⽤して埋め込みを⽣成
+デフォルトエンドポイント: http://localhost:5000/iblink/v1/embeddings</li>
+<li>データ層
+RetrieverDbContext (src/IB-Link.RetrieverAPI/Data/RetrieverDbContext.cs:10)
+PostgreSQL + pgvector 拡張を使⽤
+DocumentEmbeddings テーブルを管理
+API エンドポイント
+メイン検索エンドポイント</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-47">ページ 47</h2>
+<p>POST /iblink/v1/retriever
+ベクトル類似度および/または全⽂検索を⽤いてドキュメント検索を実⾏します。
+リクエスト形式
+{
+&quot;text&quot;: &quot;検索クエリ&quot;,
+&quot;d_app_id&quot;: &quot;app-123&quot;,
+&quot;project_id&quot;: &quot;proj-456&quot;,
+&quot;limit&quot;: 10,
+&quot;search_mode&quot;: &quot;vector&quot;,
+&quot;files_directories&quot;: [&quot;dir1&quot;, &quot;dir2&quot;],
+&quot;file_paths&quot;: [&quot;/path/to/file1.pdf&quot;, &quot;/path/to/file2.txt&quot;],
+&quot;documents_id&quot;: [&quot;guid1&quot;, &quot;guid2&quot;],
+&quot;vector_weight&quot;: 0.7,
+&quot;text_weight&quot;: 0.3,
+&quot;rrf_k&quot;: 60,
+&quot;enable_phrase_matching&quot;: true
+}
+レスポンス形式
+{
+&quot;query&quot;: &quot;検索クエリ&quot;,
+&quot;d_app_id&quot;: &quot;app-123&quot;,
+&quot;project_id&quot;: &quot;proj-456&quot;,
+&quot;total_results&quot;: 10,
+&quot;total_unfiltered_results&quot;: 150,
+&quot;filtered_directories&quot;: [&quot;dir1&quot;, &quot;dir2&quot;],
+&quot;filtered_file_paths&quot;: [&quot;/path/to/file1.pdf&quot;, &quot;/path/to/file2.txt&quot;],
+&quot;results&quot;: [
+{
+&quot;id&quot;: &quot;uuid-string&quot;,
+&quot;text&quot;: &quot;ドキュメントの⼀部テキスト...&quot;,
+&quot;score&quot;: 0.95,
+&quot;metadata&quot;: {
+&quot;source&quot;: &quot;document.pdf&quot;,
+&quot;directory&quot;: &quot;/path/to/docs&quot;,
+&quot;file_path&quot;: &quot;/full/path/to/document.pdf&quot;,
+&quot;chunk_index&quot;: 5,
+&quot;page_range&quot;: &quot;10-12&quot;,
+&quot;start_page&quot;: 10,
+&quot;end_page&quot;: 12,
+&quot;chunk_category&quot;: &quot;PDF&quot;,
+&quot;document_id&quot;: &quot;doc-uuid&quot;,
+&quot;vector_score&quot;: 0.95,
+&quot;text_score&quot;: 0.8,
+&quot;text_rank&quot;: 1.0
+}</p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-48">ページ 48</h2>
+<p>}
+]
+}
+ヘルスチェックエンドポイント
+GET /iblink/v1/retriever/health
+API と依存サービスの稼働状況を返します。
+{
+&quot;status&quot;: &quot;healthy&quot;,
+&quot;timestamp&quot;: &quot;2024-01-15T10:30:00Z&quot;,
+&quot;service&quot;: &quot;retriever-api&quot;,
+&quot;version&quot;: &quot;1.0.0&quot;,
+&quot;port&quot;: 6500,
+&quot;dependencies&quot;: {
+&quot;database&quot;: {
+&quot;status&quot;: &quot;healthy&quot;,
+&quot;message&quot;: &quot;Database connection healthy&quot;
+},
+&quot;embeddingApi&quot;: {
+&quot;status&quot;: &quot;healthy&quot;,
+&quot;message&quot;: &quot;Embedding API available&quot;,
+&quot;url&quot;: &quot;http://localhost:5000&quot;
+}
+}
+}
+情報エンドポイント
+GET /iblink/v1/retriever/info
+API の構成情報を返します。
+検索モード</p>
+<ol>
+<li>ベクトル検索（デフォルト）
+クエリとドキュメントの埋め込み間のコサイン類似度を使⽤
+⾔い換えや類義語にも強い</li>
+<li>ハイブリッド検索
+ベクトル類似度と全⽂検索を組み合わせ
+スコア: 最終スコア = (vector_score * vector_weight) + (text_score * text_weight)
+デフォルト重み: ベクトル70％、テキスト30％</li>
+<li>ハイブリッド RRF 検索</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-49">ページ 49</h2>
+<p>Reciprocal Rank Fusion による順位融合
+式: RRF_score = 1/(k + vector_rank) + 1/(k + text_rank)
+デフォルト k=60
+SQL クエリ例
+ベクトル検索クエリ
+ハイブリッド検索（重み付き）
+ハイブリッド RRF 検索
+（※元のドキュメントの SQL サンプルを⽇本語コメント付きでそのまま保持）
+テキスト検索処理
+フレーズマッチング: 単語間の近接検索や接頭辞検索をサポート
+標準検索: 単語間を AND で接続し、接頭辞マッチを適⽤
+データベーススキーマ
+DocumentEmbeddings テーブルの列構成（Id, Content, Embedding, FileName, FilePath, …）
+pgvector によるベクトルインデックス利⽤
+埋め込み API 連携
+リクエスト/レスポンス形式例
+OpenAI の text-embedding-ada-002 をデフォルト利⽤可能
+設定
+appsettings.json の設定例
+環境変数でポートや DB 接続を上書き可能
+エラーハンドリング
+エラー JSON の形式
+エラー種別（invalid_request_error / service_unavailable など）
+コード例（missing_parameter / database_unavailable など）
+パフォーマンス考慮点</p>
+<ol>
+<li>pgvector によるベクトルインデックス最適化</li>
+<li>ハイブリッド検索で内部的に 3 倍の候補を取得</li>
+<li>スコア閾値で低品質マッチを除外</li>
+<li>EF Core 接続プール</li>
+<li>埋め込みのキャッシュ推奨
+セキュリティ機能</li>
+<li>マルチテナントによるデータ分離</li>
+<li>パラメータ化クエリで SQL インジェクション防⽌</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-50">ページ 50</h2>
+<ol start="3">
+<li>⼊⼒バリデーション</li>
+<li>エラー時に機密情報を⾮表⽰</li>
+<li>ログのサニタイズ
+テスト⽤ページ
+/wwwroot/test.html – 基本検索テスト
+/wwwroot/test-hybrid.html – ハイブリッド検索テスト
+デプロイメント要件
+デフォルトポート 6500
+PostgreSQL（pgvector 拡張付き）必須
+埋め込み API へのアクセス
+.NET ランタイム環境</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-51">ページ 51</h2>
+<p>Audio API
+概要
+Audio API Server は、OpenAI 互換の⾳声⽂字起こし（Transcription）API を提供し、 リアルタイムストリ
+ーミング機能を追加したサーバーです。 Snapdragon NPU による⾼速化をサポートしつつ、CPU フォールバ
+ックにも対応しています。
+ベースURL
+http://localhost:8000
+認証
+デフォルトでは認証は不要です。 API キー認証を有効にするには、.env ファイルに API_KEY を設定しま
+す。
+エンドポイント</p>
+<ol>
+<li>ヘルスチェック
+GET /health
+サーバーが稼働しているかを確認します。
+レスポンス例
+{
+&quot;status&quot;: &quot;healthy&quot;,
+&quot;timestamp&quot;: &quot;2025-01-08T12:00:00Z&quot;
+}</li>
+<li>サーバーステータス
+GET /status
+サーバーの詳細な稼働状況と設定を取得します。
+レスポンス例
+{
+&quot;status&quot;: &quot;running&quot;,
+&quot;uptime&quot;: 3600,</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-52">ページ 52</h2>
+<p>&quot;total_requests&quot;: 150,
+&quot;active_connections&quot;: 2,
+&quot;config&quot;: {
+&quot;model&quot;: &quot;whisper-large-v3-turbo&quot;,
+&quot;npu_enabled&quot;: true,
+&quot;target_runtime&quot;: &quot;qnn_dlc&quot;
+}
+}</p>
+<ol start="3">
+<li>⾳声⽂字起こし（OpenAI 互換）
+POST /v1/audio/transcriptions
+⾳声をテキストに変換します。
+リクエスト:
+メソッド: POST
+Content-Type: multipart/form-data
+パラメータ
+パラメータ
+型
+必須
+説明
+file
+file
+はい
+⾳声ファイル（WAV, MP3, M4A など）
+model
+string
+いいえ
+モデル名（デフォルト: whisper-large-v3-turbo）
+language
+string
+いいえ
+⾔語コード（例: &quot;en&quot;, &quot;ja&quot;）または &quot;auto&quot;
+response_format
+string
+いいえ
+出⼒形式: &quot;json&quot;, &quot;text&quot;, &quot;srt&quot;, &quot;vtt&quot;, &quot;verbose_json&quot;
+prompt
+string
+いいえ
+モデルに指⽰を与えるオプションのプロンプト
+temperature
+float
+いいえ
+サンプリング温度 (0.0-1.0)
+リクエスト例
+curl -X POST http://localhost:8000/v1/audio/transcriptions <br>
+-F &quot;file=@audio.wav&quot; <br>
+-F &quot;model=whisper-large-v3-turbo&quot; <br>
+-F &quot;response_format=verbose_json&quot;
+レスポンス例（verbose_json）
+{
+&quot;task&quot;: &quot;transcribe&quot;,
+&quot;language&quot;: &quot;en&quot;,
+&quot;duration&quot;: 30.0,</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-53">ページ 53</h2>
+<p>&quot;text&quot;: &quot;This is the transcribed text...&quot;,
+&quot;segments&quot;: [
+{
+&quot;id&quot;: 0,
+&quot;seek&quot;: 0,
+&quot;start&quot;: 0.0,
+&quot;end&quot;: 5.0,
+&quot;text&quot;: &quot;This is the transcribed text&quot;,
+&quot;tokens&quot;: [50364, 1668, 307, 264, 1145, 17820, 2078],
+&quot;temperature&quot;: 0.0,
+&quot;avg_logprob&quot;: -0.25,
+&quot;compression_ratio&quot;: 1.2,
+&quot;no_speech_prob&quot;: 0.01
+}
+]
+}
+レスポンス例（json）
+{
+&quot;text&quot;: &quot;This is the transcribed text...&quot;
+}
+レスポンス例（text）
+This is the transcribed text...</p>
+<ol start="4">
+<li>⾳声翻訳
+POST /v1/audio/translations
+⾳声を英語テキストに翻訳します。 リクエスト形式は⽂字起こしと同じです。 レスポンスも同様ですが、結
+果のテキストが英語になります。</li>
+<li>WebSocket ストリーミング
+WS /v1/audio/stream
+リアルタイムで⾳声をストリーミングしながら⽂字起こしします。
+接続例
+const ws = new WebSocket('ws://localhost:8000/v1/audio/stream');</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-54">ページ 54</h2>
+<p>プロトコル</p>
+<ol>
+<li>設定を送信（JSON）
+{
+&quot;model&quot;: &quot;whisper-large-v3-turbo&quot;,
+&quot;language&quot;: &quot;auto&quot;,
+&quot;response_format&quot;: &quot;json&quot;
+}</li>
+<li>⾳声データを送信（バイナリ）
+16kHz / 16bit / モノラルの PCM
+またはファイルのチャンクを送信</li>
+<li>⽂字起こし結果を受信（JSON）
+部分結果（partial）
+{
+&quot;type&quot;: &quot;partial&quot;,
+&quot;text&quot;: &quot;This is being transcribed&quot;,
+&quot;timestamp&quot;: 1704715200,
+&quot;segment_id&quot;: 0
+}
+最終結果（final）
+{
+&quot;type&quot;: &quot;final&quot;,
+&quot;text&quot;: &quot;This is being transcribed in real time.&quot;,
+&quot;timestamp&quot;: 1704715205,
+&quot;segment_id&quot;: 0,
+&quot;segments&quot;: [...]
+}
+クライアント例
+const ws = new WebSocket('ws://localhost:8000/v1/audio/stream');</li>
+</ol>
+<p>ws.onopen = () =&gt; {
+ws.send(JSON.stringify({
+model: 'whisper-large-v3-turbo',
+language: 'auto'
+}));
+streamAudioChunks(ws);</p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-55">ページ 55</h2>
+<p>};</p>
+<p>ws.onmessage = (event) =&gt; {
+const result = JSON.parse(event.data);
+console.log('Transcription:', result.text);
+};</p>
+<ol start="6">
+<li>リアルタイム⾳声⼊⼒（マイク）
+WS /v1/audio/realtime
+マイク⼊⼒からリアルタイムで⽂字起こしします。
+プロトコル</li>
+<li>接続時の設定
+{
+&quot;action&quot;: &quot;start&quot;,
+&quot;config&quot;: {
+&quot;language&quot;: &quot;auto&quot;,
+&quot;vad_enabled&quot;: true,
+&quot;energy_threshold&quot;: 1000
+}
+}</li>
+<li>制御コマンド
+{&quot;action&quot;: &quot;pause&quot;}
+{&quot;action&quot;: &quot;resume&quot;}
+{&quot;action&quot;: &quot;stop&quot;}</li>
+<li>結果の受信
+{
+&quot;type&quot;: &quot;transcription&quot;,
+&quot;text&quot;: &quot;Hello, this is real-time transcription&quot;,
+&quot;is_final&quot;: true,
+&quot;confidence&quot;: 0.95,
+&quot;timestamp&quot;: 1704715200
+}
+エラーハンドリング</li>
+</ol>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-56">ページ 56</h2>
+<p>エラーレスポンス形式
+{
+&quot;error&quot;: {
+&quot;message&quot;: &quot;エラー説明&quot;,
+&quot;type&quot;: &quot;error_type&quot;,
+&quot;code&quot;: &quot;ERROR_CODE&quot;
+}
+}
+⼀般的なエラーコード
+コード
+HTTP ステータス
+説明
+INVALID_AUDIO
+400
+無効または破損した⾳声ファイル
+FILE_TOO_LARGE
+413
+ファイルサイズが上限を超過
+UNSUPPORTED_FORMAT
+415
+⾮対応の⾳声形式
+MODEL_NOT_FOUND
+404
+指定モデルが存在しない
+NPU_ERROR
+500
+NPU 処理失敗（CPU フォールバックあり）
+TIMEOUT
+408
+リクエストタイムアウト
+レート制限
+デフォルト設定（変更可能）:
+1分あたり 100 リクエスト / IP
+同時接続 10 / IP
+最⼤ファイルサイズ 100MB
+レスポンスフォーマット
+SRT 形式
+1
+00:00:00,000 --&gt; 00:00:05,000
+This is the first subtitle.</p>
+<p>2
+00:00:05,000 --&gt; 00:00:10,000
+This is the second subtitle.
+VTT 形式</p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-57">ページ 57</h2>
+<p>WEBVTT</p>
+<p>00:00:00.000 --&gt; 00:00:05.000
+This is the first subtitle.</p>
+<p>00:00:05.000 --&gt; 00:00:10.000
+This is the second subtitle.
+クライアント実装例
+Python
+import requests</p>
+<p>with open(&quot;audio.wav&quot;, &quot;rb&quot;) as f:
+response = requests.post(
+&quot;http://localhost:8000/v1/audio/transcriptions&quot;,
+files={&quot;file&quot;: f},
+data={&quot;model&quot;: &quot;whisper-large-v3-turbo&quot;}
+)
+print(response.json()[&quot;text&quot;])
+JavaScript / Node.js
+const FormData = require('form-data');
+const fs = require('fs');
+const axios = require('axios');</p>
+<p>const form = new FormData();
+form.append('file', fs.createReadStream('audio.wav'));
+form.append('model', 'whisper-large-v3-turbo');</p>
+<p>axios.post('http://localhost:8000/v1/audio/transcriptions', form)
+.then(response =&gt; console.log(response.data.text));
+cURL
+curl -X POST http://localhost:8000/v1/audio/transcriptions <br>
+-H &quot;Content-Type: multipart/form-data&quot; <br>
+-F &quot;file=@audio.wav&quot; <br>
+-F &quot;model=whisper-large-v3-turbo&quot; <br>
+-F &quot;response_format=json&quot;</p>
+<hr>
+<h2 id="%E3%83%9A%E3%83%BC%E3%82%B8-58">ページ 58</h2>
+<p>パフォーマンス向上のヒント</p>
+<ol>
+<li>NPU 加速を利⽤すると 5〜10倍⾼速化</li>
+<li>⻑い⾳声は 30 秒ごとに分割すると最適化可能</li>
+<li>VAD（Voice Activity Detection）を有効化して無⾳部分をスキップ</li>
+<li>適切な精度設定を選択︓NPU では w8a8、CPU では float32</li>
+<li>単⼀ワーカープロセスで NPU の競合を回避</li>
+<li>ストリーミングを活⽤してリアルタイム⽤途に最適化
+OpenAI 互換性
+この API は OpenAI の Whisper API と互換性があり、既存のクライアントを簡単に置き換えることができま
+す。</li>
+</ol>
+<h1 id="openai-%E3%82%AF%E3%83%A9%E3%82%A4%E3%82%A2%E3%83%B3%E3%83%88%E5%BE%93%E6%9D%A5">OpenAI クライアント（従来）</h1>
+<p>from openai import OpenAI
+client = OpenAI(api_key=&quot;...&quot;)
+transcription = client.audio.transcriptions.create(
+model=&quot;whisper-1&quot;,
+file=audio_file
+)</p>
+<h1 id="%E3%81%93%E3%81%AE-api-%E3%82%92%E5%88%A9%E2%BD%A4%E3%81%99%E3%82%8B%E5%A0%B4%E5%90%88">この API を利⽤する場合</h1>
+<p>client = OpenAI(
+api_key=&quot;not-needed&quot;,
+base_url=&quot;http://localhost:8000/v1&quot;
+)
+transcription = client.audio.transcriptions.create(
+model=&quot;whisper-large-v3-turbo&quot;,
+file=audio_file
+)
+© 2025 IB-Link / J-AIC 本ドキュメントの無断転載を禁じます。</p>
+<hr>
+
+</body>
+</html>
