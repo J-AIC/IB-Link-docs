@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>API Reference</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <script type="module" src="https://unpkg.com/@stoplight/elements/web-components.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/@stoplight/elements/styles.min.css" />
+  <style>
+    body{margin:0}
+    header{display:flex;gap:8px;align-items:center;padding:12px;border-bottom:1px solid #eee}
+    main{height:calc(100vh - 50px)}
+    select{font:inherit}
+  </style>
+  <!-- Elements は静的HTMLに直接埋め込み可能な Web Component です -->
+</head>
+<body>
+  <header>
+    <strong>API Reference</strong>
+    <label>Language:
+      <select id="lang">
+        <option value="ja" selected>日本語</option>
+        <option value="en">English</option>
+      </select>
+    </label>
+  </header>
+  <main>
+    <elements-api id="api" apiDescriptionUrl="./openapi.ja.yaml" router="hash" layout="sidebar"></elements-api>
+  </main>
+  <script>
+    const el = document.getElementById('api');
+    document.getElementById('lang').addEventListener('change', (e) => {
+      el.setAttribute('apiDescriptionUrl', `./openapi.${e.target.value}.yaml`);
+      location.hash = ''; // ルータを初期化
+    });
+  </script>
+</body>
+</html>
+
+

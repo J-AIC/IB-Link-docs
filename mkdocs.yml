@@ -1,0 +1,23 @@
+site_name: IB Link Docs
+site_url: https://docs.insightbuddy.cloud
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - content.code.copy
+plugins:
+  - i18n:
+      default_language: ja
+      languages:
+        ja: 日本語
+        en: English
+      docs_structure: suffix
+markdown_extensions:
+  - toc:
+      permalink: true
+      toc_depth: 2-4
+nav:
+  - マニュアル: index.md
+  - API: api/index.html
+
+

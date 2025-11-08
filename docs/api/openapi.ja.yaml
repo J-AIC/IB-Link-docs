@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info:
+  title: IB Link API
+  description: これはサンプルの日本語API定義です。
+  version: "1.0.0"
+servers:
+  - url: https://api.example.com
+paths:
+  /ping:
+    get:
+      summary: ヘルスチェック
+      description: サーバーの状態を確認します。
+      responses:
+        '200':
+          description: 正常
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+

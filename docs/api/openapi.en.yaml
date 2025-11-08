@@ -1,0 +1,25 @@
+openapi: 3.0.3
+info:
+  title: IB Link API
+  description: This is a sample English API definition.
+  version: "1.0.0"
+servers:
+  - url: https://api.example.com
+paths:
+  /ping:
+    get:
+      summary: Health check
+      description: Checks the server status.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
+

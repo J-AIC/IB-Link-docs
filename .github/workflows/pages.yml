@@ -1,0 +1,52 @@
+name: Build & Deploy Docs
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install build deps
+        run: |
+          pip install mkdocs mkdocs-material mkdocs-static-i18n requests
+
+      - name: Translate JA -> EN (Markdown)
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+          DEEPL_API_URL: https://api-free.deepl.com/v2/translate
+        run: |
+          python scripts/translate_md.py
+
+      - name: Build MkDocs
+        run: mkdocs build --clean
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    steps:
+      - uses: actions/deploy-pages@v4
+
+
