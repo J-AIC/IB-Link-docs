@@ -8,13 +8,15 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/styles/github.min.css">
 <style>
 		:root{
-			--accent:#0ea5e9;
-			--accent-600:#0284c7;
+			--navy:#1e3a5f;
+			--navy-dark:#0f2744;
+			--navy-light:#2c4f7c;
 			--bg:#ffffff;
-			--sidebar-bg:#f8fafc;
-			--border:#e5e7eb;
-			--text:#0f172a;
-			--muted:#475569;
+			--sidebar-bg:#f5f7fa;
+			--border:#d1d5db;
+			--text:#1f2937;
+			--text-light:#4b5563;
+			--accent-hover:#e8f1f8;
 		}
 		html{scroll-behavior:smooth}
 		body{
@@ -22,7 +24,8 @@
 			background:var(--bg);
 			color:var(--text);
 			font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, system-ui, sans-serif;
-			line-height:1.6;
+			line-height:1.7;
+			letter-spacing:0.01em;
 		}
 		/* Sidebar TOC */
 		.toc{
@@ -32,50 +35,78 @@
 			background:var(--sidebar-bg);
 			border-right:1px solid var(--border);
 			overflow:auto;
-			padding:16px 12px 24px 16px;
+			padding:20px 16px 24px 20px;
+			box-shadow:2px 0 8px rgba(0,0,0,.03);
 		}
 		.toc .brand{
-			display:flex;align-items:center;gap:8px;
-			font-weight:600;font-size:14px;color:var(--muted);
-			padding:8px 4px 12px 4px;letter-spacing:.02em;
+			display:flex;align-items:center;gap:10px;
+			font-weight:700;font-size:15px;color:var(--navy-dark);
+			padding:10px 6px 16px 6px;letter-spacing:.03em;
+			border-bottom:2px solid var(--navy);
+			margin-bottom:16px;
 		}
 		.toc .title{
-			font-size:12px;font-weight:700;color:var(--muted);
-			text-transform:uppercase;letter-spacing:.08em;margin:8px 0 6px 2px;
+			font-size:11px;font-weight:700;color:var(--text-light);
+			text-transform:uppercase;letter-spacing:.1em;margin:12px 0 8px 4px;
 		}
-		.toc ul{list-style:none;margin:0;padding:0 6px 24px 2px}
-		.toc li{margin:2px 0}
+		.toc ul{list-style:none;margin:0;padding:0 4px 24px 4px}
+		.toc li{margin:3px 0}
 		.toc a{
-			display:block;padding:6px 8px;border-radius:6px;text-decoration:none;
-			color:var(--text);font-size:13px;
+			display:block;padding:8px 10px;border-radius:6px;text-decoration:none;
+			color:var(--text);font-size:13.5px;transition:all .15s ease;
 		}
-		.toc a:hover{background:#e6f6fe;color:var(--accent-600)}
-		.toc a.active{background:#dff2fd;color:var(--accent-600);font-weight:600}
-		.toc .lvl3{padding-left:12px}
+		.toc a:hover{background:var(--accent-hover);color:var(--navy)}
+		.toc a.active{background:var(--navy);color:#fff;font-weight:600;box-shadow:0 2px 4px rgba(30,58,95,.2)}
+		.toc .lvl3{padding-left:16px;font-size:13px}
 		/* Content */
 		.container{
 			margin-left:300px;
-			max-width:980px;
-			padding:32px 24px;
+			max-width:1000px;
+			padding:40px 32px 60px;
 		}
-		.container h1{font-size:28px;line-height:1.2;margin:8px 0 20px}
-		.container h2{margin-top:28px;padding-top:4px;border-top:1px solid var(--border)}
-		.container h3{margin-top:20px}
-		.container a{color:var(--accent-600);text-decoration:underline;text-underline-offset:2px}
-		pre{border:1px solid var(--border);border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.04);padding:16px;overflow:auto}
-		code{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
-		img{max-width:100%;height:auto}
+		.container h1{
+			font-size:32px;line-height:1.3;margin:0 0 24px;color:var(--navy-dark);
+			font-weight:700;letter-spacing:-.01em;
+		}
+		.container h2{
+			margin-top:36px;padding-top:20px;border-top:2px solid var(--border);
+			color:var(--navy);font-weight:600;font-size:24px;letter-spacing:-.005em;
+		}
+		.container h3{
+			margin-top:24px;color:var(--navy-light);font-weight:600;font-size:19px;
+		}
+		.container a{color:var(--navy);text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:3px;transition:text-decoration-color .2s}
+		.container a:hover{text-decoration-color:var(--navy)}
+		.container p{margin:12px 0;color:var(--text)}
+		.container ul, .container ol{margin:12px 0;padding-left:24px;color:var(--text)}
+		.container li{margin:6px 0}
+		pre{
+			background:#fafbfc;border:1px solid var(--border);border-radius:8px;
+			box-shadow:0 1px 3px rgba(0,0,0,.06);padding:18px;overflow:auto;
+			font-size:13.5px;
+		}
+		code{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-size:13.5px}
+		:not(pre) > code{background:#f3f4f6;padding:2px 6px;border-radius:4px;color:var(--navy-dark);font-size:13px}
+		img{max-width:100%;height:auto;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin:16px 0}
+		blockquote{
+			border-left:4px solid var(--navy);background:#f9fafb;padding:12px 16px;margin:16px 0;
+			color:var(--text-light);font-style:italic;
+		}
+		table{border-collapse:collapse;width:100%;margin:16px 0}
+		th,td{border:1px solid var(--border);padding:10px 12px;text-align:left}
+		th{background:var(--sidebar-bg);color:var(--navy);font-weight:600}
 		/* Back to top */
 		.back-to-top{
-			position:fixed;right:18px;bottom:18px;background:var(--accent);color:#fff;
-			border:none;border-radius:999px;padding:10px 12px;font-size:12px;cursor:pointer;
-			box-shadow:0 8px 24px rgba(2,132,199,.25);opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;
+			position:fixed;right:20px;bottom:20px;background:var(--navy);color:#fff;
+			border:none;border-radius:999px;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;
+			box-shadow:0 4px 12px rgba(30,58,95,.3);opacity:0;pointer-events:none;transition:all .25s ease;
 		}
-		.back-to-top.show{opacity:1;pointer-events:auto;transform:translateY(0)}
+		.back-to-top.show{opacity:1;pointer-events:auto}
+		.back-to-top:hover{background:var(--navy-dark);transform:translateY(-2px);box-shadow:0 6px 16px rgba(30,58,95,.4)}
 		/* Responsive */
 		@media (max-width:1024px){
 			.toc{display:none}
-			.container{margin-left:0;padding:20px 16px}
+			.container{margin-left:0;padding:24px 20px}
 		}
 </style>
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
