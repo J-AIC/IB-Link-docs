@@ -1,25 +1,628 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
-  title: IB Link API
-  description: これはサンプルの日本語API定義です。
+  title: IB-Link APIs
   version: "1.0.0"
-servers:
-  - url: https://api.example.com
+  description: |
+    IB-Link の Documents API / Retriever API / Audio API を統合した OpenAPI 仕様。
+
+tags:
+  - name: Documents
+    description: ドキュメント処理・埋め込み・検索
+  - name: Retriever
+    description: ベクトル/ハイブリッド検索
+  - name: Audio
+    description: 音声文字起こし（OpenAI互換）/翻訳/ステータス
+
 paths:
-  /ping:
-    get:
-      summary: ヘルスチェック
-      description: サーバーの状態を確認します。
+  /documents/process:
+    post:
+      tags: [Documents]
+      summary: ドキュメント処理（非同期）
+      description: 埋め込み生成を伴う非同期取り込みジョブを作成します。
+      servers: [{ url: http://localhost:8500/iblink/v1 }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DocumentProcessRequest'}
+            examples:
+              default:
+                value:
+                  files:
+                    - "C:/documents/report.pdf"
+                    - file_path: "C:/images/diagram.png"
+                      enable_ocr: true
+                  directories: ["C:/documents/project"]
+                  d_app_id: "my-app-123"
+                  project_id: "project-456"
+                  chunk_size: 500
+                  chunk_overlap: 50
+                  enable_ocr: false
+                  batch_processing: true
+                  duplicate_strategy: skip
+                  force_update: false
       responses:
-        '200':
-          description: 正常
+        "202":
+          description: ジョブ作成成功
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: ok
+              schema: {$ref: '#/components/schemas/JobAccepted'}
+        "400": {$ref: '#/components/responses/BadRequest'}
+        "500": {$ref: '#/components/responses/ServerError'}
 
+  /documents/status:
+    post:
+      tags: [Documents]
+      summary: 処理状況/キュー/クオータ/ヘルス確認
+      servers: [{ url: http://localhost:8500/iblink/v1 }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DocumentStatusRequest'}
+            examples:
+              processing:
+                value:
+                  status_type: processing
+                  job_id: "my-app-123_project-456_job_20250129_143022"
+                  include_files: true
+      responses:
+        "200":
+          description: ステータス
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DocumentStatusResponse'}
+        "400": {$ref: '#/components/responses/BadRequest'}
+
+  /documents/search:
+    post:
+      tags: [Documents]
+      summary: 意味検索
+      servers: [{ url: http://localhost:8500/iblink/v1 }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DocumentSearchRequest'}
+      responses:
+        "200":
+          description: 検索結果
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DocumentSearchResponse'}
+
+  /documents/extract:
+    post:
+      tags: [Documents]
+      summary: コンテンツ抽出（埋め込み生成なし）
+      servers: [{ url: http://localhost:8500/iblink/v1 }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DocumentExtractRequest'}
+      responses:
+        "200":
+          description: 抽出結果
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DocumentExtractResponse'}
+
+  /documents/list:
+    post:
+      tags: [Documents]
+      summary: ドキュメント/プロジェクト一覧
+      servers: [{ url: http://localhost:8500/iblink/v1 }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DocumentListRequest'}
+      responses:
+        "200":
+          description: 一覧
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DocumentListResponse'}
+
+  /documents/delete:
+    delete:
+      tags: [Documents]
+      summary: ドキュメント削除
+      servers: [{ url: http://localhost:8500/iblink/v1 }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DocumentDeleteRequest'}
+      responses:
+        "200":
+          description: 削除結果
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DocumentDeleteResponse'}
+
+  /documents/info:
+    get:
+      tags: [Documents]
+      summary: API 情報
+      servers: [{ url: http://localhost:8500/iblink/v1 }]
+      responses:
+        "200":
+          description: 情報
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DocumentsInfo'}
+
+  /retriever:
+    post:
+      tags: [Retriever]
+      summary: ベクトル/ハイブリッド検索
+      servers: [{ url: http://localhost:6500/iblink/v1 }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/RetrieverRequest'}
+      responses:
+        "200":
+          description: 検索結果
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RetrieverResponse'}
+
+  /retriever/health:
+    get:
+      tags: [Retriever]
+      summary: ヘルスチェック
+      servers: [{ url: http://localhost:6500/iblink/v1 }]
+      responses:
+        "200":
+          description: ヘルス
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RetrieverHealth'}
+
+  /retriever/info:
+    get:
+      tags: [Retriever]
+      summary: API 情報
+      servers: [{ url: http://localhost:6500/iblink/v1 }]
+      responses:
+        "200":
+          description: 情報
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RetrieverInfo'}
+
+  /health:
+    get:
+      tags: [Audio]
+      summary: Audio API ヘルス
+      servers: [{ url: http://localhost:8000 }]
+      responses:
+        "200":
+          description: ヘルス
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AudioHealth'}
+
+  /status:
+    get:
+      tags: [Audio]
+      summary: Audio API ステータス
+      servers: [{ url: http://localhost:8000 }]
+      responses:
+        "200":
+          description: ステータス
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AudioStatus'}
+
+  /v1/audio/transcriptions:
+    post:
+      tags: [Audio]
+      summary: 文字起こし（OpenAI 互換）
+      description: multipart/form-data で音声を送信します。
+      servers: [{ url: http://localhost:8000 }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: 音声ファイル（wav/mp3/m4a等）
+                model:
+                  type: string
+                  default: whisper-large-v3-turbo
+                language:
+                  type: string
+                  description: 例 "en" / "ja" / "auto"
+                response_format:
+                  type: string
+                  enum: [json, text, srt, vtt, verbose_json]
+                prompt:
+                  type: string
+                temperature:
+                  type: number
+                  format: float
+                  minimum: 0
+                  maximum: 1
+      responses:
+        "200":
+          description: 文字起こし結果
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AudioTranscriptVerbose'}
+            text/plain:
+              schema:
+                type: string
+        "400": {$ref: '#/components/responses/BadRequest'}
+
+  /v1/audio/translations:
+    post:
+      tags: [Audio]
+      summary: 音声翻訳（英語化）
+      servers: [{ url: http://localhost:8000 }]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: { type: string, format: binary }
+                model: { type: string, default: whisper-large-v3-turbo }
+                response_format:
+                  type: string
+                  enum: [json, text, srt, vtt, verbose_json]
+      responses:
+        "200":
+          description: 翻訳結果
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/AudioTranscriptVerbose'}
+            text/plain:
+              schema: { type: string }
+
+components:
+  responses:
+    BadRequest:
+      description: 不正なリクエスト
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+    ServerError:
+      description: サーバー内部エラー
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/Error'}
+
+  schemas:
+    # ---- Common ----
+    Error:
+      type: object
+      properties:
+        error:
+          anyOf:
+            - type: string
+            - type: object
+              properties:
+                message: { type: string }
+                type: { type: string }
+                code: { type: string }
+        message: { type: string }
+        timestamp: { type: string, format: date-time }
+
+    # ---- Documents ----
+    DocumentProcessRequest:
+      type: object
+      properties:
+        files:
+          type: array
+          items:
+            anyOf:
+              - type: string
+              - type: object
+                properties:
+                  file_path: { type: string }
+                  enable_ocr: { type: boolean }
+        directories:
+          type: array
+          items: { type: string }
+        d_app_id: { type: string }
+        project_id: { type: string }
+        chunk_size: { type: integer }
+        chunk_overlap: { type: integer }
+        enable_ocr: { type: boolean }
+        batch_processing: { type: boolean }
+        duplicate_strategy:
+          type: string
+          enum: [skip, update, add, sync]
+        force_update: { type: boolean }
+      required: [d_app_id, project_id]
+
+    JobAccepted:
+      type: object
+      properties:
+        job_id: { type: string }
+        status: { type: string, enum: [queued, processing, completed, failed] }
+        message: { type: string }
+        status_url: { type: string }
+        created_at: { type: string, format: date-time }
+
+    DocumentStatusRequest:
+      type: object
+      properties:
+        status_type:
+          type: string
+          enum: [processing, queue, quota, health, dependency, jobs]
+        job_id: { type: string }
+        include_files: { type: boolean }
+        d_app_id: { type: string }
+      required: [status_type]
+
+    DocumentStatusResponse:
+      type: object
+      additionalProperties: true
+      description: ステータスタイプにより動的
+
+    DocumentSearchRequest:
+      type: object
+      properties:
+        query: { type: string }
+        d_app_id: { type: string }
+        project_id: { type: string }
+        directories:
+          type: array
+          items: { type: string }
+        limit: { type: integer, default: 10 }
+        similarity_threshold: { type: number }
+      required: [query]
+
+    DocumentSearchHit:
+      type: object
+      properties:
+        document_id: { type: string }
+        content: { type: string }
+        similarity_score: { type: number }
+        file_name: { type: string }
+        file_path: { type: string }
+        page_range: { type: string }
+
+    DocumentSearchResponse:
+      type: object
+      properties:
+        query: { type: string }
+        results:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentSearchHit' }
+        total_results: { type: integer }
+
+    DocumentExtractRequest:
+      type: object
+      properties:
+        files:
+          type: array
+          items:
+            anyOf:
+              - type: string
+              - type: object
+                properties:
+                  file_path: { type: string }
+                  enable_ocr: { type: boolean }
+        d_app_id: { type: string }
+        project_id: { type: string }
+        include_metadata: { type: boolean }
+
+    DocumentExtractItem:
+      type: object
+      properties:
+        file_name: { type: string }
+        content: { type: string }
+        content_length: { type: integer }
+        metadata:
+          type: object
+          additionalProperties: true
+
+    DocumentExtractResponse:
+      type: object
+      properties:
+        status: { type: string }
+        extracted_files:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentExtractItem' }
+
+    DocumentListRequest:
+      type: object
+      properties:
+        list_type:
+          type: string
+          enum: [documents, projects]
+        d_app_id: { type: string }
+        project_id: { type: string }
+        file_extension: { type: string }
+
+    DocumentListItem:
+      type: object
+      properties:
+        document_id: { type: string }
+        file_name: { type: string }
+        file_size: { type: integer }
+        created_at: { type: string, format: date-time }
+
+    DocumentListResponse:
+      type: object
+      properties:
+        documents:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentListItem' }
+        total_count: { type: integer }
+
+    DocumentDeleteRequest:
+      type: object
+      properties:
+        d_app_id: { type: string }
+        project_id: { type: string }
+        file_paths:
+          type: array
+          items: { type: string }
+        delete_all: { type: boolean, default: false }
+      required: [d_app_id]
+
+    DocumentDeleteResponse:
+      type: object
+      properties:
+        status: { type: string }
+        deleted_count: { type: integer }
+        message: { type: string }
+
+    DocumentsInfo:
+      type: object
+      properties:
+        service: { type: string }
+        version: { type: string }
+        description: { type: string }
+        supported_file_types:
+          type: array
+          items: { type: string }
+        database:
+          type: object
+          properties:
+            provider: { type: string }
+
+    # ---- Retriever ----
+    RetrieverRequest:
+      type: object
+      properties:
+        text: { type: string, description: "検索クエリ" }
+        d_app_id: { type: string }
+        project_id: { type: string }
+        limit: { type: integer, default: 10 }
+        search_mode:
+          type: string
+          enum: [vector, hybrid, hybrid_rrf]
+          default: vector
+        files_directories:
+          type: array
+          items: { type: string }
+        file_paths:
+          type: array
+          items: { type: string }
+        documents_id:
+          type: array
+          items: { type: string }
+        vector_weight: { type: number, default: 0.7 }
+        text_weight: { type: number, default: 0.3 }
+        rrf_k: { type: integer, default: 60 }
+        enable_phrase_matching: { type: boolean, default: true }
+      required: [text]
+
+    RetrieverHitMetadata:
+      type: object
+      properties:
+        source: { type: string }
+        directory: { type: string }
+        file_path: { type: string }
+        chunk_index: { type: integer }
+        page_range: { type: string }
+        start_page: { type: integer }
+        end_page: { type: integer }
+        chunk_category: { type: string }
+        document_id: { type: string }
+        vector_score: { type: number }
+        text_score: { type: number }
+        text_rank: { type: number }
+
+    RetrieverHit:
+      type: object
+      properties:
+        id: { type: string }
+        text: { type: string }
+        score: { type: number }
+        metadata: { $ref: '#/components/schemas/RetrieverHitMetadata' }
+
+    RetrieverResponse:
+      type: object
+      properties:
+        query: { type: string }
+        d_app_id: { type: string }
+        project_id: { type: string }
+        total_results: { type: integer }
+        total_unfiltered_results: { type: integer }
+        filtered_directories:
+          type: array
+          items: { type: string }
+        filtered_file_paths:
+          type: array
+          items: { type: string }
+        results:
+          type: array
+          items: { $ref: '#/components/schemas/RetrieverHit' }
+
+    RetrieverHealth:
+      type: object
+      properties:
+        status: { type: string }
+        timestamp: { type: string, format: date-time }
+        service: { type: string }
+        version: { type: string }
+        port: { type: integer }
+        dependencies:
+          type: object
+          additionalProperties: true
+
+    RetrieverInfo:
+      type: object
+      additionalProperties: true
+
+    # ---- Audio ----
+    AudioHealth:
+      type: object
+      properties:
+        status: { type: string }
+        timestamp: { type: string, format: date-time }
+
+    AudioStatus:
+      type: object
+      properties:
+        status: { type: string }
+        uptime: { type: integer }
+        total_requests: { type: integer }
+        active_connections: { type: integer }
+        config:
+          type: object
+          properties:
+            model: { type: string }
+            npu_enabled: { type: boolean }
+            target_runtime: { type: string }
+
+    AudioTranscriptVerbose:
+      type: object
+      properties:
+        task: { type: string }
+        language: { type: string }
+        duration: { type: number }
+        text: { type: string }
+        segments:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer }
+              seek: { type: integer }
+              start: { type: number }
+              end: { type: number }
+              text: { type: string }
+              tokens:
+                type: array
+                items: { type: integer }
+              temperature: { type: number }
+              avg_logprob: { type: number }
+              compression_ratio: { type: number }
+              no_speech_prob: { type: number }
 

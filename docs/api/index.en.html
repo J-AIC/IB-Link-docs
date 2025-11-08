@@ -22,7 +22,6 @@
     .link:hover{background:#f9fafb}
     main{height:calc(100vh - 50px)}
   </style>
-  <!-- Elements は静的HTMLに直接埋め込み可能な Web Component です -->
 </head>
 <body>
   <header>
@@ -30,22 +29,22 @@
       <strong>API Reference</strong>
     </div>
     <div class="right">
-      <a class="link btn" href="../index.html" title="マニュアルを見る">
+      <a class="link btn" href="../index.html" title="Open Manual">
         <span class="ico">
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <path d="M4 5.5C4 4.67 4.67 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5v-13Z" stroke="#1f2937" stroke-width="1.5"/>
             <path d="M12 4h6.5c.83 0 1.5.67 1.5 1.5v13c0 .83-.67 1.5-1.5 1.5H12V4Z" stroke="#1f2937" stroke-width="1.5"/>
           </svg>
         </span>
-        <span>マニュアルを見る</span>
+        <span>Open Manual</span>
       </a>
       <div class="lang" id="lang">
-        <button class="flag" data-lang="ja" aria-label="日本語" title="日本語">
+        <button class="flag" data-lang="ja" aria-label="Japanese" title="Japanese">
           <svg viewBox="0 0 60 40" aria-hidden="true">
             <rect width="60" height="40" fill="#fff"/>
             <circle cx="30" cy="20" r="12" fill="#bc002d"/>
           </svg>
-          <span class="label">日本語</span>
+          <span class="label">Japanese</span>
         </button>
         <button class="flag" data-lang="en" aria-label="English" title="English">
           <svg viewBox="0 0 60 40" aria-hidden="true">
@@ -65,7 +64,7 @@
     </div>
   </header>
   <main>
-    <elements-api id="api" apiDescriptionUrl="./openapi.ja.yaml" router="hash" layout="sidebar"></elements-api>
+    <elements-api id="api" apiDescriptionUrl="./openapi.en.yaml" router="hash" layout="sidebar"></elements-api>
   </main>
   <script>
     const el = document.getElementById('api');
@@ -93,4 +92,5 @@
   </script>
 </body>
 </html>
+
 

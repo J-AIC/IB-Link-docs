@@ -95,6 +95,15 @@
 		table{border-collapse:collapse;width:100%;margin:16px 0}
 		th,td{border:1px solid var(--border);padding:10px 12px;text-align:left}
 		th{background:var(--sidebar-bg);color:var(--navy);font-weight:600}
+		/* Quick links */
+		.quick-links{display:flex;gap:8px;margin:8px 4px 12px}
+		.quick-links a{
+			display:flex;gap:8px;align-items:center;text-decoration:none;
+			color:var(--navy);background:#fff;border:1px solid var(--border);
+			border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;
+		}
+		.quick-links a:hover{background:var(--accent-hover)}
+		.quick-links .ico svg{width:16px;height:16px;display:block}
 		/* Back to top */
 		.back-to-top{
 			position:fixed;right:20px;bottom:20px;background:var(--navy);color:#fff;
@@ -115,6 +124,17 @@
 <body>
 	<nav class="toc">
 		<div class="brand">IB‑Link ユーザーガイド</div>
+		<div class="quick-links">
+			<a href="./api/index.html" title="APIリファレンスを開く">
+				<span class="ico">
+					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+						<path d="M4 5.5C4 4.67 4.67 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5v-13Z" stroke="#1e3a5f" stroke-width="1.5"/>
+						<path d="M12 4h6.5c.83 0 1.5.67 1.5 1.5v13c0 .83-.67 1.5-1.5 1.5H12V4Z" stroke="#1e3a5f" stroke-width="1.5"/>
+					</svg>
+				</span>
+				<span>APIリファレンス</span>
+			</a>
+		</div>
 		<div class="title">目次</div>
 		<ul id="toc"></ul>
 	</nav>

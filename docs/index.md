@@ -1,7 +1,4 @@
-# IB-Link 操作マニュアル（抽出版）
-
-
-
+# IB-Link 操作マニュアル
 
 
 IB-Link 操作マニュアル
@@ -11,12 +8,6 @@ IB-Link 操作マニュアル
 2025/07/15 「IB-Link」表記修正  
 2025/06/25 「利⽤者向け機能」「開発者向け機能」章分け  
 2025/06/18  初版  
-
-
-
----
-
-
 
 ## ⽬次
 
@@ -32,9 +23,10 @@ IB-Link 操作マニュアル
    4.2. Runtime（ランタイム）設定  
    4.3. Logs機能  
    4.4. ドキュメント埋め込み  
-   4.5. ⾳声⽂字起こし  
-   4.6. データーベース  
-   4.7. API仕様
+   4.5. データベース  
+   4.6. Documents API  
+   4.7. Retriever API  
+   4.8. Audio API
 ## 1.システム概要
    ⼤規模⾔語モデル（LLM）をPC上で実⾏・実験できるLLM利⽤アプリケーションです。
 ## 2.機能概要
@@ -50,10 +42,6 @@ IB-Link 操作マニュアル
    ⾳声⽂字起こし
    データベース
    API
-
-
-
----
 
 
 
@@ -342,8 +330,6 @@ LLMを試せます。
 ![図: 画像 2](images/page-019_img-002.png)
 
 
-
----
 
 
 
@@ -669,131 +655,125 @@ Filter API で対象を絞り、Changes Only をオンにして差分だけを�
 
 
 
-### 4.6 API 仕様
-Documents API、Retriever API、Audio APIの仕様について記載します。
-#### Documents API
+### 4.6 Documents API
 概要
-Documents API は、ドキュメントの処理、埋め込み（embedding）⽣成、セマンティック検索を提供する
-RESTful API サービスです。 ドキュメントを⾮同期で処理し、意味的な類似検索のためのベクトル埋め込みを
-⽣成し、包括的なドキュメント管理機能を備えています。
+Documents API は、ドキュメントの処理、埋め込み（embedding）⽣成、セマンティック検索を提供する RESTful API サービスです。ドキュメントを⾮同期で処理し、意味的な類似検索のためのベクトル埋め込みを⽣成し、包括的なドキュメント管理機能を備えています。
+
 クイックスタート
-ベースURL
-http://localhost:8500/iblink/v1
-コンテンツタイプ
-すべてのリクエストには次を含める必要があります:
-Content-Type: application/json
+- ベースURL: `http://localhost:8500/iblink/v1`
+- コンテンツタイプ: すべてのリクエストに `Content-Type: application/json` を指定
+
 基本的な利⽤フロー
+- 1. ドキュメントを処理して埋め込みを作成（POST `/documents/process`）
+- 2. 処理状況を確認（POST `/documents/status`）
+- 3. ⾃然⾔語で検索（POST `/documents/search`）
+- 4. 埋め込みを作成せずに内容を抽出（POST `/documents/extract`）
 
-1. ドキュメントを処理して埋め込みを作成（POST /documents/process）
-2. 処理状況を確認（POST /documents/status）
-3. ⾃然⾔語で検索（POST /documents/search）
-4. 埋め込みを作成せずに内容を抽出（POST /documents/extract）
-   サポートされるファイル形式
-   ドキュメント
-   Office: .docx, .xlsx, .pptx, .doc, .xls, .ppt
-   PDF: .pdf（OCR対応）
-   テキスト: .txt, .md, .rtf
-   Web: .html, .htm, .xml, .json
-   データ: .csv, .ipynb（Jupyter Notebook）
-   フィード: .rss, .atom
-   画像（OCR対応）
-   .jpg, .jpeg, .png, .bmp, .tiff, .tif, .gif, .webp
-
-
-
----
-
-
+サポートされるファイル形式
+- ドキュメント
+  - Office: `.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`
+  - PDF: `.pdf`（OCR対応）
+  - テキスト: `.txt`, `.md`, `.rtf`
+  - Web: `.html`, `.htm`, `.xml`, `.json`
+  - データ: `.csv`, `.ipynb`（Jupyter Notebook）
+  - フィード: `.rss`, `.atom`
+- 画像（OCR対応）
+  - `.jpg`, `.jpeg`, `.png`, `.bmp`, `.tiff`, `.tif`, `.gif`, `.webp`
 
 API エンドポイント
 
-1. ドキュメント処理 (⾮同期)
-   埋め込みを⾮同期で作成します。システムへのファイル取り込みの主要なエンドポイントです。
-   POST /documents/process
-   リクエスト例
-   {
-     "files": [
+1. ドキュメント処理（⾮同期）
+   - 埋め込みを⾮同期で作成します。システムへのファイル取り込みの主要なエンドポイントです。
+   - エンドポイント: POST `/documents/process`
+   - リクエスト例
+
+```json
+{
+  "files": [
     "C:/documents/report.pdf",
     {
       "file_path": "C:/images/diagram.png",
       "enable_ocr": true
     }
-     ],
-     "directories": ["C:/documents/project"],
-     "d_app_id": "my-app-123",
-     "project_id": "project-456",
-     "chunk_size": 500,
-     "chunk_overlap": 50,
-     "enable_ocr": false,
-     "batch_processing": true,
-     "duplicate_strategy": "skip",
-     "force_update": false
-   }
-   主要パラメータ説明
-   files : ファイルパスまたはファイル設定オブジェクトの配列
-   directories : 再帰的に処理するディレクトリ⼀覧
-   d_app_id : テナント識別⼦
-   project_id : プロジェクト識別⼦
-   chunk_size : 埋め込み⽣成時のテキスト分割サイズ
-   chunk_overlap : チャンク間の重なり
-   enable_ocr : OCRを有効化
-   duplicate_strategy : 重複時の動作（skip/update/add/sync）
-   レスポンス例（202 Accepted）
-   {
-     "job_id": "my-app-123_project-456_job_20250129_143022",
-     "status": "queued",
-     "message": "Document processing job created successfully",
+  ],
+  "directories": ["C:/documents/project"],
+  "d_app_id": "my-app-123",
+  "project_id": "project-456",
+  "chunk_size": 500,
+  "chunk_overlap": 50,
+  "enable_ocr": false,
+  "batch_processing": true,
+  "duplicate_strategy": "skip",
+  "force_update": false
+}
+```
 
+   - 主要パラメータ
+     - `files`: ファイルパスまたはファイル設定オブジェクトの配列
+     - `directories`: 再帰的に処理するディレクトリ⼀覧
+     - `d_app_id`: テナント識別⼦
+     - `project_id`: プロジェクト識別⼦
+     - `chunk_size`: テキスト分割サイズ
+     - `chunk_overlap`: チャンク間の重なり
+     - `enable_ocr`: OCR 有効化
+     - `duplicate_strategy`: 重複時の動作（`skip`/`update`/`add`/`sync`）
 
+   - レスポンス例（202 Accepted）
 
----
-
-
-
-"status_url": "/iblink/v1/documents/status",
+```json
+{
+  "job_id": "my-app-123_project-456_job_20250129_143022",
+  "status": "queued",
+  "message": "Document processing job created successfully",
+  "status_url": "/iblink/v1/documents/status",
   "created_at": "2025-01-29T14:30:22Z"
 }
+```
 
 2. 処理状況の確認
-   ジョブの進捗やキュー状態を確認します。
-   POST /documents/status
-   リクエスト例
-   {
-     "status_type": "processing",
-     "job_id": "my-app-123_project-456_job_20250129_143022",
-     "include_files": true
-   }
-   主な status_type
-   processing : 特定ジョブの進捗
-   queue : キューの状態
-   quota : リソース使⽤量
-   health : サービスの健全性
-   dependency : 外部依存の状態
-   jobs : すべてのジョブ⼀覧
-   レスポンス例（処理中）
-   {
-     "status_type": "processing",
-     "status": "processing",
-     "processing": {
+   - ジョブの進捗やキュー状態を確認します。
+   - エンドポイント: POST `/documents/status`
+   - リクエスト例
+
+```json
+{
+  "status_type": "processing",
+  "job_id": "my-app-123_project-456_job_20250129_143022",
+  "include_files": true
+}
+```
+
+   - 主な `status_type`
+     - `processing`: 特定ジョブの進捗
+     - `queue`: キューの状態
+     - `quota`: リソース使⽤量
+     - `health`: サービスの健全性
+     - `dependency`: 外部依存の状態
+     - `jobs`: すべてのジョブ⼀覧
+
+   - レスポンス例（処理中）
+
+```json
+{
+  "status_type": "processing",
+  "status": "processing",
+  "processing": {
     "progress": 45,
     "total_files": 10,
     "processed_files": 4,
     "current_file": "document5.pdf",
     "started_at": "2025-01-29T14:30:23Z",
     "estimated_completion": "2025-01-29T14:35:00Z"
-     }
-   }
+  }
+}
+```
+
 3. ドキュメント検索
+   - 処理済みのドキュメントを意味的類似度で検索します。
+   - エンドポイント: POST `/documents/search`
+   - リクエスト例
 
-
-
----
-
-
-
-処理済みのドキュメントを意味的類似度で検索します。
-POST /documents/search
-リクエスト例
+```json
 {
   "query": "How to configure authentication in the system?",
   "d_app_id": "my-app-123",
@@ -802,14 +782,17 @@ POST /documents/search
   "limit": 10,
   "similarity_threshold": 0.7
 }
-レスポンス例
+```
+
+   - レスポンス例
+
+```json
 {
   "query": "How to configure authentication in the system?",
   "results": [
     {
       "document_id": "550e8400-e29b-41d4-a716-446655440001",
-      "content": "To configure authentication, first navigate to the Settings >
-Security section...",
+      "content": "To configure authentication, first navigate to the Settings > Security section...",
       "similarity_score": 0.92,
       "file_name": "security-guide.pdf",
       "file_path": "C:/documents/guides/security-guide.pdf",
@@ -818,18 +801,14 @@ Security section...",
   ],
   "total_results": 2
 }
+```
 
 4. コンテンツ抽出
-   埋め込みを⽣成せずにテキストを抽出します。
-   POST /documents/extract
-   リクエスト例
+   - 埋め込みを⽣成せずにテキストを抽出します。
+   - エンドポイント: POST `/documents/extract`
+   - リクエスト例
 
-
-
----
-
-
-
+```json
 {
   "files": [
     "C:/documents/report.pdf",
@@ -842,7 +821,11 @@ Security section...",
   "project_id": "project-456",
   "include_metadata": true
 }
-レスポンス例
+```
+
+   - レスポンス例
+
+```json
 {
   "status": "success",
   "extracted_files": [
@@ -857,25 +840,25 @@ Security section...",
     }
   ]
 }
+```
 
 5. ドキュメント⼀覧
-   処理済みのドキュメントまたはプロジェクトIDの⼀覧を取得します。
-   POST /documents/list
-   リクエスト例（ドキュメント⼀覧）
-   {
-     "list_type": "documents",
-     "d_app_id": "my-app-123",
-     "project_id": "project-456",
-     "file_extension": ".pdf"
-   }
+   - 処理済みのドキュメントまたはプロジェクトIDの⼀覧を取得します。
+   - エンドポイント: POST `/documents/list`
+   - リクエスト例（ドキュメント⼀覧）
 
+```json
+{
+  "list_type": "documents",
+  "d_app_id": "my-app-123",
+  "project_id": "project-456",
+  "file_extension": ".pdf"
+}
+```
 
+   - レスポンス例
 
----
-
-
-
-レスポンス例
+```json
 {
   "documents": [
     {
@@ -887,87 +870,97 @@ Security section...",
   ],
   "total_count": 2
 }
+```
 
 6. ドキュメント削除
-   埋め込み済みのドキュメントを削除します。
-   DELETE /documents/delete
-   リクエスト例
-   {
-     "d_app_id": "my-app-123",
-     "project_id": "project-456",
-     "file_paths": ["C:/documents/old-doc.pdf"],
-     "delete_all": false
-   }
-   レスポンス例
-   {
-     "status": "success",
-     "deleted_count": 3,
-     "message": "Successfully deleted 3 document(s) with 45 total embeddings"
-   }
-7. サービス状態確認
-   健康状態チェック
+   - 埋め込み済みのドキュメントを削除します。
+   - エンドポイント: DELETE `/documents/delete`
+   - リクエスト例
 
-
-
----
-
-
-
+```json
 {
-  "status_type": "health"
+  "d_app_id": "my-app-123",
+  "project_id": "project-456",
+  "file_paths": ["C:/documents/old-doc.pdf"],
+  "delete_all": false
 }
-キュー状態確認
+```
+
+   - レスポンス例
+
+```json
 {
-  "status_type": "queue",
-  "d_app_id": "my-app-123"
+  "status": "success",
+  "deleted_count": 3,
+  "message": "Successfully deleted 3 document(s) with 45 total embeddings"
 }
-クオータ確認
-{
-  "status_type": "quota",
-  "d_app_id": "my-app-123"
-}
+```
+
+7. サービス状態確認（POST `/documents/status`）
+   - 健康状態チェック
+
+```json
+{ "status_type": "health" }
+```
+
+   - キュー状態確認
+
+```json
+{ "status_type": "queue", "d_app_id": "my-app-123" }
+```
+
+   - クオータ確認
+
+```json
+{ "status_type": "quota", "d_app_id": "my-app-123" }
+```
 
 8. API情報取得
-   GET /documents/info
-   レスポンス例
-   {
-     "service": "IB-Link Documents API (Standalone)",
-     "version": "1.0.0",
-     "description": "Enhanced document processing and embedding generation service",
-     "supported_file_types": [".pdf", ".txt", ".md", ".docx", ".xlsx", ".pptx", ...],
-     "database": { "provider": "PostgreSQL with pgvector" }
-   }
-   エラーハンドリング
-   標準的なエラーレスポンス:
-   {
-     "error": "エラーの概要",
-     "message": "詳細な説明",
+   - エンドポイント: GET `/documents/info`
+   - レスポンス例
 
-
-
----
-
-
-
-"timestamp": "2025-01-29T15:20:00Z"
+```json
+{
+  "service": "IB-Link Documents API (Standalone)",
+  "version": "1.0.0",
+  "description": "Enhanced document processing and embedding generation service",
+  "supported_file_types": [".pdf", ".txt", ".md", ".docx", ".xlsx", ".pptx"],
+  "database": { "provider": "PostgreSQL with pgvector" }
 }
+```
+
+エラーハンドリング
+- 標準的なエラーレスポンス
+
+```json
+{
+  "error": "エラーの概要",
+  "message": "詳細な説明",
+  "timestamp": "2025-01-29T15:20:00Z"
+}
+```
+
 よく使われるHTTPステータスコード
-200 OK: 成功
-202 Accepted: ⾮同期ジョブ作成成功
-400 Bad Request: パラメータ不備
-404 Not Found: ジョブ/ドキュメントが存在しない
-429 Too Many Requests: レート/キュー制限超過
-500 Internal Server Error: サーバー内部エラー
-503 Service Unavailable: 依存サービスが利⽤不可
-507 Insufficient Storage: 容量制限超過
+- 200 OK: 成功
+- 202 Accepted: ⾮同期ジョブ作成成功
+- 400 Bad Request: パラメータ不備
+- 404 Not Found: ジョブ/ドキュメントが存在しない
+- 429 Too Many Requests: レート/キュー制限超過
+- 500 Internal Server Error: サーバー内部エラー
+- 503 Service Unavailable: 依存サービスが利⽤不可
+- 507 Insufficient Storage: 容量制限超過
+
 ベストプラクティス
-バッチ処理を推奨: 複数ファイルを⼀度に送信
-適切なチャンクサイズを選択: ⼩さい⽂書は 300〜500、⼤きい⽂書は 500〜1000
-ジョブ状態を定期的に確認: ポーリングを活⽤
-OCR は必要な場合のみ有効化: パフォーマンスを最適化
-重複戦略を活⽤: 更新時は update、完全同期は sync
+- バッチ処理を推奨（複数ファイルを⼀度に送信）
+- 適切なチャンクサイズを選択（⼩規模: 300〜500 / ⼤規模: 500〜1000）
+- ジョブ状態を定期的に確認（ポーリング活⽤）
+- OCR は必要な場合のみ有効化（パフォーマンス最適化）
+- 重複戦略を活⽤（更新時は `update`、完全同期は `sync`）
+
 統合サンプル
-Python
+
+```python
+# Python
 client = DocumentsAPIClient()
 
 result = client.process_documents(
@@ -980,19 +973,15 @@ print(f"Processed {result['successful_files']} files successfully")
 results = client.search("authentication", "my-app")
 for r in results["results"]:
     print(f"Score: {r['similarity_score']} - {r['file_name']}")
-Node.js
+```
+
+```javascript
+// Node.js
 const client = new DocumentsAPIClient();
 
 const result = await client.processDocuments(
   ['report.pdf', 'guide.docx'],
-
-
-
----
-
-
-
-'my-app',
+  'my-app',
   'docs'
 );
 console.log(`Processed ${result.successful_files} files successfully`);
@@ -1001,12 +990,14 @@ const searchResults = await client.search('authentication', 'my-app');
 searchResults.results.forEach(r => {
   console.log(`Score: ${r.similarity_score} - ${r.file_name}`);
 });
+```
+
 設定例
+
+```json
 {
   "ConnectionStrings": {
-    "DefaultConnection":
-"Host=localhost;Database=iblink_documents;Username=postgres;Password=your_password
-"
+    "DefaultConnection": "Host=localhost;Database=iblink_documents;Username=postgres;Password=your_password"
   },
   "DocumentsApi": {
     "ChunkSize": 500,
@@ -1017,81 +1008,63 @@ searchResults.results.forEach(r => {
     "Model": "cl_nagoya_ruri_v3_310m_optimized_onnx"
   }
 }
+```
+
 トラブルシューティング
-ジョブが進まない場合: ログ確認・依存サービスのヘルスチェック
-OCR が動作しない: Tesseract のデータやパスを確認
-検索結果が出ない: 埋め込み⽣成が完了しているか確認、しきい値を下げる
-容量制限超過: 古いドキュメントを削除または管理者に拡張を依頼
+- ジョブが進まない場合: ログ確認・依存サービスのヘルスチェック
+- OCR が動作しない: Tesseract のデータやパスを確認
+- 検索結果が出ない: 埋め込み⽣成完了の確認、しきい値を下げる
+- 容量制限超過: 古いドキュメントを削除または管理者に拡張を依頼
+
 パフォーマンス最適化
-10〜50ファイルを⼀括処理すると効率的
-OCRは必要なときだけ有効化
-低レイテンシの埋め込みAPI接続を確保
-結果キャッシュを活⽤
+- 10〜50 ファイルを⼀括処理
+- OCR は必要なときだけ有効化
+- 低レイテンシの埋め込み API 接続を確保
+- 結果キャッシュを活⽤
+
 セキュリティ
-d_app_id によるマルチテナント分離
+- `d_app_id` によるマルチテナント分離
+- ディレクトリトラバーサル防⽌、SQL インジェクション対策
+- データはローカルに保存、外部送信なし（埋め込み API 先を除く）
 
-
-
----
-
-
-
-ディレクトリトラバーサル防⽌、SQLインジェクション対策
-データはローカルに保存、外部送信なし（埋め込みAPI先を除く）
 サポート
-logs/ ディレクトリのアプリログを確認
-ステータスエンドポイントで依存状況を確認
-提供されている cURL サンプルで動作確認
-
-
+- `logs/` ディレクトリのアプリログを確認
+- ステータスエンドポイントで依存状況を確認
+- 提供されている cURL サンプルで動作確認
 
 ---
 
-
-
-#### Retriever API
+### 4.7 Retriever API
 概要
-Retriever API は、ドキュメントの埋め込み（embedding）を活⽤したセマンティック検索およびドキュメン
-ト取得を⾏う独⽴型サービスです。 ベクトルベース検索とハイブリッド検索の両⽅をサポートし、類似度検
-索と全⽂検索を統合したインターフェースを提供します。
+Retriever API は、ドキュメントの埋め込み（embedding）を活⽤したセマンティック検索およびドキュメント取得を⾏う独⽴型サービスです。ベクトルベース検索とハイブリッド検索の両⽅をサポートし、類似度検索と全⽂検索を統合したインターフェースを提供します。
+
 主な機能
-ベクトルセマンティック検索: 埋め込みを使って意味的に類似したドキュメントを検索
-ハイブリッド検索: ベクトル類似度と全⽂検索を組み合わせて精度向上
-ハイブリッド RRF 検索: Reciprocal Rank Fusion を使って複数のランキング信号を統合
-マルチテナント対応: d_app_id と project_id によるデータ分離
-ドキュメントフィルタリング: ドキュメント ID やディレクトリパスで絞り込み可能
-PostgreSQL + pgvector: 効率的なベクトル演算を実現
+- ベクトルセマンティック検索: 埋め込みを使って意味的に類似したドキュメントを検索
+- ハイブリッド検索: ベクトル類似度と全⽂検索を組み合わせて精度向上
+- ハイブリッド RRF 検索: Reciprocal Rank Fusion を使って複数のランキング信号を統合
+- マルチテナント対応: `d_app_id` と `project_id` によるデータ分離
+- ドキュメントフィルタリング: ドキュメント ID やディレクトリパスで絞り込み可能
+- PostgreSQL + pgvector: 効率的なベクトル演算を実現
+
 アーキテクチャ構成
-
 1. コントローラ層
-   RetrieverController (src/IB-Link.RetrieverAPI/Controllers/RetrieverController.cs:13)
-   メイン API エンドポイント: POST /iblink/v1/retriever
-   ヘルスチェック: GET /iblink/v1/retriever/health
-   API 情報: GET /iblink/v1/retriever/info
+   - メイン API エンドポイント: POST `/iblink/v1/retriever`
+   - ヘルスチェック: GET `/iblink/v1/retriever/health`
+   - API 情報: GET `/iblink/v1/retriever/info`
 2. サービス層
-   CustomRetrieverService (src/IB-
-   Link.RetrieverAPI/Services/CustomRetrieverService.cs:14)
-   すべての検索モードのロジックを実装
-   DB クエリ管理と結果の整形を担当
-   EmbeddingService (src/IB-Link.RetrieverAPI/Services/EmbeddingService.cs:9)
-   外部の埋め込み API を使⽤して埋め込みを⽣成
-   デフォルトエンドポイント: http://localhost:5000/iblink/v1/embeddings
+   - すべての検索モードのロジックを実装
+   - DB クエリ管理と結果の整形を担当
+   - 埋め込み⽣成に外部の埋め込み API を使⽤（デフォルト: `http://localhost:5000/iblink/v1/embeddings`）
 3. データ層
-   RetrieverDbContext (src/IB-Link.RetrieverAPI/Data/RetrieverDbContext.cs:10)
-   PostgreSQL + pgvector 拡張を使⽤
-   DocumentEmbeddings テーブルを管理
-   API エンドポイント
-   メイン検索エンドポイント
+   - PostgreSQL + pgvector 拡張を使⽤
+   - `DocumentEmbeddings` テーブルを管理
 
+API エンドポイント
+- メイン検索エンドポイント（POST `/iblink/v1/retriever`）
+  - ベクトル類似度および/または全⽂検索を⽤いてドキュメント検索を実⾏します。
+  - リクエスト例
 
-
----
-
-
-
-POST /iblink/v1/retriever
-ベクトル類似度および/または全⽂検索を⽤いてドキュメント検索を実⾏します。
-リクエスト形式
+```json
 {
   "text": "検索クエリ",
   "d_app_id": "app-123",
@@ -1106,7 +1079,11 @@ POST /iblink/v1/retriever
   "rrf_k": 60,
   "enable_phrase_matching": true
 }
-レスポンス形式
+```
+
+  - レスポンス例
+
+```json
 {
   "query": "検索クエリ",
   "d_app_id": "app-123",
@@ -1134,19 +1111,14 @@ POST /iblink/v1/retriever
         "text_score": 0.8,
         "text_rank": 1.0
       }
-
-
-
----
-
-
-
-}
+    }
   ]
 }
-ヘルスチェックエンドポイント
-GET /iblink/v1/retriever/health
-API と依存サービスの稼働状況を返します。
+```
+
+- ヘルスチェック（GET `/iblink/v1/retriever/health`）
+
+```json
 {
   "status": "healthy",
   "timestamp": "2024-01-15T10:30:00Z",
@@ -1165,120 +1137,73 @@ API と依存サービスの稼働状況を返します。
     }
   }
 }
-情報エンドポイント
-GET /iblink/v1/retriever/info
-API の構成情報を返します。
+```
+
+- 情報エンドポイント（GET `/iblink/v1/retriever/info`）
+  - API の構成情報を返します。
+
 検索モード
+- ベクトル検索（デフォルト）: コサイン類似度。⾔い換えや類義語にも強い
+- ハイブリッド検索: 最終スコア = `(vector_score * vector_weight) + (text_score * text_weight)`（デフォルト 70/30）
+- ハイブリッド RRF 検索: `RRF_score = 1/(k + vector_rank) + 1/(k + text_rank)`（デフォルト k=60）
 
-1. ベクトル検索（デフォルト）
-   クエリとドキュメントの埋め込み間のコサイン類似度を使⽤
-   ⾔い換えや類義語にも強い
-2. ハイブリッド検索
-   ベクトル類似度と全⽂検索を組み合わせ
-   スコア: 最終スコア = (vector_score * vector_weight) + (text_score * text_weight)
-   デフォルト重み: ベクトル70％、テキスト30％
-3. ハイブリッド RRF 検索
-
-
-
----
-
-
-
-Reciprocal Rank Fusion による順位融合
-式: RRF_score = 1/(k + vector_rank) + 1/(k + text_rank)
-デフォルト k=60
-SQL クエリ例
-ベクトル検索クエリ
-ハイブリッド検索（重み付き）
-ハイブリッド RRF 検索
-（※元のドキュメントの SQL サンプルを⽇本語コメント付きでそのまま保持）
 テキスト検索処理
-フレーズマッチング: 単語間の近接検索や接頭辞検索をサポート
-標準検索: 単語間を AND で接続し、接頭辞マッチを適⽤
+- フレーズマッチング（近接/接頭辞）対応
+- 標準検索は AND + 接頭辞マッチ
+
 データベーススキーマ
-DocumentEmbeddings テーブルの列構成（Id, Content, Embedding, FileName, FilePath, …）
-pgvector によるベクトルインデックス利⽤
-埋め込み API 連携
-リクエスト/レスポンス形式例
-OpenAI の text-embedding-ada-002 をデフォルト利⽤可能
+- `DocumentEmbeddings`（Id, Content, Embedding, FileName, FilePath, …）
+- pgvector によるベクトルインデックス利⽤
+
 設定
-appsettings.json の設定例
-環境変数でポートや DB 接続を上書き可能
+- `appsettings.json` の設定例／環境変数でポートや DB 接続を上書き可能
+
 エラーハンドリング
-エラー JSON の形式
-エラー種別（invalid_request_error / service_unavailable など）
-コード例（missing_parameter / database_unavailable など）
-パフォーマンス考慮点
+- エラー JSON の形式、種別（`invalid_request_error` / `service_unavailable` など）
 
-1. pgvector によるベクトルインデックス最適化
-2. ハイブリッド検索で内部的に 3 倍の候補を取得
-3. スコア閾値で低品質マッチを除外
-4. EF Core 接続プール
-5. 埋め込みのキャッシュ推奨
-   セキュリティ機能
-6. マルチテナントによるデータ分離
-7. パラメータ化クエリで SQL インジェクション防⽌
+パフォーマンス
+- pgvector インデックス最適化
+- ハイブリッドで内部的に 3 倍の候補を取得
+- スコア閾値で低品質マッチを除外
+- 接続プール／埋め込みキャッシュ推奨
 
-
+セキュリティ
+- マルチテナントによる分離
+- パラメータ化クエリ・ログのサニタイズ・⼊⼒バリデーション
 
 ---
 
-
-
-3. ⼊⼒バリデーション
-4. エラー時に機密情報を⾮表⽰
-5. ログのサニタイズ
-   テスト⽤ページ
-   /wwwroot/test.html – 基本検索テスト
-   /wwwroot/test-hybrid.html – ハイブリッド検索テスト
-   デプロイメント要件
-   デフォルトポート 6500
-   PostgreSQL（pgvector 拡張付き）必須
-   埋め込み API へのアクセス
-   .NET ランタイム環境
-
-
-
----
-
-
-
-#### Audio API
+### 4.8 Audio API
 概要
-Audio API Server は、OpenAI 互換の⾳声⽂字起こし（Transcription）API を提供し、 リアルタイムストリ
-ーミング機能を追加したサーバーです。 Snapdragon NPU による⾼速化をサポートしつつ、CPU フォールバ
-ックにも対応しています。
+Audio API Server は、OpenAI 互換の⾳声⽂字起こし（Transcription）API を提供し、リアルタイムストリーミング機能を備えたサーバーです。Snapdragon NPU による⾼速化をサポートしつつ、CPU フォールバックにも対応しています。
+
 ベースURL
-http://localhost:8000
+`http://localhost:8000`
+
 認証
-デフォルトでは認証は不要です。 API キー認証を有効にするには、.env ファイルに API_KEY を設定しま
-す。
+デフォルトでは認証は不要です。 API キー認証を有効にするには、.env ファイルに API_KEY を設定します。
+
 エンドポイント
 
 1. ヘルスチェック
-   GET /health
-   サーバーが稼働しているかを確認します。
-   レスポンス例
-   {
-     "status": "healthy",
-     "timestamp": "2025-01-08T12:00:00Z"
-   }
+   - GET `/health`
+   - サーバーが稼働しているかを確認します。
+   - レスポンス例
+
+```json
+{ "status": "healthy", "timestamp": "2025-01-08T12:00:00Z" }
+```
+
 2. サーバーステータス
-   GET /status
-   サーバーの詳細な稼働状況と設定を取得します。
-   レスポンス例
-   {
-     "status": "running",
-     "uptime": 3600,
+   - GET `/status`
+   - サーバーの詳細な稼働状況と設定を取得します。
+   - レスポンス例
 
-
-
----
-
-
-
-"total_requests": 150,
+```json
+{
+  "status": "running",
+  "uptime": 3600,
+  "total_requests": 150,
   "active_connections": 2,
   "config": {
     "model": "whisper-large-v3-turbo",
@@ -1286,60 +1211,30 @@ http://localhost:8000
     "target_runtime": "qnn_dlc"
   }
 }
+```
 
 3. ⾳声⽂字起こし（OpenAI 互換）
-   POST /v1/audio/transcriptions
-   ⾳声をテキストに変換します。
-   リクエスト:
-   メソッド: POST
-   Content-Type: multipart/form-data
-   パラメータ
-   パラメータ
-   型
-   必須
-   説明
-   file
-   file
-   はい
-   ⾳声ファイル（WAV, MP3, M4A など）
-   model
-   string
-   いいえ
-   モデル名（デフォルト: whisper-large-v3-turbo）
-   language
-   string
-   いいえ
-   ⾔語コード（例: "en", "ja"）または "auto"
-   response_format
-   string
-   いいえ
-   出⼒形式: "json", "text", "srt", "vtt", "verbose_json"
-   prompt
-   string
-   いいえ
-   モデルに指⽰を与えるオプションのプロンプト
-   temperature
-   float
-   いいえ
-   サンプリング温度 (0.0-1.0)
-   リクエスト例
-   curl -X POST http://localhost:8000/v1/audio/transcriptions \
-     -F "file=@audio.wav" \
-     -F "model=whisper-large-v3-turbo" \
-     -F "response_format=verbose_json"
-   レスポンス例（verbose_json）
-   {
-     "task": "transcribe",
-     "language": "en",
-     "duration": 30.0,
+   - POST `/v1/audio/transcriptions`
+   - ⾳声をテキストに変換します。
+   - Content-Type: `multipart/form-data`
+   - 主なパラメータ: `file`(必須), `model`, `language`, `response_format`, `prompt`, `temperature`
+   - リクエスト例
 
+```bash
+curl -X POST http://localhost:8000/v1/audio/transcriptions \
+  -F "file=@audio.wav" \
+  -F "model=whisper-large-v3-turbo" \
+  -F "response_format=verbose_json"
+```
 
+   - レスポンス例（verbose_json）
 
----
-
-
-
-"text": "This is the transcribed text...",
+```json
+{
+  "task": "transcribe",
+  "language": "en",
+  "duration": 30.0,
+  "text": "This is the transcribed text...",
   "segments": [
     {
       "id": 0,
@@ -1355,149 +1250,117 @@ http://localhost:8000
     }
   ]
 }
-レスポンス例（json）
-{
-  "text": "This is the transcribed text..."
-}
-レスポンス例（text）
+```
+
+   - レスポンス例（json）
+
+```json
+{ "text": "This is the transcribed text..." }
+```
+
+   - レスポンス例（text）
+
+```
 This is the transcribed text...
+```
 
 4. ⾳声翻訳
-   POST /v1/audio/translations
-   ⾳声を英語テキストに翻訳します。 リクエスト形式は⽂字起こしと同じです。 レスポンスも同様ですが、結
-   果のテキストが英語になります。
+   - POST `/v1/audio/translations`
+   - ⾳声を英語テキストに翻訳します（リクエスト/レスポンスは⾳声⽂字起こしと同様、結果が英語）。
+
 5. WebSocket ストリーミング
-   WS /v1/audio/stream
-   リアルタイムで⾳声をストリーミングしながら⽂字起こしします。
-   接続例
-   const ws = new WebSocket('ws://localhost:8000/v1/audio/stream');
+   - WS `/v1/audio/stream`
+   - リアルタイムで⾳声をストリーミングしながら⽂字起こしします。
+   - 接続例
 
-
-
----
-
-
-
-プロトコル
-
-1. 設定を送信（JSON）
-   {
-     "model": "whisper-large-v3-turbo",
-     "language": "auto",
-     "response_format": "json"
-   }
-2. ⾳声データを送信（バイナリ）
-   16kHz / 16bit / モノラルの PCM
-   またはファイルのチャンクを送信
-3. ⽂字起こし結果を受信（JSON）
-   部分結果（partial）
-   {
-     "type": "partial",
-     "text": "This is being transcribed",
-     "timestamp": 1704715200,
-     "segment_id": 0
-   }
-   最終結果（final）
-   {
-     "type": "final",
-     "text": "This is being transcribed in real time.",
-     "timestamp": 1704715205,
-     "segment_id": 0,
-     "segments": [...]
-   }
-   クライアント例
-   const ws = new WebSocket('ws://localhost:8000/v1/audio/stream');
+```javascript
+const ws = new WebSocket('ws://localhost:8000/v1/audio/stream');
 
 ws.onopen = () => {
   ws.send(JSON.stringify({
     model: 'whisper-large-v3-turbo',
-    language: 'auto'
+    language: 'auto',
+    response_format: 'json'
   }));
   streamAudioChunks(ws);
-
-
-
----
-
-
-
 };
 
 ws.onmessage = (event) => {
   const result = JSON.parse(event.data);
   console.log('Transcription:', result.text);
 };
+```
+
+プロトコル
+- 1) 設定を送信（JSON）
+
+```json
+{ "model": "whisper-large-v3-turbo", "language": "auto", "response_format": "json" }
+```
+
+- 2) ⾳声データを送信（バイナリ: 16kHz/16bit/モノラル PCM またはファイルチャンク）
+- 3) 結果を受信（JSON）
+  - 部分結果（partial）
+
+```json
+{ "type": "partial", "text": "This is being transcribed", "timestamp": 1704715200, "segment_id": 0 }
+```
+
+  - 最終結果（final）
+
+```json
+{ "type": "final", "text": "This is being transcribed in real time.", "timestamp": 1704715205, "segment_id": 0, "segments": [] }
+```
 
 6. リアルタイム⾳声⼊⼒（マイク）
-   WS /v1/audio/realtime
-   マイク⼊⼒からリアルタイムで⽂字起こしします。
-   プロトコル
-7. 接続時の設定
-   {
-     "action": "start",
-     "config": {
-    "language": "auto",
-    "vad_enabled": true,
-    "energy_threshold": 1000
-     }
-   }
-8. 制御コマンド
-   {"action": "pause"}
-   {"action": "resume"}
-   {"action": "stop"}
-9. 結果の受信
-   {
-     "type": "transcription",
-     "text": "Hello, this is real-time transcription",
-     "is_final": true,
-     "confidence": 0.95,
-     "timestamp": 1704715200
-   }
-   エラーハンドリング
+   - WS `/v1/audio/realtime`
+   - マイク⼊⼒からリアルタイムで⽂字起こしします。
+   - 接続時の設定
 
+```json
+{
+  "action": "start",
+  "config": { "language": "auto", "vad_enabled": true, "energy_threshold": 1000 }
+}
+```
 
+   - 制御コマンド
+
+```json
+{ "action": "pause" }
+{ "action": "resume" }
+{ "action": "stop" }
+```
+
+   - 結果の受信
+
+```json
+{ "type": "transcription", "text": "Hello, this is real-time transcription", "is_final": true, "confidence": 0.95, "timestamp": 1704715200 }
+```
 
 ---
 
-
-
 エラーレスポンス形式
-{
-  "error": {
-    "message": "エラー説明",
-    "type": "error_type",
-    "code": "ERROR_CODE"
-  }
-}
+
+```json
+{ "error": { "message": "エラー説明", "type": "error_type", "code": "ERROR_CODE" } }
+```
+
 ⼀般的なエラーコード
-コード
-HTTP ステータス
-説明
-INVALID_AUDIO
-400
-無効または破損した⾳声ファイル
-FILE_TOO_LARGE
-413
-ファイルサイズが上限を超過
-UNSUPPORTED_FORMAT
-415
-⾮対応の⾳声形式
-MODEL_NOT_FOUND
-404
-指定モデルが存在しない
-NPU_ERROR
-500
-NPU 処理失敗（CPU フォールバックあり）
-TIMEOUT
-408
-リクエストタイムアウト
+- INVALID_AUDIO（400）: 無効または破損した⾳声ファイル
+- FILE_TOO_LARGE（413）: ファイルサイズが上限を超過
+- UNSUPPORTED_FORMAT（415）: ⾮対応の⾳声形式
+- MODEL_NOT_FOUND（404）: 指定モデルが存在しない
+- NPU_ERROR（500）: NPU 処理失敗（CPU フォールバックあり）
+- TIMEOUT（408）: リクエストタイムアウト
+
 レート制限
-デフォルト設定（変更可能）:
-1分あたり 100 リクエスト / IP
-同時接続 10 / IP
-最⼤ファイルサイズ 100MB
+- デフォルト（変更可能）: 1分あたり 100 リクエスト / IP、同時接続 10 / IP、最⼤ファイルサイズ 100MB
+
 レスポンスフォーマット
 SRT 形式
+
+```
 1
 00:00:00,000 --> 00:00:05,000
 This is the first subtitle.
@@ -1505,14 +1368,11 @@ This is the first subtitle.
 2
 00:00:05,000 --> 00:00:10,000
 This is the second subtitle.
+```
+
 VTT 形式
 
-
-
----
-
-
-
+```
 WEBVTT
 
 00:00:00.000 --> 00:00:05.000
@@ -1520,8 +1380,12 @@ This is the first subtitle.
 
 00:00:05.000 --> 00:00:10.000
 This is the second subtitle.
+```
+
 クライアント実装例
-Python
+
+```python
+# Python
 import requests
 
 with open("audio.wav", "rb") as f:
@@ -1531,7 +1395,10 @@ with open("audio.wav", "rb") as f:
         data={"model": "whisper-large-v3-turbo"}
     )
     print(response.json()["text"])
-JavaScript / Node.js
+```
+
+```javascript
+# JavaScript / Node.js
 const FormData = require('form-data');
 const fs = require('fs');
 const axios = require('axios');
@@ -1542,50 +1409,49 @@ form.append('model', 'whisper-large-v3-turbo');
 
 axios.post('http://localhost:8000/v1/audio/transcriptions', form)
   .then(response => console.log(response.data.text));
-cURL
+```
+
+```bash
+# cURL
 curl -X POST http://localhost:8000/v1/audio/transcriptions \
   -H "Content-Type: multipart/form-data" \
   -F "file=@audio.wav" \
   -F "model=whisper-large-v3-turbo" \
   -F "response_format=json"
-
-
+```
 
 ---
 
-
-
 パフォーマンス向上のヒント
+- NPU 加速を利⽤すると 5〜10倍⾼速化
+- ⻑い⾳声は 30 秒ごとに分割すると最適化可能
+- VAD（Voice Activity Detection）を有効化して無⾳部分をスキップ
+- 精度設定の最適化︓NPU では `w8a8`、CPU では `float32`
+- 単⼀ワーカープロセスで NPU の競合を回避
+- ストリーミングを活⽤してリアルタイム⽤途に最適化
 
-1. NPU 加速を利⽤すると 5〜10倍⾼速化
-2. ⻑い⾳声は 30 秒ごとに分割すると最適化可能
-3. VAD（Voice Activity Detection）を有効化して無⾳部分をスキップ
-4. 適切な精度設定を選択︓NPU では w8a8、CPU では float32
-5. 単⼀ワーカープロセスで NPU の競合を回避
-6. ストリーミングを活⽤してリアルタイム⽤途に最適化
-   OpenAI 互換性
-   この API は OpenAI の Whisper API と互換性があり、既存のクライアントを簡単に置き換えることができま
-   す。
+OpenAI 互換性
+- この API は OpenAI の Whisper API と互換性があり、既存のクライアントを簡単に置き換えることができます。
 
+```python
 # OpenAI クライアント（従来）
-
 from openai import OpenAI
 client = OpenAI(api_key="...")
 transcription = client.audio.transcriptions.create(
   model="whisper-1",
   file=audio_file
 )
+```
 
+```python
 # この API を利⽤する場合
-
-client = OpenAI(
-  api_key="not-needed",
-  base_url="http://localhost:8000/v1"
-)
+from openai import OpenAI
+client = OpenAI(api_key="not-needed", base_url="http://localhost:8000/v1")
 transcription = client.audio.transcriptions.create(
   model="whisper-large-v3-turbo",
   file=audio_file
 )
+```
 © 2025 IB-Link / J-AIC 本ドキュメントの無断転載を禁じます。
 
 
