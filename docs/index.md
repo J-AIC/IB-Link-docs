@@ -680,7 +680,7 @@ API エンドポイント
 ```
 
    - 主要パラメータ
-     - `model`: モデル名（IB_Link内で設定するため無効）
+     - `model`: モデル名（IB-Link内で設定するため無効）
      - `message`: LLMに投入する指示や質問
      - `temperature`: LLMの出力の揺らぎ度合い
      - `max_tokens`: LLMの出力の最大トークン数制限
@@ -1227,7 +1227,7 @@ Audio API Server は、OpenAI 互換の⾳声⽂字起こし（Transcription）A
 
 注意点
 - 動作確認はCopilot PCに搭載されているマイクで行っております。
-- IB_Linkで録音、文字起こしを行っているため、フロントエンド側でのマイク入力は不要です。
+- IB-Linkで録音、文字起こしを行っているため、フロントエンド側でのマイク入力は不要です。
 
 ベースURL
 `http://localhost:8000`
