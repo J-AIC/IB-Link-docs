@@ -398,40 +398,6 @@ Runtime タブでは、ローカルモデルの実⾏に必要な Llamaサーバ
 
 
 
-3. API Settings タブ
-   APIを⽤いたチャットやレポート⽣成の設定ができます。
-4. 設定内容︓
-   項⽬
-   説明
-   API Key
-   APIキー（例: sk-...）
-   Model
-   利⽤モデル（例: gpt-4, gpt-3.5-turbo）
-   Base URL
-   APIのエンドポイントURL（例: http://localhost:8080/v1）
-   Temperature
-   応答のランダム性（0.0 = 決定的, 2.0 = ランダム）
-   Max Tokens
-   応答トークンの最⼤数（例: 1000）
-   操作ボタン︓
-   Save Settings︓設定を保存
-   Reset to Defaults︓デフォルトに戻す
-   Test Connection︓API接続をテスト
-5. Embeddigs API タブ
-   このタブは機能として提供しておりません。
-   設定を変更いただかないようお願いいたします。
-   注意事項
-   設定変更後は再度 Run Server しないと反映されません。
-
-
-![図: 画像 1](images/page-024_img-001.png)
-
-
-
----
-
-
-
 ### 4.3 Logs機能
 Server Logs の確認
 上部タブから Server Logs を選択します。
@@ -651,6 +617,8 @@ Filter API で対象を絞り、Changes Only をオンにして差分だけを�
 ![図: 画像 1](images/page-035_img-001.png)
 
 
+---
+
 
 ### 4.6 Chat API
 概要
@@ -715,8 +683,10 @@ Documents API は、ドキュメントの処理、埋め込み（embedding）⽣
 基本的な利⽤フロー
 - 1. ドキュメントを処理して埋め込みを作成（POST `/documents/process`）
 - 2. 処理状況を確認（POST `/documents/status`）
-- 3. ⾃然⾔語で検索（POST `/documents/search`）
-- 4. 埋め込みを作成せずに内容を抽出（POST `/documents/extract`）
+- 3. 全ドキュメントを一覧表示（GET `/documents/list`）
+- 4. ⾃然⾔語で検索（POST `/documents/search`）
+- 5. 埋め込みを作成せずに内容を抽出（POST `/documents/extract`）
+- 6. ドキュメントを削除（DELETE `/documents/delete`）
 
 サポートされるファイル形式
 - ドキュメント
