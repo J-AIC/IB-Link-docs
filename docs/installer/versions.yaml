@@ -1,0 +1,47 @@
+## IB-Link インストーラーリリース一覧定義
+## - このファイルは docs/installer/index.html から js-yaml 経由で読み込まれます
+## - 基本構造:
+##   releases:
+##     - version: "vX.Y.Z"              # 表示用バージョン（必須）
+##       label: "IB-Link vX.Y.Z"        # 任意のラベル
+##       release_date: "YYYY-MM-DD"     # ISO 形式の日付文字列
+##       status: "current|preview|archived"  # 表示バッジ種別
+##       summary: "概要テキスト"        # 短い説明
+##       changes:                       # 変更点一覧
+##         - "変更点 1"
+##         - "変更点 2"
+##       downloads:                     # ダウンロードリンク（複数可）
+##         - arch: "x64"
+##           title: "Windows 11/10 x64"
+##           filename: "IB-Link_Setup_vX.Y.Z_win-x64.exe"
+##           url: "https://..."
+##           checksum: ""               # 任意（空でも可）
+##       notices:                       # 注意事項（任意・複数可）
+##         - "注意点 1"
+##         - "注意点 2"
+
+releases:
+  - version: "v3.0"
+    label: "IB-Link v3.0"
+    release_date: "2025-11-15"
+    status: "current"
+    summary: "ダミー: v3 系列の公開版として安定性と配布導線を整備しました。"
+    changes:
+      - "ダミー: インストーラーの署名およびプロンプトを最新仕様に合わせて更新。"
+      - "ダミー: 初回同期ウィザードのガイドを改善。"
+      - "ダミー: ARM / Intel 版で共通の設定テンプレートを同梱。"
+    downloads:
+      - arch: "arm64"
+        title: "Windows 11/10 ARM64"
+        filename: "IB-Link_Setup_v3.0_win-arm64.exe"
+        url: "https://j-aic.sakura.ne.jp/d-app/IB-Link_Setup_v3.0_win-arm64.exe"
+        checksum: ""
+      - arch: "x64"
+        title: "Windows 11/10 x64 (Intel)"
+        filename: "IB-Link_Setup_v3.0_win-x64_Intel.exe"
+        url: "https://j-aic.sakura.ne.jp/d-app/IB-Link_Setup_v3.0_win-x64_Intel.exe"
+        checksum: ""
+    notices:
+      - "ダミー: 初回起動後に管理者アカウントで再ログインしてください。"
+      - "ダミー: 旧v2からアップグレードする場合はバックアップを取得してから作業してください。"
+

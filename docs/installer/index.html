@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="ja">
+<head>
+	<meta charset="utf-8" />
+	<title>IB-Link インストーラー</title>
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<link rel="preconnect" href="https://cdn.jsdelivr.net">
+	<link rel="stylesheet" href="../assets/base.css">
+	<style>
+		.page-header{
+			margin-bottom:32px;
+		}
+		.page-header .eyebrow{
+			color:var(--navy-light);
+			font-size:12px;
+			text-transform:uppercase;
+			letter-spacing:.2em;
+			margin:0 0 8px;
+		}
+		.page-header h1{
+			margin:0;
+			font-size:32px;
+			color:var(--navy-dark);
+			letter-spacing:-.01em;
+		}
+		.page-header p{
+			margin:12px 0 0;
+			color:var(--text-light);
+		}
+		.release-panel{
+			background:var(--card);
+			border-radius:16px;
+			padding:28px;
+		}
+		.section-head{
+			display:flex;
+			align-items:center;
+			justify-content:space-between;
+			gap:12px;
+			margin-bottom:18px;
+		}
+		.section-head h2{
+			margin:0;
+			font-size:24px;
+			color:var(--navy);
+		}
+		.section-head span{
+			font-size:13px;
+			color:var(--text-light);
+		}
+		.release-grid{
+			display:grid;
+			grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+			gap:18px;
+			margin:0;
+			padding:0;
+			list-style:none;
+		}
+		.release-card{
+			border:1px solid var(--border);
+			border-radius:14px;
+			padding:20px;
+			display:flex;
+			flex-direction:column;
+			gap:12px;
+			background:#fff;
+		}
+		.release-card header{
+			display:flex;
+			justify-content:space-between;
+			align-items:flex-start;
+			gap:12px;
+		}
+		.release-card h3{
+			margin:0;
+			font-size:20px;
+			color:var(--navy-dark);
+		}
+		.badge{
+			padding:4px 10px;
+			border-radius:999px;
+			font-size:11px;
+			font-weight:700;
+			border:1px solid var(--border);
+			color:var(--text-light);
+			text-transform:uppercase;
+		}
+		.badge[data-status="current"]{
+			color:#fff;
+			background:var(--navy-light);
+			border-color:var(--navy-light);
+		}
+		.badge[data-status="preview"]{
+			color:#92400e;
+			background:#fef3c7;
+			border-color:#fbbf24;
+		}
+		.summary{
+			margin:0;
+			color:var(--text-light);
+			line-height:1.6;
+		}
+		.meta-list{
+			display:flex;
+			flex-wrap:wrap;
+			gap:10px;
+			padding:0;
+			margin:0;
+			list-style:none;
+			font-size:13px;
+			color:var(--text-light);
+		}
+		.meta-list li{display:flex;gap:4px;align-items:center}
+		.meta-list li::before{
+			content:"●";
+			font-size:6px;
+			color:var(--border);
+		}
+		.block-title{
+			margin:8px 0 0;
+			font-size:14px;
+			font-weight:700;
+			color:var(--navy);
+			text-transform:uppercase;
+			letter-spacing:.08em;
+		}
+		.change-list{
+			margin:8px 0 0;
+			padding-left:20px;
+			color:var(--text);
+		}
+		.downloads{
+			display:flex;
+			flex-direction:column;
+			gap:10px;
+			margin-top:4px;
+		}
+		.download-link{
+			border:1px solid var(--border);
+			border-radius:10px;
+			padding:12px 14px;
+			text-decoration:none;
+			color:var(--text);
+			display:flex;
+			flex-direction:column;
+			gap:4px;
+			background:#f9fafb;
+			transition:background .15s ease,border-color .15s ease;
+		}
+		.download-link:hover{background:var(--accent-hover);border-color:var(--navy-light)}
+		.download-link strong{font-size:15px}
+		.download-link span{
+			font-size:12px;
+			color:var(--text-light);
+		}
+		.download-link small{
+			font-size:11px;
+			color:var(--text-light);
+		}
+		.notice-box{
+			border:1px solid #f59e0b;
+			background:#fff7ed;
+			border-radius:10px;
+			padding:12px 14px;
+			color:#92400e;
+			font-size:13px;
+		}
+		.notice-box ul{
+			margin:0;
+			padding-left:18px;
+		}
+		.status-note{
+			margin-top:18px;
+			font-size:13px;
+			color:var(--text-light);
+		}
+	</style>
+</head>
+<body>
+	<nav class="toc">
+		<div class="brand">IB‑Link ダウンロード</div>
+		<div class="quick-links">
+			<a href="../IB-Link操作マニュアル_v3.0.pdf" title="PDFをダウンロード" download>
+				<span class="ico">
+					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+						<path d="M12 4v10" stroke="#1e3a5f" stroke-width="1.5" stroke-linecap="round"/>
+						<path d="M8.5 10.5 12 14l3.5-3.5" stroke="#1e3a5f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+						<path d="M5 16.5h14" stroke="#1e3a5f" stroke-width="1.5" stroke-linecap="round"/>
+					</svg>
+				</span>
+				<span>PDFダウンロード</span>
+			</a>
+			<a href="../api/index.html" title="APIリファレンスを開く">
+				<span class="ico">
+					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+						<path d="M4 5.5C4 4.67 4.67 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5v-13Z" stroke="#1e3a5f" stroke-width="1.5"/>
+						<path d="M12 4h6.5c.83 0 1.5.67 1.5 1.5v13c0 .83-.67 1.5-1.5 1.5H12V4Z" stroke="#1e3a5f" stroke-width="1.5"/>
+					</svg>
+				</span>
+				<span>APIリファレンス</span>
+			</a>
+			<a href="./index.html" title="インストーラーページを開く">
+				<span class="ico">
+					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+						<path d="M12 2L2 7v10c0 5.5 3.8 10.7 10 12 6.2-1.3 10-6.5 10-12V7l-10-5z" stroke="#1e3a5f" stroke-width="1.5" stroke-linejoin="round"/>
+						<path d="M9 12l2 2 4-4" stroke="#1e3a5f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</span>
+				<span>インストーラー</span>
+			</a>
+		</div>
+	</nav>
+	<main class="container">
+		<header class="page-header">
+			<p class="eyebrow">Download Center</p>
+			<h1>IB-Link インストーラー</h1>
+			<p>Windows 向け IB-Link 最新版・旧版のインストーラーをアーキテクチャ別に公開しています。</p>
+		</header>
+
+		<section class="release-panel">
+			<div class="section-head">
+				<h2>リリース一覧</h2>
+				<span id="release-count">読み込み中…</span>
+			</div>
+			<div id="release-list" class="release-grid" role="list"></div>
+			<p id="status-message" class="status-note" role="status">データを取得中です。</p>
+		</section>
+
+	</main>
+	<button id="toTop" class="back-to-top" aria-label="ページ上部へ戻る">Top</button>
+
+	<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+	<script src="../assets/common.js"></script>
+	<script>
+		(function(){
+			/**
+			 * versions.yaml から release 情報を取得してカードとして描画する。
+			 * release オブジェクトの想定形:
+			 * {
+			 *   version: string,
+			 *   label?: string,
+			 *   release_date?: string,
+			 *   status?: 'current' | 'preview' | 'archived',
+			 *   summary?: string,
+			 *   tag?: string,
+			 *   changes?: string[],
+			 *   downloads?: { arch?: string, title?: string, filename?: string, url?: string, checksum?: string }[],
+			 *   notices?: string[]
+			 * }
+			 */
+			const listEl = document.getElementById('release-list');
+			const statusEl = document.getElementById('status-message');
+			const countEl = document.getElementById('release-count');
+
+			// Back to top（共通ユーティリティを利用）
+			if(window.IBLinkCommon && window.IBLinkCommon.initBackToTop){
+				window.IBLinkCommon.initBackToTop('toTop', 600);
+			}
+
+			async function loadReleases(){
+				try{
+					const res = await fetch('versions.yaml', {cache:'no-cache'});
+					if(!res.ok) throw new Error('versions.yaml を取得できませんでした');
+					const yamlText = await res.text();
+					const data = jsyaml.load(yamlText) || {};
+					const releases = Array.isArray(data.releases) ? data.releases : [];
+					renderReleases(releases);
+				}catch(err){
+					console.error(err);
+					listEl.innerHTML = '';
+					countEl.textContent = '0件';
+					statusEl.textContent = 'バージョン情報の読み込みに失敗しました。ネットワークやパスを確認してください。必要に応じて管理者にお問い合わせください。';
+				}
+			}
+
+			function renderReleases(releases){
+				if(!releases.length){
+					listEl.innerHTML = '';
+					countEl.textContent = '0件';
+					statusEl.textContent = '登録済みのリリースがありません。';
+					return;
+				}
+
+				const sorted = releases
+					.map(function(release, idx){ return Object.assign({_idx: idx}, release); })
+					.sort(function(a, b){
+						const da = Date.parse(a.release_date || '') || 0;
+						const db = Date.parse(b.release_date || '') || 0;
+						if(da === db) return b._idx - a._idx;
+						return db - da;
+					});
+
+				listEl.innerHTML = '';
+				sorted.forEach(function(release){
+					listEl.appendChild(createCard(release));
+				});
+				countEl.textContent = sorted.length + '件';
+				statusEl.textContent = '';
+			}
+
+			function createCard(release){
+				const card = document.createElement('article');
+				card.className = 'release-card';
+				card.setAttribute('role','listitem');
+
+				const header = document.createElement('header');
+				const title = document.createElement('h3');
+				title.textContent = release.version || release.label || '未定義';
+				const badge = document.createElement('span');
+				badge.className = 'badge';
+				const statusKey = String(release.status || 'archived').toLowerCase();
+				badge.dataset.status = statusKey;
+				badge.textContent = getStatusLabel(statusKey);
+				header.append(title, badge);
+
+				const summary = document.createElement('p');
+				summary.className = 'summary';
+				summary.textContent = release.summary || '概要が登録されていません。';
+
+				const metaList = document.createElement('ul');
+				metaList.className = 'meta-list';
+				if(release.label){
+					metaList.appendChild(createMetaItem('ラベル', release.label));
+				}
+				if(release.release_date){
+					metaList.appendChild(createMetaItem('リリース日', formatDate(release.release_date)));
+				}
+				if(release.tag){
+					metaList.appendChild(createMetaItem('タグ', release.tag));
+				}
+
+				const changeTitle = document.createElement('p');
+				changeTitle.className = 'block-title';
+				changeTitle.textContent = 'CHANGELOG';
+
+				const changeList = document.createElement('ul');
+				changeList.className = 'change-list';
+				(release.changes || []).forEach(function(change){
+					const li = document.createElement('li');
+					li.textContent = change;
+					changeList.appendChild(li);
+				});
+				if(!changeList.childElementCount){
+					const li = document.createElement('li');
+					li.textContent = '変更点は未入力です。';
+					changeList.appendChild(li);
+				}
+
+				const dlTitle = document.createElement('p');
+				dlTitle.className = 'block-title';
+				dlTitle.textContent = 'DOWNLOAD';
+
+				const downloads = document.createElement('div');
+				downloads.className = 'downloads';
+				(release.downloads || []).forEach(function(dl){
+					downloads.appendChild(createDownloadLink(dl, release.version));
+				});
+				if(!downloads.childElementCount){
+					const note = document.createElement('p');
+					note.className = 'summary';
+					note.textContent = 'ダウンロードリンクが未設定です。';
+					downloads.appendChild(note);
+				}
+
+				card.append(header, summary, metaList, changeTitle, changeList, dlTitle, downloads);
+
+				if(Array.isArray(release.notices) && release.notices.length){
+					const noticeBox = document.createElement('div');
+					noticeBox.className = 'notice-box';
+					const list = document.createElement('ul');
+					release.notices.forEach(function(note){
+						const li = document.createElement('li');
+						li.textContent = note;
+						list.appendChild(li);
+					});
+					noticeBox.appendChild(list);
+					card.appendChild(noticeBox);
+				}
+
+				return card;
+			}
+
+			function createMetaItem(label, value){
+				const li = document.createElement('li');
+				const strong = document.createElement('span');
+				strong.textContent = label + ':';
+				const span = document.createElement('span');
+				span.textContent = value;
+				li.append(strong, span);
+				return li;
+			}
+
+			function createDownloadLink(dl, version){
+				const link = document.createElement('a');
+				link.className = 'download-link';
+				link.href = dl.url || '#';
+				link.target = '_blank';
+				link.rel = 'noopener noreferrer';
+				if(!dl.url){
+					link.setAttribute('aria-disabled','true');
+					link.style.opacity = '0.5';
+				}
+
+				const title = document.createElement('strong');
+				title.textContent = dl.title || dl.arch || '未記載';
+
+				const meta = document.createElement('span');
+				const filename = dl.filename ? ' · ' + dl.filename : '';
+				const versionText = version || '';
+				meta.textContent = (versionText + filename).trim() || 'ファイル未設定';
+
+				link.append(title, meta);
+
+				if(dl.checksum){
+					const hash = document.createElement('small');
+					hash.textContent = 'Checksum: ' + dl.checksum;
+					link.appendChild(hash);
+				}
+
+				return link;
+			}
+
+			function formatDate(value){
+				const date = new Date(value);
+				if(Number.isNaN(date.getTime())) return value;
+				return new Intl.DateTimeFormat('ja-JP',{year:'numeric', month:'short', day:'numeric'}).format(date);
+			}
+
+			function getStatusLabel(status){
+				switch(status){
+					case 'current': return '最新';
+					case 'preview': return 'プレビュー';
+					case 'archived':
+					default: return 'アーカイブ';
+				}
+			}
+
+			loadReleases();
+		})();
+	</script>
+</body>
+</html>
+
