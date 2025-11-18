@@ -25,7 +25,8 @@
 			.container{
 				margin-left:0 !important;
 				max-width:100% !important;
-				padding:8mm 0 10mm !important; /* 上:ヘッダー分 / 下:フッター分 */
+				/* 先頭のコンテンツが印刷ヘッダーにかぶらないように、上方向の余白を少し広めにとる */
+				padding:12mm 0 10mm !important;
 			}
 			/* 先頭の「IB-Link 操作マニュアル」見出しと、その直後の段落は印刷時のみ非表示 */
 			.container h1:first-of-type,
@@ -35,14 +36,16 @@
 			/* 背景と余白を印刷向けに調整（固定ヘッダー/フッターと本文が重ならないようにする） */
 			body{
 				background:white !important;
-				margin-top:12mm;
+				margin-top:0mm;
 				margin-bottom:12mm;
 			}
 			img{page-break-inside:avoid;max-width:100%}
 			h1{page-break-before:avoid;margin-top:0}
-			h2{page-break-before:always;margin-top:0;padding-top:6mm;border-top:none}
+			/* 各ページ先頭の見出しが印刷ヘッダーに隠れないよう余白を広げる */
+			h2{page-break-before:always;margin-top:0;padding-top:24mm;border-top:none}
 			h2:first-of-type{page-break-before:avoid;padding-top:0}
-			h3{page-break-after:avoid}
+			/* h3 もページ先頭に来た場合にヘッダーに隠れないよう、上方向に余白をとる */
+			h3{page-break-after:avoid;margin-top:0;padding-top:12mm;}
 			/* コードブロックは印刷時は折り返し＆スクロールバーなし */
 			pre{
 				page-break-inside:avoid;
