@@ -6,125 +6,131 @@
 	<title>IB‑Link ユーザーマニュアル</title>
 	<link rel="preconnect" href="https://cdn.jsdelivr.net">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/styles/github.min.css">
+	<link rel="stylesheet" href="./assets/base.css">
 <style>
-		:root{
-			--navy:#1e3a5f;
-			--navy-dark:#0f2744;
-			--navy-light:#2c4f7c;
-			--bg:#ffffff;
-			--sidebar-bg:#f5f7fa;
-			--border:#d1d5db;
-			--text:#1f2937;
-			--text-light:#4b5563;
-			--accent-hover:#e8f1f8;
-		}
-		html{scroll-behavior:smooth}
-		body{
-			margin:0;
-			background:var(--bg);
-			color:var(--text);
-			font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, system-ui, sans-serif;
-			line-height:1.7;
-			letter-spacing:0.01em;
-		}
-		/* Sidebar TOC */
-		.toc{
-			position:fixed;
-			top:0;left:0;bottom:0;
-			width:280px;
-			background:var(--sidebar-bg);
-			border-right:1px solid var(--border);
-			overflow:auto;
-			padding:20px 16px 24px 20px;
-			box-shadow:2px 0 8px rgba(0,0,0,.03);
-		}
-		.toc .brand{
-			display:flex;align-items:center;gap:10px;
-			font-weight:700;font-size:15px;color:var(--navy-dark);
-			padding:10px 6px 16px 6px;letter-spacing:.03em;
-			border-bottom:2px solid var(--navy);
-			margin-bottom:16px;
-		}
-		.toc .title{
-			font-size:11px;font-weight:700;color:var(--text-light);
-			text-transform:uppercase;letter-spacing:.1em;margin:12px 0 8px 4px;
-		}
-		.toc ul{list-style:none;margin:0;padding:0 4px 24px 4px}
-		.toc li{margin:3px 0}
-		.toc a{
-			display:block;padding:8px 10px;border-radius:6px;text-decoration:none;
-			color:var(--text);font-size:13.5px;transition:all .15s ease;
-		}
-		.toc a:hover{background:var(--accent-hover);color:var(--navy)}
-		.toc a.active{background:var(--navy);color:#fff;font-weight:600;box-shadow:0 2px 4px rgba(30,58,95,.2)}
-		.toc .lvl3{padding-left:16px;font-size:13px}
-		/* Content */
-		.container{
-			margin-left:300px;
-			max-width:1000px;
-			padding:40px 32px 60px;
-		}
-		.container h1{
-			font-size:32px;line-height:1.3;margin:0 0 24px;color:var(--navy-dark);
-			font-weight:700;letter-spacing:-.01em;
-		}
-		.container h2{
-			margin-top:36px;padding-top:20px;border-top:2px solid var(--border);
-			color:var(--navy);font-weight:600;font-size:24px;letter-spacing:-.005em;
-		}
-		.container h3{
-			margin-top:24px;color:var(--navy-light);font-weight:600;font-size:19px;
-		}
-		.container a{color:var(--navy);text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:3px;transition:text-decoration-color .2s}
-		.container a:hover{text-decoration-color:var(--navy)}
-		.container p{margin:12px 0;color:var(--text)}
-		.container ul, .container ol{margin:12px 0;padding-left:24px;color:var(--text)}
-		.container li{margin:6px 0}
-		pre{
-			background:#fafbfc;border:1px solid var(--border);border-radius:8px;
-			box-shadow:0 1px 3px rgba(0,0,0,.06);padding:18px;overflow:auto;
-			font-size:13.5px;
-		}
-		code{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-size:13.5px}
-		:not(pre) > code{background:#f3f4f6;padding:2px 6px;border-radius:4px;color:var(--navy-dark);font-size:13px}
-		img{max-width:100%;height:auto;border-radius:6px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin:16px 0}
-		blockquote{
-			border-left:4px solid var(--navy);background:#f9fafb;padding:12px 16px;margin:16px 0;
-			color:var(--text-light);font-style:italic;
-		}
-		table{border-collapse:collapse;width:100%;margin:16px 0}
-		th,td{border:1px solid var(--border);padding:10px 12px;text-align:left}
-		th{background:var(--sidebar-bg);color:var(--navy);font-weight:600}
-		/* Quick links */
-		.quick-links{display:flex;gap:8px;margin:8px 4px 12px}
-		.quick-links a{
-			display:flex;gap:8px;align-items:center;text-decoration:none;
-			color:var(--navy);background:#fff;border:1px solid var(--border);
-			border-radius:8px;padding:6px 10px;font-size:13px;font-weight:600;
-		}
-		.quick-links a:hover{background:var(--accent-hover)}
-		.quick-links .ico svg{width:16px;height:16px;display:block}
-		/* Back to top */
-		.back-to-top{
-			position:fixed;right:20px;bottom:20px;background:var(--navy);color:#fff;
-			border:none;border-radius:999px;padding:12px 16px;font-size:13px;font-weight:600;cursor:pointer;
-			box-shadow:0 4px 12px rgba(30,58,95,.3);opacity:0;pointer-events:none;transition:all .25s ease;
-		}
-		.back-to-top.show{opacity:1;pointer-events:auto}
-		.back-to-top:hover{background:var(--navy-dark);transform:translateY(-2px);box-shadow:0 6px 16px rgba(30,58,95,.4)}
-		/* Responsive */
-		@media (max-width:1024px){
-			.toc{display:none}
-			.container{margin-left:0;padding:24px 20px}
+		/* index.html 固有スタイル（印刷レイアウトなど）
+		 * ベースのレイアウト / タイポグラフィは ./assets/base.css で共有
+		 */
+		/* Print styles */
+		@media print{
+			@page{
+				margin-top:14mm;
+				margin-bottom:16mm;
+				margin-left:15mm;
+				margin-right:15mm;
+			}
+			/* 左メニューなどは印刷しない */
+			.toc, .back-to-top, .quick-links{display:none !important}
+			/* コンテンツ位置をヘッダー／フッターと重ならないように調整 */
+			.container{
+				margin-left:0 !important;
+				max-width:100% !important;
+				/* 先頭のコンテンツが印刷ヘッダーにかぶらないように、上方向の余白を少し広めにとる */
+				padding:12mm 0 10mm !important;
+			}
+			/* 先頭の「IB-Link 操作マニュアル」見出しと、その直後の段落は印刷時のみ非表示 */
+			.container h1:first-of-type,
+			.container h1:first-of-type + p{
+				display:none !important;
+			}
+			/* 背景と余白を印刷向けに調整（固定ヘッダー/フッターと本文が重ならないようにする） */
+			body{
+				background:white !important;
+				margin-top:0mm;
+				margin-bottom:12mm;
+			}
+			img{page-break-inside:avoid;max-width:100%}
+			h1{page-break-before:avoid;margin-top:0}
+			/* 各ページ先頭の見出しが印刷ヘッダーに隠れないよう余白を広げる */
+			h2{page-break-before:always;margin-top:0;padding-top:24mm;border-top:none}
+			h2:first-of-type{page-break-before:avoid;padding-top:0}
+			/* h3 もページ先頭に来た場合にヘッダーに隠れないよう、上方向に余白をとる */
+			h3{page-break-after:avoid;margin-top:0;padding-top:12mm;}
+			/* コードブロックは印刷時は折り返し＆スクロールバーなし */
+			pre{
+				page-break-inside:avoid;
+				overflow:visible !important;
+				white-space:pre-wrap !important;
+				word-wrap:break-word !important;
+			}
+			table{page-break-inside:avoid}
+			code{word-wrap:break-word}
+			/* 最後の区切り線（hr）を印刷時のみ非表示にする */
+			.container hr:last-of-type{
+				display:none !important;
+			}
+			/* Print header/footer (fixed, minimal height, no borders) */
+			.print-header{
+				display:flex !important;
+				position:fixed;
+				top:0;
+				left:0;
+				right:0;
+				height:6mm;
+				padding:0 4mm;
+				justify-content:space-between;
+				align-items:flex-start;
+				background:white;
+				font-size:9pt;
+			}
+			.print-header-left{
+				font-weight:700;
+				color:var(--navy-dark);
+			}
+			.print-header-right{
+				font-size:8pt;
+				color:var(--text-light);
+				text-align:right;
+			}
+			.print-footer{
+				display:flex !important;
+				position:fixed;
+				bottom:0;
+				left:0;
+				right:0;
+				height:6mm;
+				padding:0 4mm;
+				justify-content:flex-end;
+				align-items:flex-end;
+				background:white;
+				font-size:8pt;
+			}
+			.print-footer-center{
+				display:none;
+			}
+			.print-footer-right{
+				color:var(--text-light);
+				white-space:nowrap;
+			}
 		}
 </style>
 	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+	<script src="./assets/common.js"></script>
 </head>
 <body>
+	<!-- Print-only header/footer -->
+	<div class="print-header" style="display:none">
+		<div class="print-header-left">IB-Link 操作マニュアル</div>
+		<div class="print-header-right" id="printDate"></div>
+	</div>
+	<div class="print-footer" style="display:none">
+		<div class="print-footer-center"></div>
+		<div class="print-footer-right">© J-AIC</div>
+	</div>
 	<nav class="toc">
 		<div class="brand">IB‑Link ユーザーガイド</div>
 		<div class="quick-links">
+			<a href="#" id="printManual" title="マニュアルを印刷">
+				<span class="ico">
+					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+						<path d="M7 17h10M7 13h10" stroke="#1e3a5f" stroke-width="1.5" stroke-linecap="round"/>
+						<path d="M6 9h12V6c0-.55-.45-1-1-1H7c-.55 0-1 .45-1 1v3Z" stroke="#1e3a5f" stroke-width="1.5"/>
+						<path d="M4 9c-.55 0-1 .45-1 1v5c0 .55.45 1 1 1h2v3c0 .55.45 1 1 1h10c.55 0 1-.45 1-1v-3h2c.55 0 1-.45 1-1v-5c0-.55-.45-1-1-1H4Z" stroke="#1e3a5f" stroke-width="1.5"/>
+					</svg>
+				</span>
+				<span>マニュアル印刷</span>
+			</a>
 			<a href="./api/index.html" title="APIリファレンスを開く">
 				<span class="ico">
 					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -133,6 +139,15 @@
 					</svg>
 				</span>
 				<span>APIリファレンス</span>
+			</a>
+			<a href="./installer/index.html" title="インストーラーページを開く">
+				<span class="ico">
+					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+						<path d="M12 2L2 7v10c0 5.5 3.8 10.7 10 12 6.2-1.3 10-6.5 10-12V7l-10-5z" stroke="#1e3a5f" stroke-width="1.5" stroke-linejoin="round"/>
+						<path d="M9 12l2 2 4-4" stroke="#1e3a5f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</span>
+				<span>インストーラー</span>
 			</a>
 		</div>
 		<div class="title">目次</div>
@@ -196,15 +211,24 @@
 				// Render with marked
 				marked.setOptions({
 					highlight: function(code, lang){
-						try{ return hljs.highlight(code, {language: lang || 'plaintext'}).value; }
-						catch(_){ return hljs.highlightAuto(code).value; }
+						// highlight.js が利用可能な場合のみハイライトする
+						if(window.hljs){
+							try{ return hljs.highlight(code, {language: lang || 'plaintext'}).value; }
+							catch(_){
+								try{ return hljs.highlightAuto(code).value; }
+								catch(__){ return code; }
+							}
+						}
+						return code;
 					},
 					breaks: false,
 					gfm: true
 				});
 				app.innerHTML = marked.parse(md);
-				// Code blocks styling
-				document.querySelectorAll('pre code').forEach(el=>hljs.highlightElement(el));
+				// Code blocks styling（hljs があれば実行）
+				if(window.hljs){
+					document.querySelectorAll('pre code').forEach(el=>hljs.highlightElement(el));
+				}
 				// Build TOC
 				const headings = ensureHeadingIds(app);
 				buildToc(headings);
@@ -214,13 +238,28 @@
 			}
 		}
 		render();
-		// Back to top
-		const toTop = document.getElementById('toTop');
-		toTop.addEventListener('click', ()=>window.scrollTo({top:0, behavior:'smooth'}));
-		window.addEventListener('scroll', ()=>{
-			if(window.scrollY>600) toTop.classList.add('show');
-			else toTop.classList.remove('show');
-		});
+		// Print manual
+		const printBtn = document.getElementById('printManual');
+		const printDateEl = document.getElementById('printDate');
+		if(printBtn){
+			printBtn.addEventListener('click', (e)=>{
+				e.preventDefault();
+				// Set print date text
+				const now = new Date();
+				const year = now.getFullYear();
+				const month = String(now.getMonth() + 1).padStart(2, '0');
+				const day = String(now.getDate()).padStart(2, '0');
+				if(printDateEl){
+					printDateEl.textContent = `印刷日: ${year}年${month}月${day}日`;
+				}
+				// Open print dialog
+				setTimeout(() => window.print(), 100);
+			});
+		}
+		// Back to top（共通ユーティリティを利用）
+		if(window.IBLinkCommon && window.IBLinkCommon.initBackToTop){
+			window.IBLinkCommon.initBackToTop('toTop', 600);
+		}
 	</script>
 </body>
 </html>
