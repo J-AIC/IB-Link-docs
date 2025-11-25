@@ -25,11 +25,9 @@ releases:
     label: "IB-Link v3.0.1"
     release_date: "2025-11-15"
     status: "current"
-    summary: "ダミー: v3 系列の公開版として安定性と配布導線を整備しました。"
+    summary: "v3系列の機能改善版"
     changes:
-      - "ダミー: インストーラーの署名およびプロンプトを最新仕様に合わせて更新。"
-      - "ダミー: 初回同期ウィザードのガイドを改善。"
-      - "ダミー: ARM / Intel 版で共通の設定テンプレートを同梱。"
+      - "Foundry Localダウンロード機能追加"
     downloads:
       - arch: "arm64"
         title: "Windows 11 ARM64"
