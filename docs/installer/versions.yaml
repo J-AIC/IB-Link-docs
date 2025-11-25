@@ -21,27 +21,24 @@
 ##         - "注意点 2"
 
 releases:
-  - version: "v3.0"
-    label: "IB-Link v3.0"
+  - version: "v3.0.1"
+    label: "IB-Link v3.0.1"
     release_date: "2025-11-15"
     status: "current"
-    summary: "ダミー: v3 系列の公開版として安定性と配布導線を整備しました。"
+    summary: "v3系列の機能改善版"
     changes:
-      - "ダミー: インストーラーの署名およびプロンプトを最新仕様に合わせて更新。"
-      - "ダミー: 初回同期ウィザードのガイドを改善。"
-      - "ダミー: ARM / Intel 版で共通の設定テンプレートを同梱。"
+      - "Foundry Localダウンロード機能追加"
     downloads:
       - arch: "arm64"
-        title: "Windows 11/10 ARM64"
-        filename: "IB-Link_Setup_v3.0_win-arm64.exe"
-        url: "https://j-aic.sakura.ne.jp/d-app/IB-Link_Setup_v3.0_win-arm64.exe"
+        title: "Windows 11 ARM64"
+        filename: "IB_Link_Setup_v3.0.1_win-arm64.exe"
+        url: "https://j-aic.sakura.ne.jp/d-app/IB_Link_Setup_v3.0.1_win-arm64.exe"
         checksum: ""
       - arch: "x64"
-        title: "Windows 11/10 x64 (Intel)"
-        filename: "IB-Link_Setup_v3.0_win-x64_Intel.exe"
-        url: "https://j-aic.sakura.ne.jp/d-app/IB-Link_Setup_v3.0_win-x64_Intel.exe"
+        title: "Windows 11 x64 (Intel)"
+        filename: "IB_Link_Setup_v3.0.1_win-x64_Intel.exe"
+        url: "https://j-aic.sakura.ne.jp/d-app/IB_Link_Setup_v3.0.1_win-x64_Intel.exe"
         checksum: ""
     notices:
-      - "ダミー: 初回起動後に管理者アカウントで再ログインしてください。"
-      - "ダミー: 旧v2からアップグレードする場合はバックアップを取得してから作業してください。"
+      - "アップグレードする場合アンインストールしてからインストールしてください。"
 
