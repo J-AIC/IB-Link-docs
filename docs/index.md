@@ -3,7 +3,8 @@
 
 IB-Link 操作マニュアル
 ## 更新履歴
-2025/11/17 Document API利用フロー追記およびRuntime設定修正
+2025/11/21 モデル操作修正  
+2025/11/17 Document API利用フロー追記およびRuntime設定修正  
 2025/11/11 Chat APIおよび補足追記  
 2025/09/30 バージョン3.0対応  
 2025/09/09 バージョン2.0対応  
@@ -49,6 +50,7 @@ IB-Link 操作マニュアル
 
 ## 3.利⽤者向け機能
 ### 3.1 モデル操作
+#### 3.1.1 GGUF形式のLLMモデル操作
 「Models」タブでは、利⽤するGGUF形式のLLMモデルを検索・選択・ダウンロードできます。
 初期状態 デフォルトのモデルが選択され、使⽤可能な状態になっています。
 最適なモデル選定 速度重視の軽量モデル／精度重視の⼤型モデルを簡単に切り替え、⽤途に合った
@@ -56,8 +58,7 @@ LLMを試せます。
 モデルバージョン管理 旧版も併存させて⽐較しながら検証できるので、アップグレード判定がスムー
 ズ。
 
-1. Modelsタブを開く
-   左側メニューから「Models」を選択すると、モデル管理画⾯が表⽰されます。
+1. 「GGUF Models」タブをクリックすると、モデル管理画⾯が表⽰されます。
    右側にモデルの詳細情報が表⽰されます。
    モデルは C:\Users\<ユーザー名>\.iblink\Models に保存されます。
 
@@ -70,7 +71,7 @@ LLMを試せます。
 
 
 
-2. モデルを検索する
+2. モデルを検索する  
    上部の検索バーにモデル名を⼊⼒すると、該当する候補が⼀覧に表⽰されます。
    例︓Qwen3-0.6B と⼊⼒すると、該当するGGUFモデルがリストに出てきます。
    絞り込み可能です（部分⼀致）。
@@ -84,8 +85,7 @@ LLMを試せます。
 
 
 
-3. モデルの詳細を確認する
-   任意のモデルをクリックすると、右側にモデル情報が表⽰されます。
+3. 任意のモデルをクリックすると、右側にモデル情報が表⽰されます。
    作成者、種類、ファイルサイズ、作成⽇、最終更新⽇などが確認可能です。
    複数のGGUFファイルがある場合、それぞれ選択できます。
 
@@ -98,10 +98,8 @@ LLMを試せます。
 
 
 
-4. モデルのダウンロード
-   使⽤するGGUFファイルをプルダウンから選び、「Download Selected GGUF File」ボタンをクリックしま
-   す。
-   ダウンロードの進捗が画⾯下に表⽰されます（例︓5.6%）。
+4. 「Available GGUF Files」からダウンロードするファイルを選び、「Download Selected File」ボタンをクリックします。
+   ダウンロードの進捗が画⾯下に表⽰されます（例︓10.9%）。
    複数ファイルがある場合は、任意の精度（例︓q5_k, q8_0など）を選択できます。
 
 
@@ -113,8 +111,8 @@ LLMを試せます。
 
 
 
-5. ダウンロード完了メッセージ
-   ダウンロードが完了すると、モデルファイルが保存されたことと、UIへの通知メッセージが表⽰されます。
+5. ダウンロード完了メッセージ  
+   ダウンロードが完了すると、Donwloaded Modelsにモデルが表示されます。
    保存先︓C:\Users\<ユーザー名>\.iblink\Models
    チャット画⾯でモデルが使⽤可能になります。
 
@@ -127,6 +125,40 @@ LLMを試せます。
 
 
 
+6. モデルの削除は、「Donwloaded Models」の削除対象のモデルを選択し、「Delete」をクリックします。
+
+
+![図: 画像 1](images/page-007_img-002.png)
+
+  OKをクリックすると削除されます。
+
+![図: 画像 1](images/page-007_img-003.png)
+
+
+---
+#### 3.1.2 Foundry LocalのLLMモデル操作　（Intel版は本機能がございません）
+1. FL Modelsタブを開く  
+   「Reflesh Models」をクリックすると、Available Modelsにモデルが表示されます。ダウンロードするモデルを選択し、「Download Model」をクリックします。  
+
+
+![図: 画像 1](images/page-007_img-004.png)
+
+2. モデルのダウンロード開始  
+　 
+![図: 画像 1](images/page-007_img-005.png)
+
+3. ダウンロードが完了すると、右の「Download Models」に表示されます。
+
+![図: 画像 1](images/page-007_img-006.png)
+
+4. モデルの削除は、「Download Models」に表示されているモデルから対象を選択します。
+
+![図: 画像 1](images/page-007_img-007.png)
+
+5. 「Delete Models」をクリックします。 
+![図: 画像 1](images/page-007_img-008.png)
+
+---
 ### 3.2 モデル選択と起動⼿順
 ダウンロード済みのモデルを選択し、起動するための⼿順を解説します。
 
@@ -157,7 +189,7 @@ LLMを試せます。
 
 
 
-3. モデル選択⼿順
+3. モデル選択⼿順  
    画⾯上部の Model: ドロップダウンをクリックし、使⽤したいモデル（例︓Qwenやtinyswallow）を選びま
    す。
    .gguf 形式のモデルファイルから選べます。
@@ -171,8 +203,7 @@ LLMを試せます。
 
 
 
-4. サーバー起動の必要メッセージ
-   モデルを選んでも、サーバーを起動していないと以下のような警告が表⽰されます。
+4. サーバーを起動していないと以下のような警告が表⽰されます。  
    To start chatting, either:
    Run the local server (click 'Run Server' button)
    Configure OpenAI API settings in the Runtime tab
@@ -186,7 +217,7 @@ LLMを試せます。
 
 
 
-5. サーバーを起動する
+5. サーバーを起動する  
    右上の Run Server ボタンをクリックすると、ローカルモデルのロードが始まります。
    ステータス︓Loading model... → Server running になると起動完了になります。
 
@@ -200,15 +231,13 @@ LLMを試せます。
 
 
 ### 3.3 マルチモーダルモデル
-マルチモーダルモデルを使⽤する⼿順を記載します。
-⼿順
+マルチモーダルモデルを使⽤する⼿順を記載します。  
 
 1. Models でモデルを検索
    左側サイドバーで Models を開き、検索ボックスに次を⼊⼒します。
    ggml-org/gemma-3-4b-it-qat-gguf
-2. リポジトリを選択して内容を確認
-   検索結果から ggml-org/gemma-3-4b-it-gguf を選択します。右側の Model Information に基本情報と利⽤
-   可能な GGUF ファイルが表⽰されます。
+2. リポジトリを選択して内容を確認  
+   検索結果から ggml-org/gemma-3-4b-it-gguf を選択します。右側の Model Information に基本情報と利⽤可能な GGUF ファイルが表⽰されます。  
    Available GGUF Files に以下の 2 つが⾒えることを確認します。
    gemma-3-4b-it-qat-Q4_0.gguf（約 2.35GB）
    mmproj-model-f16-4B.gguf（約 0.79GB）
@@ -222,9 +251,8 @@ LLMを試せます。
 
 
 
-3. Gemma 本体（Q4_0）をダウンロード
-   gemma-3-4b-it-qat-Q4_0.gguf を選択し、右下の Download Selected GGUF File をクリック。進捗が下部
-   に表⽰されます。
+3. Gemma 本体（Q4_0）をダウンロード  
+   gemma-3-4b-it-qat-Q4_0.gguf を選択し、右下の Download Selected GGUF File をクリック。進捗が下部に表⽰されます。  
    ダウンロード完了メッセージが出るまで待ちます。
 
 
@@ -239,7 +267,7 @@ LLMを試せます。
 
 
 
-4. mmproj（投影モデル）をダウンロード
+4. mmproj（投影モデル）をダウンロード  
    続けて mmproj-model-f16-4B.gguf を選択して同様にダウンロードします。
    完了を確認します。
 
@@ -255,10 +283,9 @@ LLMを試せます。
 
 
 
-5. ローカルサーバーを停⽌
-   左側サイドバーで Chat を開く。 右上の Stop Server をクリックしてサーバーを起動します。ステータスが
-   Server stopped になることを確認する。
-   上部の Model ドロップダウンから gemma-3-4b-it-qat-Q4_0.gguf を選択します。
+5. ローカルサーバーを停⽌  
+   左側サイドバーで Chat を開きます。 右上の Stop Server をクリックしてサーバーを起動します。ステータスが Server stopped になることを確認します。  
+   上部の Model ドロップダウンから gemma-3-4b-it-qat-Q4_0.gguf を選択します。  
    <>アイコンを押下して、詳細設定ページを開きます。
    Custom Arguments に mmproj を追加します︓
 
@@ -279,21 +306,16 @@ LLMを試せます。
 >\.iblink\Modelsmmproj-model-f16-4B.gguf を⼊⼒
 >（モデルと同じディレクトリにある前提・相対指定が可能です）
 >Save Setting をクリック
->プレビュー（Command Preview）に --mmproj "mmproj-model-f16-4B.gguf" が含まれていることを確認
->します。
+>プレビュー（Command Preview）に --mmproj "mmproj-model-f16-4B.gguf" が含まれていることを確認します。  
 
 6. ローカルサーバーを起動
    右上の Run Server をクリックしてサーバーを起動します。ステータスが Server running になったら、下部
    の⼊⼒欄からチャットを開始できます。
-7. D-app再起動
-   D-appを再起動してください。
-   うまくいかないときは
-   モデルが⾒つからない/読み込めない
-   Download Location（…\.iblink\Models）にファイルがあるか確認
-   モデル名の拡張⼦が .gguf で⼀致しているか確認
-   mmproj が効いていない
-   Custom Arguments に --mmproj mmproj-model-f16-4B.gguf が⼊っているか、Command
-   Preview に反映されているか確認
+7. D-Appを再起動してください。
+   うまくいかないときは、モデルが⾒つからない/読み込めないDownload Location（…\.iblink\Models）にファイルがあるか確認します。  
+   モデル名の拡張⼦が .gguf で⼀致しているか確認します。  
+   mmproj が効いていない  
+   Custom Arguments に --mmproj mmproj-model-f16-4B.gguf が⼊っているか、Command Preview に反映されているか確認します。  
 
 
 ![図: 画像 1](images/page-017_img-001.png)
@@ -306,9 +328,9 @@ LLMを試せます。
 
 ### 3.4 IB-Link 停⽌⼿順
 
-1. IB-Linkが起動中であることを確認
+1. IB-Linkが起動中であることを確認  
    IB-Link の画⾯右上にある Status: Server running を確認します。
-2. 「Stop Server」ボタンをクリック
+2. 「Stop Server」ボタンをクリック  
    上部の「Stop Server」ボタンをクリックして、ローカルサーバを停⽌します。
 
 
@@ -320,10 +342,10 @@ LLMを試せます。
 
 
 
-3. IB-Link停⽌を確認
-   「Status」が Server stopped に変わっていることを確認します。
-4. タスクトレイから IB-Link を終了（必要に応じて）
-   タスクバーのトレイアイコンから IB-Link を右クリックし、Exit を選択します。
+3. IB-Link停⽌を確認  
+   「Status」が Server stopped に変わっていることを確認します。  
+4. タスクトレイから IB-Link を終了（必要に応じて）  
+   タスクバーのトレイアイコンから IB-Link を右クリックし、Exit を選択します。  
 
 
 ![図: 画像 1](images/page-019_img-001.png)
@@ -349,8 +371,8 @@ LLMを試せます。
 
 
 
-2. メッセージの⼊⼒と送信
-   下部のテキストボックスにメッセージを⼊⼒し、右側の ⻘い⽮印ボタン をクリックして送信します。
+2. メッセージの⼊⼒と送信  
+   下部のテキストボックスにメッセージを⼊⼒し、右側の⻘い⽮印ボタンをクリックして送信します。  
 
 
 ![図: 画像 1](images/page-021_img-001.png)
@@ -376,18 +398,15 @@ LLMを試せます。
 ### 4.2 Runtime 設定
 Runtime タブでは、ローカルモデルの実⾏に必要な Llamaサーバー設定 と API設定 を構成できます。
 初期状態 デフォルトの Llama が選択され、使⽤可能な状態になっています。
-ハードウェアに合わせた最適化 ⾃PCの命令セットに合う Llama バイナリを選ぶことで推論速度を最⼤
-化できます。
+ハードウェアに合わせた最適化 ⾃PCの命令セットに合う Llama バイナリを選ぶことで推論速度を最⼤化できます。  
 
 1. Llama Server 設定タブ
-   ローカル実⾏⽤ Llama サーバーの .exe 実⾏パスを指定し、任意のバージョンを選択またはダウンロードで
-   きます。
+   ローカル実⾏⽤ Llama サーバーの .exe 実⾏パスを指定し、任意のバージョンを選択またはダウンロードできます。  
 2. 操作⼿順
 3. llama-server.exe を指定
    Browse ボタンで任意のバイナリファイルを選択
-4. Select from Downloaded Servers から⾃動抽出されたバージョンを選択
-   選択するとそのパスが有効になります
-5. 必要に応じて Release Tag と Zip File Name を⼊⼒し、モデルをダウンロード可能
+4. Select from Downloaded Servers から⾃動抽出されたバージョンを選択するとそのパスが有効になります。  
+5. 必要に応じて Release Tag と Zip File Name を⼊⼒し、モデルをダウンロードします。  
    例: b5085, llama-b5085-bin-win-avx2-x64
 
 
@@ -400,14 +419,12 @@ Runtime タブでは、ローカルモデルの実⾏に必要な Llamaサーバ
 
 
 ### 4.3 Logs機能
-Server Logs の確認
+Server Logs の確認  
 上部タブから Server Logs を選択します。
-アプリ起動時の状態、モデルロード、OCR設定、バックグラウンドサービスの状態などが時系列で表
-⽰されます。
+アプリ起動時の状態、モデルロード、OCR設定、バックグラウンドサービスの状態などが時系列で表⽰されます。  
 例: APIキーの読込、ローカルサーバの起動、OCR対象ディレクトリ数、エラー/警告 等。
-API Logs の確認
-上部タブから API Logs を選択します。
-すべてのAPIログを⼀覧で確認できます。
+API Logs の確認  
+上部タブから API Logs を選択します。すべてのAPIログを⼀覧で確認できます。  
 
 
 ![図: 画像 1](images/page-025_img-001.png)
@@ -425,12 +442,9 @@ API の絞り込み（Filter API）
 
 1. 画⾯上部の Filter API ドロップダウンをクリックします。
 2. All / Documents API / Embeddings API / Retriever API / Audio API などから対象を選択します。
-   Documents API のログを⾒る
-   Documents API を選択すると、ドキュメント処理（OCR、分割、チャンク数、進捗％、成功/失敗件
-   数、ストレージ使⽤量など）の詳細が確認できます。
-   例:
-   「Processed file」「Strategy: Sync」「Chunks」「Progress」「Succeeded/Failed」 などの⾏で処
-   理結果を確認
+   Documents API のログを⾒る  
+   Documents API を選択すると、ドキュメント処理（OCR、分割、チャンク数、進捗％、成功/失敗件数、ストレージ使⽤量など）の詳細が確認できます。  
+   例:「Processed file」「Strategy: Sync」「Chunks」「Progress」「Succeeded/Failed」 などの⾏で処理結果を確認できます。  
 
 
 ![図: 画像 1](images/page-026_img-001.png)
@@ -475,8 +489,7 @@ Clear Logs: 画⾯上のログ表⽰をクリアします（※サーバ側の�
 Start/Stop/Restart API: 埋め込みやリトリーバー等のAPIサービスの起動/停⽌/再起動を⾏います（権
 限・構成に依存）。
 トラブルシューティングのヒント
-エラーが出た時刻を基点に Server Logs と API Logs を併読し、原因箇所（起動直後・ドキュメント処
-理・埋め込み⽣成・検索処理など）を切り分けます。
+エラーが出た時刻を基点に Server Logs と API Logs を併読し、原因箇所（起動直後・ドキュメント処理・埋め込み⽣成・検索処理など）を切り分けます。
 Filter API で対象を絞り、Changes Only をオンにして差分だけを追うと効率的です。
 
 
@@ -558,18 +571,18 @@ Filter API で対象を絞り、Changes Only をオンにして差分だけを�
 
 ### 4.5 データベース
 
-1. Database 画⾯を開く
+1. Database 画⾯を開く  
    左メニューの Database を開きます。
-2. データベース接続を設定する
-3. 画⾯上部の Setup Database Connection をクリック。
-4. 表⽰されたダイアログに接続情報を⼊⼒します（例）
-   Host: localhost
-   Port: 5432
-   Database: iblink
-   Username: postgres
-   Password: （PostgreSQL のパスワード）
-5. Test Connection を押して「Connection successful!」を確認。
-6. Setup Database を押して反映。
+2. データベース接続を設定します。  
+3. 画⾯上部の Setup Database Connection をクリックします。  
+4. 表⽰されたダイアログに接続情報を⼊⼒します（例）  
+   Host: localhost  
+   Port: 5432  
+   Database: iblink  
+   Username: postgres  
+   Password: （PostgreSQL のパスワード）  
+5. Test Connection を押して「Connection successful!」を確認します。  
+6. Setup Database を押して反映します。  
 
 
 ![図: 画像 1](images/page-033_img-001.png)
