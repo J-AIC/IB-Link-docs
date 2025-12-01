@@ -42,3 +42,50 @@ releases:
     notices:
       - "アップグレードする場合アンインストールしてからインストールしてください。"
 
+  - version: "v3.0"
+    label: "IB-Link v3.0"
+    release_date: "2025-10-30"
+    status: "archived"
+    summary: "Intel版対応"
+    changes:
+      - "Intel版対応"
+    downloads:
+      - arch: "x64"
+        title: "Windows 11 x64 (Intel)"
+        filename: "IB_Link_Setup_v3.0_win-x64_Intel.exe"
+        url: "https://j-aic.sakura.ne.jp/d-app/IB-Link_Setup_v3.0_win-x64_Intel.exe"
+        checksum: ""
+    notices:
+      - "アップグレードする場合アンインストールしてからインストールしてください。"
+
+  - version: "v3.0"
+    label: "IB-Link v3.0"
+    release_date: "2025-09-30"
+    status: "archived"
+    summary: "Qualcomm NPU対応版"
+    changes:
+      - "Qualcomm NPU対応版"
+    downloads:
+      - arch: "arm64"
+        title: "Windows 11 ARM64"
+        filename: "IB_Link_Setup_v3.0_win-arm64.exe"
+        url: "https://j-aic.sakura.ne.jp/d-app/IB-Link_Setup_v3.0_win-arm64.exe"
+        checksum: ""
+    notices:
+      - "アップグレードする場合アンインストールしてからインストールしてください。"
+
+  - version: "v2.0"
+    label: "IB-Link v2.0"
+    release_date: "2025-09-10"
+    status: "archived"
+    summary: "Qualcomm対応版"
+    changes:
+      - "Qualcomm対応版"
+    downloads:
+      - arch: "arm64"
+        title: "Windows 11 ARM64"
+        filename: "IB_Link_Setup_v2.0.exe"
+        url: "https://j-aic.sakura.ne.jp/d-app/IB_Link_Setup_v2.0.exe"
+        checksum: ""
+    notices:
+      - ""
