@@ -626,3 +626,473 @@ components:
               compression_ratio: { type: number }
               no_speech_prob: { type: number }
 
+# ---- LlamaServer: Server Management ----
+    LlamaServerStartRequest:
+      type: object
+      description: llama-server 起動時の設定
+      properties:
+        model_path:
+          type: string
+          description: 起動に使用する GGUF モデルファイルのフルパス
+        port:
+          type: integer
+          description: llama-server が待ち受けるポート番号
+          default: 8080
+        host:
+          type: string
+          description: バインドするホスト（例: 127.0.0.1 / 0.0.0.0）
+          default: 127.0.0.1
+        binary_path:
+          type: string
+          description: 使用する llama-server バイナリのパス（省略時はデフォルトバイナリ）
+        num_threads:
+          type: integer
+          description: 推論スレッド数（CPU スレッド数に応じて設定）
+        ctx_size:
+          type: integer
+          description: コンテキストサイズ（トークン数）
+        batch_size:
+          type: integer
+          description: バッチサイズ
+        ngl:
+          type: integer
+          description: GPU レイヤー数などバックエンド固有オプション
+        embedding:
+          type: boolean
+          description: 埋め込み専用モードで起動するかどうか
+        additional_args:
+          type: array
+          description: CLI にそのまま渡す追加引数（高度なチューニング用）
+          items:
+            type: string
+        env:
+          type: object
+          description: プロセスに付与する環境変数
+          additionalProperties:
+            type: string
+        allow_existing:
+          type: boolean
+          description: 既存プロセスが起動済みの場合にエラーではなく既存情報を返すかどうか
+          default: true
+      required: [model_path]
+
+    LlamaServerStatus:
+      type: object
+      description: llama-server プロセスの現在状態
+      properties:
+        status:
+          type: string
+          description: サーバーステータス
+          enum: [stopped, starting, running, stopping, error]
+        pid:
+          type: integer
+          nullable: true
+          description: プロセス ID（未起動の場合は null）
+        port:
+          type: integer
+          nullable: true
+        host:
+          type: string
+          nullable: true
+        model_path:
+          type: string
+          nullable: true
+        started_at:
+          type: string
+          format: date-time
+          nullable: true
+        uptime_seconds:
+          type: integer
+          nullable: true
+        health:
+          type: string
+          description: ヘルス評価（ok/degraded/error など）
+        last_error:
+          type: string
+          nullable: true
+        binary_path:
+          type: string
+          nullable: true
+        metrics:
+          type: object
+          description: パフォーマンスメトリクス（tokens/sec 等）
+          additionalProperties: true
+
+    LlamaServerStopResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: 結果ステータス（stopped / not_running / error 等）
+        message:
+          type: string
+        previous_status:
+          $ref: '#/components/schemas/LlamaServerStatus'
+
+    LlamaServerSwitchModelRequest:
+      type: object
+      description: モデル切り替えリクエスト
+      properties:
+        model_path:
+          type: string
+          description: 切り替え先 GGUF モデルのパス
+        restart_strategy:
+          type: string
+          description: 再起動戦略
+          enum: [graceful, force]
+          default: graceful
+        port:
+          type: integer
+          description: 使用ポート（省略時は現在のポートを引き継ぐ）
+        binary_path:
+          type: string
+          description: 使用するバイナリを明示的に指定する場合
+        additional_args:
+          type: array
+          items:
+            type: string
+      required: [model_path]
+
+    # ---- LlamaServer: Models ----
+    LlamaModelInfo:
+      type: object
+      description: ローカル GGUF モデル情報
+      properties:
+        name:
+          type: string
+          description: モデル表示名
+        path:
+          type: string
+          description: モデルファイルのフルパス
+        size_bytes:
+          type: integer
+        quantization:
+          type: string
+          description: 量子化形式（例: Q4_K_M）
+        format:
+          type: string
+          description: ファイルフォーマット（通常 gguf）
+        last_modified:
+          type: string
+          format: date-time
+        is_default:
+          type: boolean
+        tags:
+          type: array
+          items: { type: string }
+
+    LlamaModelListResponse:
+      type: object
+      properties:
+        models:
+          type: array
+          items:
+            $ref: '#/components/schemas/LlamaModelInfo'
+        total:
+          type: integer
+
+    LlamaModelDeleteRequest:
+      type: object
+      description: ローカルモデル削除リクエスト
+      properties:
+        paths:
+          type: array
+          description: 削除対象モデルファイルパス
+          items:
+            type: string
+        delete_all:
+          type: boolean
+          description: 全モデルを削除する（危険操作）
+          default: false
+
+    LlamaModelDeleteResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        deleted:
+          type: array
+          items:
+            type: string
+        failed:
+          type: array
+          items:
+            type: object
+            properties:
+              path: { type: string }
+              reason: { type: string }
+
+    LlamaModelSearchRequest:
+      type: object
+      description: HuggingFace 検索条件
+      properties:
+        query:
+          type: string
+          description: 検索キーワード（例: "gemma gguf"）
+        limit:
+          type: integer
+          default: 20
+        provider:
+          type: string
+          description: モデル提供元
+          enum: [huggingface]
+          default: huggingface
+        include_community:
+          type: boolean
+          description: コミュニティモデルを含めるかどうか
+          default: true
+      required: [query]
+
+    LlamaModelRepositoryFile:
+      type: object
+      description: リポジトリ内のファイル
+      properties:
+        name:
+          type: string
+        size_bytes:
+          type: integer
+        sha256:
+          type: string
+        download_url:
+          type: string
+        is_gguf:
+          type: boolean
+        is_sharded:
+          type: boolean
+
+    LlamaModelSearchResult:
+      type: object
+      description: 単一リポジトリの検索結果
+      properties:
+        repository:
+          type: string
+          description: リポジトリ名（owner/repo）
+        description:
+          type: string
+        likes:
+          type: integer
+        downloads:
+          type: integer
+        tags:
+          type: array
+          items: { type: string }
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/LlamaModelRepositoryFile'
+
+    LlamaModelSearchResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LlamaModelSearchResult'
+
+    LlamaModelRepositoryInfo:
+      type: object
+      description: 特定リポジトリの詳細情報
+      properties:
+        repository:
+          type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items: { type: string }
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/LlamaModelRepositoryFile'
+        sharded:
+          type: boolean
+        shard_pattern:
+          type: string
+
+    LlamaModelDownloadRequest:
+      type: object
+      description: モデルダウンロード要求
+      properties:
+        repository:
+          type: string
+          description: HuggingFace リポジトリ名
+        files:
+          type: array
+          description: ダウンロード対象ファイル名一覧（省略時は推奨ファイルを自動選択）
+          items:
+            type: string
+        destination_dir:
+          type: string
+          description: 保存先ディレクトリ（省略時はデフォルトモデルディレクトリ）
+        force:
+          type: boolean
+          description: 既存ファイルがある場合も上書きダウンロードするか
+          default: false
+      required: [repository]
+
+    LlamaDownloadedFile:
+      type: object
+      properties:
+        file_name:
+          type: string
+        path:
+          type: string
+        size_bytes:
+          type: integer
+
+    LlamaModelDownloadResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        repository:
+          type: string
+        downloaded_files:
+          type: array
+          items:
+            $ref: '#/components/schemas/LlamaDownloadedFile'
+        total_bytes:
+          type: integer
+
+    # ---- LlamaServer: Binaries ----
+    LlamaBinaryInfo:
+      type: object
+      description: llama-server バイナリ情報
+      properties:
+        path:
+          type: string
+        arch:
+          type: string
+          description: アーキテクチャ（x64, arm64 等）
+        version:
+          type: string
+        build_flags:
+          type: array
+          items:
+            type: string
+        detected_capabilities:
+          type: array
+          description: GPU 対応可否など
+          items:
+            type: string
+        is_default:
+          type: boolean
+
+    LlamaBinaryListResponse:
+      type: object
+      properties:
+        default_binary:
+          type: string
+        binaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LlamaBinaryInfo'
+
+    LlamaBinarySetRequest:
+      type: object
+      properties:
+        binary_path:
+          type: string
+          description: デフォルトとして設定する llama-server バイナリパス
+      required: [binary_path]
+
+    LlamaBinarySetResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        binary:
+          $ref: '#/components/schemas/LlamaBinaryInfo'
+
+    # ---- LlamaServer: Config / Info / Logs / Health ----
+    LlamaServerInfo:
+      type: object
+      description: LlamaServer API のメタ情報
+      properties:
+        service:
+          type: string
+        version:
+          type: string
+        description:
+          type: string
+        defaults:
+          type: object
+          additionalProperties: true
+        environment:
+          type: object
+          additionalProperties: true
+        features:
+          type: array
+          items:
+            type: string
+
+    LlamaServerConfigUpdateRequest:
+      type: object
+      description: 設定更新リクエスト
+      properties:
+        model_search_paths:
+          type: array
+          items:
+            type: string
+        default_port:
+          type: integer
+        max_concurrent_processes:
+          type: integer
+        log_buffer_size:
+          type: integer
+        additional:
+          type: object
+          additionalProperties: true
+
+    LlamaServerConfigUpdateResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+        config:
+          type: object
+          additionalProperties: true
+
+    LlamaServerLogEntry:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        level:
+          type: string
+        source:
+          type: string
+          description: "api / server / system 等"
+        message:
+          type: string
+
+    LlamaServerLogsResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/LlamaServerLogEntry'
+        total:
+          type: integer
+
+    LlamaServerHealth:
+      type: object
+      properties:
+        status:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        checks:
+          type: object
+          additionalProperties: true
