@@ -209,6 +209,11 @@
 				<span>インストーラー</span>
 			</a>
 		</div>
+		<div class="title">目次</div>
+		<ul>
+			<li><a href="#install">インストール手順</a></li>
+			<li><a href="#uninstall">アンインストール手順</a></li>
+		</ul>
 	</nav>
 	<main class="container">
 		<header class="page-header">
@@ -224,12 +229,22 @@
 			<div id="release-list" class="release-grid" role="list"></div>
 			<p id="status-message" class="status-note" role="status">データを取得中です。</p>
 		</section>
+		<section id="install">
+			<h2>インストール手順</h2>
+			<div id="installContent"><p>読み込み中…</p></div>
+		</section>
+		<section id="uninstall">
+			<h2>アンインストール手順</h2>
+			<div id="uninstallContent"><p>読み込み中…</p></div>
+		</section>
 
 	</main>
 	<button id="toTop" class="back-to-top" aria-label="ページ上部へ戻る">Top</button>
 
 	<script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
 	<script src="../assets/common.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
 	<script>
 		(function(){
 			/**
@@ -435,6 +450,119 @@
 			}
 
 			loadReleases();
+		})();
+	</script>
+	<script>
+		(function(){
+			var installMount = document.getElementById('installContent');
+			var uninstallMount = document.getElementById('uninstallContent');
+			var MD_URL = '../../sample/install.md';
+			var IMG_BASE = '../../sample/';
+
+			function adjustAssetPaths(container, base){
+				if(!container) return;
+				container.querySelectorAll('img').forEach(function(img){
+					var src = img.getAttribute('src') || '';
+					if(/^images\//.test(src)) img.setAttribute('src', base + src);
+				});
+				container.querySelectorAll('a').forEach(function(a){
+					var href = a.getAttribute('href') || '';
+					if(/^images\//.test(href)) a.setAttribute('href', base + href);
+				});
+			}
+
+			function splitInstallAndUninstall(wrapper){
+				var headings = wrapper.querySelectorAll('h1,h2,h3');
+				var splitNode = null;
+				Array.prototype.forEach.call(headings, function(h){
+					if(/アンインストール手順/.test(h.textContent)) splitNode = splitNode || h;
+				});
+
+				var installContainer = document.createElement('div');
+				var uninstallContainer = document.createElement('div');
+
+				if(!splitNode){
+					installContainer.appendChild(wrapper);
+					return {install: installContainer, uninstall: uninstallContainer};
+				}
+
+				var current = installContainer;
+				Array.prototype.slice.call(wrapper.childNodes).forEach(function(node){
+					if(node === splitNode) current = uninstallContainer;
+					current.appendChild(node);
+				});
+
+				return {install: installContainer, uninstall: uninstallContainer};
+			}
+
+			function setAnchorIds(){
+				var iSec = document.getElementById('install');
+				var uSec = document.getElementById('uninstall');
+				if(iSec){
+					var iHead = iSec.querySelector('h1, h2');
+					if(iHead) iHead.id = 'install';
+				}
+				if(uSec){
+					var uHead = uSec.querySelector('h1, h2');
+					if(uHead) uHead.id = 'uninstall';
+				}
+			}
+
+			async function renderManual(){
+				try{
+					var res = await fetch(MD_URL, {cache:'no-cache'});
+					if(!res.ok) throw new Error('install.md を取得できませんでした');
+					var md = await res.text();
+
+					if(window.marked){
+						marked.setOptions({
+							highlight: function(code, lang){
+								if(window.hljs){
+									try{ return hljs.highlight(code, {language: lang || 'plaintext'}).value; }
+									catch(_){
+										try{ return hljs.highlightAuto(code).value; }
+										catch(__){ return code; }
+									}
+								}
+								return code;
+							},
+							breaks: false,
+							gfm: true
+						});
+					}
+
+					var html = window.marked ? marked.parse(md) : md;
+					var tmp = document.createElement('div');
+					tmp.innerHTML = html;
+
+					var parts = splitInstallAndUninstall(tmp);
+
+					adjustAssetPaths(parts.install, IMG_BASE);
+					if(installMount){
+						installMount.innerHTML = '';
+						installMount.appendChild(parts.install);
+					}
+
+					if(parts.uninstall && parts.uninstall.childNodes.length){
+						adjustAssetPaths(parts.uninstall, IMG_BASE);
+						if(uninstallMount){
+							uninstallMount.innerHTML = '';
+							uninstallMount.appendChild(parts.uninstall);
+						}
+					}
+
+					setAnchorIds();
+
+					if(window.hljs){
+						document.querySelectorAll('pre code').forEach(function(el){ hljs.highlightElement(el); });
+					}
+				}catch(e){
+					console.error(e);
+					if(installMount) installMount.innerHTML = '<p>コンテンツの読み込みに失敗しました。</p>';
+				}
+			}
+
+			renderManual();
 		})();
 	</script>
 </body>
