@@ -1,4 +1,4 @@
-<!doctype html>
+niin<!doctype html>
 <html lang="ja">
 <head>
 	<meta charset="utf-8" />
@@ -174,6 +174,30 @@
 			font-size:13px;
 			color:var(--text-light);
 		}
+		.version-panel{
+			margin-bottom:24px;
+		}
+		.version-tags{
+			display:flex;
+			flex-wrap:wrap;
+			gap:10px;
+		}
+		.version-tag{
+			display:inline-flex;
+			align-items:center;
+			padding:6px 12px;
+			border:1px solid var(--border);
+			border-radius:999px;
+			background:#fff;
+			color:var(--navy-dark);
+			font-size:13px;
+			white-space:nowrap;
+		}
+		.version-tag[data-newest="true"]{
+			background:var(--navy-light);
+			color:#fff;
+			border-color:var(--navy-light);
+		}
 	</style>
 </head>
 <body>
@@ -221,6 +245,14 @@
 			<p>Windows 向け IB-Link 最新版・旧版のインストーラーをアーキテクチャ別に公開しています。</p>
 		</header>
 
+		<section class="version-panel">
+			<div class="section-head">
+				<h2>バージョン一覧</h2>
+				<span id="version-count">読み込み中…</span>
+			</div>
+			<div id="version-tags" class="version-tags" role="list"></div>
+		</section>
+
 		<section class="release-panel">
 			<div class="section-head">
 				<h2>リリース一覧</h2>
@@ -265,6 +297,8 @@
 			const listEl = document.getElementById('release-list');
 			const statusEl = document.getElementById('status-message');
 			const countEl = document.getElementById('release-count');
+			const versionTagsEl = document.getElementById('version-tags');
+			const versionCountEl = document.getElementById('version-count');
 
 			// Back to top（共通ユーティリティを利用）
 			if(window.IBLinkCommon && window.IBLinkCommon.initBackToTop){
@@ -276,14 +310,24 @@
 					const res = await fetch('versions.yaml', {cache:'no-cache'});
 					if(!res.ok) throw new Error('versions.yaml を取得できませんでした');
 					const yamlText = await res.text();
-					const data = jsyaml.load(yamlText) || {};
-					const releases = Array.isArray(data.releases) ? data.releases : [];
+					const parsed = jsyaml.load(yamlText) || [];
+
+					const versions = Array.isArray(parsed) ? parsed
+						: Array.isArray(parsed.versions) ? parsed.versions
+						: Array.isArray(parsed.releases) ? parsed.releases.map(function(r){ return r && r.version; }).filter(Boolean)
+						: [];
+
+					const releases = Array.isArray(parsed.releases) ? parsed.releases : [];
+
+					renderVersionTags(versions);
 					renderReleases(releases);
 				}catch(err){
 					console.error(err);
 					listEl.innerHTML = '';
 					countEl.textContent = '0件';
 					statusEl.textContent = 'バージョン情報の読み込みに失敗しました。ネットワークやパスを確認してください。必要に応じて管理者にお問い合わせください。';
+					if(versionTagsEl) versionTagsEl.innerHTML = '';
+					if(versionCountEl) versionCountEl.textContent = '0件';
 				}
 			}
 
@@ -310,6 +354,23 @@
 				});
 				countEl.textContent = sorted.length + '件';
 				statusEl.textContent = '';
+			}
+
+			function renderVersionTags(versions){
+				if(!Array.isArray(versions) || !versions.length){
+					if(versionTagsEl) versionTagsEl.innerHTML = '';
+					if(versionCountEl) versionCountEl.textContent = '0件';
+					return;
+				}
+				if(versionTagsEl) versionTagsEl.innerHTML = '';
+				versions.forEach(function(v, idx){
+					var tag = document.createElement('span');
+					tag.className = 'version-tag';
+					tag.textContent = v;
+					if(idx === 0) tag.dataset.newest = 'true';
+					versionTagsEl.appendChild(tag);
+				});
+				if(versionCountEl) versionCountEl.textContent = versions.length + '件';
 			}
 
 			function createCard(release){
