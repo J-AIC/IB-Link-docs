@@ -67,9 +67,9 @@
 		}
 		.release-card header{
 			display:flex;
-			justify-content:space-between;
-			align-items:flex-start;
-			gap:12px;
+			justify-content:flex-start;
+			align-items:center;
+			gap:8px;
 		}
 		.release-card h3{
 			margin:0;
@@ -174,29 +174,88 @@
 			font-size:13px;
 			color:var(--text-light);
 		}
-		.version-panel{
-			margin-bottom:24px;
-		}
-		.version-tags{
-			display:flex;
-			flex-wrap:wrap;
-			gap:10px;
-		}
-		.version-tag{
-			display:inline-flex;
-			align-items:center;
-			padding:6px 12px;
-			border:1px solid var(--border);
-			border-radius:999px;
-			background:#fff;
-			color:var(--navy-dark);
-			font-size:13px;
-			white-space:nowrap;
-		}
-		.version-tag[data-newest="true"]{
-			background:var(--navy-light);
-			color:#fff;
-			border-color:var(--navy-light);
+		/* 横長 2カラムレイアウト（幅広のとき） */
+		@media (min-width: 1024px){
+			/* 横長カードを1列で表示（各カードを行いっぱいに） */
+			.release-grid{
+				grid-template-columns: 1fr;
+			}
+			.release-card{
+				display:grid;
+				grid-template-columns: 1fr 300px; /* 左:本文 / 右:DL欄（少し狭め） */
+				grid-auto-rows: min-content;
+				column-gap: 16px;
+				row-gap: 6px;
+				padding: 8px 10px; /* さらに圧縮 */
+			}
+			/* ラップ要素のレイアウト */
+			.release-card .col-left{
+				display:grid;
+				grid-auto-rows:min-content;
+				row-gap:6px;
+			}
+			.release-card .col-right{
+				display:flex;
+				flex-direction:column;
+				gap:6px;
+				align-self:start; /* 右カラムを上詰め */
+			}
+			/* 見出し・バッジのコンパクト化 */
+			.release-card h3{ font-size: 18px; }
+			.badge{ padding: 3px 8px; font-size: 10px; }
+			/* ヘッダーの間隔を詰める */
+			.release-card header{ gap: 8px; }
+			/* 既定は左カラム */
+			.release-card header,
+			.release-card .summary,
+			.release-card .meta-list,
+			.release-card .block-title,
+			.release-card .change-list{
+				grid-column: 1;
+			}
+			/* 「DOWNLOAD 見出し」だけを右カラムへ */
+			.release-card .block-title:has(+ .downloads){
+				grid-column: 2;
+			}
+			/* ダウンロード欄は右カラム */
+			.release-card .downloads{
+				grid-column: 2;
+				align-self: start;
+				gap: 6px;           /* ボタン間隔をさらに詰める */
+				margin-top: 2px;
+			}
+			/* 注意書きは全幅 */
+			.release-card .notice-box{
+				grid-column: 1 / -1;
+			}
+			/* テキスト系のマージン・サイズを控えめに */
+			.release-card .summary{
+				margin: 2px 0 0;
+				line-height: 1.5;
+			}
+			.release-card .meta-list{
+				gap: 6px;
+				font-size: 12px; /* ベースより小さめ */
+			}
+			.release-card .block-title{
+				margin: 4px 0 0;
+				font-size: 12px;
+			}
+			.release-card .change-list{
+				margin: 4px 0 0;
+				padding-left: 16px;
+			}
+			.release-card .change-list li{
+				margin: 1px 0;
+			}
+			/* ダウンロードボタンの余白を控えめに */
+			.download-link{
+				padding: 8px 10px;
+				gap: 2px;            /* タイトルとメタの間隔 */
+			}
+			.download-link strong{ font-size: 14px; }
+			.download-link span{ font-size: 11px; }
+			.download-link small{ font-size: 10px; }
 		}
 	</style>
 </head>
@@ -245,14 +304,6 @@
 			<p>Windows 向け IB-Link 最新版・旧版のインストーラーをアーキテクチャ別に公開しています。</p>
 		</header>
 
-		<section class="version-panel">
-			<div class="section-head">
-				<h2>バージョン一覧</h2>
-				<span id="version-count">読み込み中…</span>
-			</div>
-			<div id="version-tags" class="version-tags" role="list"></div>
-		</section>
-
 		<section class="release-panel">
 			<div class="section-head">
 				<h2>リリース一覧</h2>
@@ -297,8 +348,6 @@
 			const listEl = document.getElementById('release-list');
 			const statusEl = document.getElementById('status-message');
 			const countEl = document.getElementById('release-count');
-			const versionTagsEl = document.getElementById('version-tags');
-			const versionCountEl = document.getElementById('version-count');
 
 			// Back to top（共通ユーティリティを利用）
 			if(window.IBLinkCommon && window.IBLinkCommon.initBackToTop){
@@ -312,22 +361,14 @@
 					const yamlText = await res.text();
 					const parsed = jsyaml.load(yamlText) || [];
 
-					const versions = Array.isArray(parsed) ? parsed
-						: Array.isArray(parsed.versions) ? parsed.versions
-						: Array.isArray(parsed.releases) ? parsed.releases.map(function(r){ return r && r.version; }).filter(Boolean)
-						: [];
-
 					const releases = Array.isArray(parsed.releases) ? parsed.releases : [];
 
-					renderVersionTags(versions);
 					renderReleases(releases);
 				}catch(err){
 					console.error(err);
 					listEl.innerHTML = '';
 					countEl.textContent = '0件';
 					statusEl.textContent = 'バージョン情報の読み込みに失敗しました。ネットワークやパスを確認してください。必要に応じて管理者にお問い合わせください。';
-					if(versionTagsEl) versionTagsEl.innerHTML = '';
-					if(versionCountEl) versionCountEl.textContent = '0件';
 				}
 			}
 
@@ -356,28 +397,12 @@
 				statusEl.textContent = '';
 			}
 
-			function renderVersionTags(versions){
-				if(!Array.isArray(versions) || !versions.length){
-					if(versionTagsEl) versionTagsEl.innerHTML = '';
-					if(versionCountEl) versionCountEl.textContent = '0件';
-					return;
-				}
-				if(versionTagsEl) versionTagsEl.innerHTML = '';
-				versions.forEach(function(v, idx){
-					var tag = document.createElement('span');
-					tag.className = 'version-tag';
-					tag.textContent = v;
-					if(idx === 0) tag.dataset.newest = 'true';
-					versionTagsEl.appendChild(tag);
-				});
-				if(versionCountEl) versionCountEl.textContent = versions.length + '件';
-			}
-
 			function createCard(release){
 				const card = document.createElement('article');
 				card.className = 'release-card';
 				card.setAttribute('role','listitem');
 
+				// 左カラム要素
 				const header = document.createElement('header');
 				const title = document.createElement('h3');
 				title.textContent = release.version || release.label || '未定義';
@@ -421,6 +446,7 @@
 					changeList.appendChild(li);
 				}
 
+				// 右カラム要素
 				const dlTitle = document.createElement('p');
 				dlTitle.className = 'block-title';
 				dlTitle.textContent = 'DOWNLOAD';
@@ -437,7 +463,16 @@
 					downloads.appendChild(note);
 				}
 
-				card.append(header, summary, metaList, changeTitle, changeList, dlTitle, downloads);
+				// ラップして2カラムに配置（デスクトップ時）
+				const leftCol = document.createElement('div');
+				leftCol.className = 'col-left';
+				leftCol.append(header, summary, metaList, changeTitle, changeList);
+
+				const rightCol = document.createElement('aside');
+				rightCol.className = 'col-right';
+				rightCol.append(dlTitle, downloads);
+
+				card.append(leftCol, rightCol);
 
 				if(Array.isArray(release.notices) && release.notices.length){
 					const noticeBox = document.createElement('div');
