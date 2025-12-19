@@ -39,7 +39,8 @@ releases:
         filename: "IB_Link_Setup_v3.0.1_win-x64_Intel.exe"
         url: "https://j-aic.sakura.ne.jp/d-app/IB_Link_Setup_v3.0.1_win-x64_Intel.exe"
         checksum: ""
-
+    notices:
+      - "アップグレードする場合アンインストールしてからインストールしてください。"
 
   - version: "v3.0"
     label: "IB-Link v3.0"
@@ -54,7 +55,8 @@ releases:
         filename: "IB_Link_Setup_v3.0_win-x64_Intel.exe"
         url: "https://j-aic.sakura.ne.jp/d-app/IB-Link_Setup_v3.0_win-x64_Intel.exe"
         checksum: ""
-
+    notices:
+      - "アップグレードする場合アンインストールしてからインストールしてください。"
 
   - version: "v3.0"
     label: "IB-Link v3.0"
@@ -69,7 +71,8 @@ releases:
         filename: "IB_Link_Setup_v3.0_win-arm64.exe"
         url: "https://j-aic.sakura.ne.jp/d-app/IB-Link_Setup_v3.0_win-arm64.exe"
         checksum: ""
-
+    notices:
+      - "アップグレードする場合アンインストールしてからインストールしてください。"
 
   - version: "v2.0"
     label: "IB-Link v2.0"
@@ -84,3 +87,5 @@ releases:
         filename: "IB_Link_Setup_v2.0.exe"
         url: "https://j-aic.sakura.ne.jp/d-app/IB_Link_Setup_v2.0.exe"
         checksum: ""
+    notices:
+      - ""
