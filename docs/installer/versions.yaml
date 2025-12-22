@@ -21,10 +21,29 @@
 ##         - "注意点 2"
 
 releases:
+  - version: "v3.1.0"
+    label: "IB-Link v3.1.0"
+    release_date: "2025-12-15"
+    status: "current"
+    summary: "v3系列の機能改善版"
+    changes:
+      - "PostgreSQLパスワード設定機能追加"
+    downloads:
+      - arch: "arm64"
+        title: "Windows 11 ARM64"
+        filename: "IB_Link_Setup_v3.1.0_win-arm64.exe"
+        url: "https://j-aic.sakura.ne.jp/d-app/IB_Link_Setup_v3.1.0_win-arm64.exe"
+        checksum: ""
+      - arch: "x64"
+        title: "Windows 11 x64 (Intel)"
+        filename: "IB_Link_Setup_v3.1.0_win-x64_Intel.exe"
+        url: "https://j-aic.sakura.ne.jp/d-app/IB_Link_Setup_v3.1.0_win-x64_Intel.exe"
+        checksum: ""
+
   - version: "v3.0.1"
     label: "IB-Link v3.0.1"
     release_date: "2025-11-15"
-    status: "current"
+    status: "archived"
     summary: "v3系列の機能改善版"
     changes:
       - "Foundry Localダウンロード機能追加"
