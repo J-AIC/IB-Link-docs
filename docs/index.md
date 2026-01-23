@@ -22,6 +22,7 @@ IB-Link 操作マニュアル
    3.2. モデル選択と起動⼿順  
    3.3. マルチモーダルモデル  
    3.4. IB-Link 停⽌⼿順  
+   3.5. 初期化失敗時の再イニシャライズ（再実行）  
 4. 開発者向け機能  
    4.1. チャットの使い⽅  
    4.2. Runtime（ランタイム）設定  
@@ -359,6 +360,86 @@ LLMを試せます。
 
 
 
+
+### 3.5 初期化失敗時の再イニシャライズ（再実行）
+
+初回起動（初期化：IB-Link Setup）が途中で失敗した場合、失敗したステップのみを選択して再実行（再イニシャライズ）できます。
+
+#### 3.5.1 事前確認
+
+- IB-Link を起動し、左メニューの `Setup` を開きます。
+- 画面下部の `Activity Log` に失敗理由（例：ネットワークエラー、依存関係の導入失敗など）が表示されている場合は、先に内容を確認します。
+
+#### 3.5.2 ネットワークエラー（Prerequisites）が出る場合
+
+依存コンポーネント（例：Visual C++ Redistributable）の取得でネットワークが必要になる場合があります。
+
+1. `Network Connection Required` の警告が表示されたら、ネットワーク接続を確認します。
+2. 右側の `Retry` をクリックして再試行します。
+3. 繰り返し失敗する場合は、警告内に表示されるダウンロード URL から手動導入し、再度 `Retry` をクリックします。
+
+![図: ネットワーク接続が必要](images/page-040_img-060.png)
+
+#### 3.5.3 再イニシャライズ（再実行）の実施
+
+1. 左メニューから `Setup` を開き、`Initialization Complete`（または Setup 画面）まで進んでいることを確認します。
+2. `Re-run Initialization Steps` で、再実行したいステップにチェックを入れます。
+3. `Re-initialize Selected` をクリックして再実行します。
+
+![図: 再実行ステップ選択（全体）](images/page-040_img-061.png)
+
+##### 3.5.3.1 Prerequisites（前提条件）を再実行する例
+
+1. `Prerequisites` にチェックを入れます。
+2. `Re-initialize Selected` をクリックします。
+
+![図: Prerequisites を選択](images/page-040_img-062.png)
+
+実行中はステップが `In Progress` になり、進捗とログが更新されます。
+
+![図: Prerequisites 再実行中](images/page-040_img-063.png)
+
+完了すると当該ステップが `Done`（緑のチェック）になります。
+
+![図: Prerequisites 完了](images/page-040_img-064.png)
+
+##### 3.5.3.2 Whisper を再実行する例
+
+1. `Whisper` にチェックを入れます。
+2. `Re-initialize Selected` をクリックします。
+
+![図: Whisper を選択](images/page-040_img-065.png)
+
+実行中は `Whisper Setup` が `In Progress` になり、進捗が表示されます。
+
+![図: Whisper 再実行中](images/page-040_img-066.png)
+
+完了すると `Whisper` が `Done` になります。
+
+![図: Whisper 完了](images/page-040_img-067.png)
+
+##### 3.5.3.3 Models（Chat Model）を再実行する例
+
+1. `Models` にチェックを入れます。
+2. `Re-initialize Selected` をクリックします。
+
+![図: Models を選択](images/page-040_img-068.png)
+
+実行中はダウンロード進捗とログが表示されます。
+
+![図: Models 再実行中](images/page-040_img-069.png)
+
+完了すると `Models` が `Done` になります。
+
+![図: Models 完了](images/page-040_img-070.png)
+
+#### 3.5.4 再実行がうまくいかない場合の確認ポイント
+
+- **ログ確認**: `Setup` 画面の `Activity Log` を確認し、失敗要因（ネットワーク、権限、容量、依存導入など）を切り分けます。  
+  例：`C:\Users\<ユーザー名>\.iblink\logs\initialization_*.log`
+- **ネットワーク**: 企業プロキシ／FW 環境では外部取得がブロックされることがあります。必要に応じて手動導入後に再実行します。
+- **権限**: 依存導入で管理者権限が必要になることがあります。
+- **ディスク容量**: `Models` 再実行はモデル取得で容量が必要です。
 
 ## 4. 開発者向け機能
 ### 4.1 チャットの使い⽅
