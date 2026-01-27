@@ -23,11 +23,11 @@
 releases:
   - version: "v4.0.0"
     label: "IB-Link v4.0.0"
-    release_date: "2026-01-23"
+    release_date: "2026-01-30"
     status: "current"
     summary: "新バージョンv4"
     changes:
-      - "イニシャライズ処理改善"
+      - "イニシャライズ再実行機能追加"
     downloads:
       - arch: "arm64"
         title: "Windows 11 ARM64"
