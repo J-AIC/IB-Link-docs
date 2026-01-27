@@ -29,12 +29,11 @@ IB-Link 操作マニュアル
    4.2. Runtime（ランタイム）設定  
    4.3. Logs機能  
    4.4. ドキュメント埋め込み  
-   4.5. データベース  
-   4.6. Chat API  
-   4.7. Documents API  
-   4.8. Retriever API
-   4.9. Audio API  
-   4.10. モデル切り替え API  
+   4.5. Chat API  
+   4.6. Documents API  
+   4.7. Retriever API
+   4.8. Audio API  
+   4.9. モデル切り替え API  
 ## 1.システム概要
    ⼤規模⾔語モデル（LLM）をPC上で実⾏・実験できるLLM利⽤アプリケーションです。
 ## 2.機能概要
@@ -651,69 +650,74 @@ Filter API で対象を絞り、Changes Only をオンにして差分だけを�
 
 
 ---
+### 4.5 イニシャライズ・データベースセットアップ
 
-
-
-### 4.5 データベース
-
-1. Database 画⾯を開く  
-   左メニューの Database を開きます。
-2. データベース接続を設定します。  
-3. 画⾯上部の Setup Database Connection をクリックします。  
-4. 表⽰されたダイアログに接続情報を⼊⼒します（例）  
-   Host: localhost  
-   Port: 5432  
-   Database: iblink  
-   Username: postgres  
-   Password: （PostgreSQL のパスワード）  
-5. Test Connection を押して「Connection successful!」を確認します。  
-6. Setup Database を押して反映します。  
-
-
-![図: 画像 1](images/page-033_img-001.png)
-
+概要
+イニシャライズ状態を確認し、PostgreSQL の接続設定（Database Connection Setup）を行って、接続テスト成功までを確認する。
 
 
 ---
 
+1. 左メニューから **Setup** を開く。
+2. 画面上部のセットアップステップがすべて **Done** になっていることを確認する。  
+   - Prerequisites / Database / App Setup / Whisper / Models / Finalize
+3. **Initialization Complete** が表示され、進捗が **100%** になっていることを確認する。
 
-
-接続後、Database Settings 画⾯の Connection Status が True になっていることを確認します。
-
-3. タイムゾーン設定（任意）
-4. Time Zone Settings の Select Time Zone で Asia/Tokyo を選択。
-5. Apply Time Zone をクリックして保存。
-6. ストレージモード選択
-   既定は Database Storage（バージョン3はデータベース必須）︓会話データを PostgreSQL に保存。
-   JSON File Storage︓ポータビリティ重視のローカル JSON 保存。
-   もし JSON から DB に移⾏する場合は Migrate JSON to Database を実⾏。
-7. SQL マイグレーション（必要に応じて）
-
-
-![図: 画像 1](images/page-034_img-001.png)
-
-
+![IB-Link Setup 完了画面](images/page-033_img-001.png)
 
 ---
 
+#### 4.5.1 再イニシャライズ（必要な場合のみ）
 
+「3.5 初期化失敗時の再イニシャライズ」を参照してください。
 
-1. SQL Migration セクションで Browse SQL File をクリック。
-2. 実⾏したい .sql ファイルを選択。
-3. Apply Migration を押して適⽤。
-4. 診断の実⾏（動作確認）
-5. 右下の Run Diagnostics をクリック。
-6. Status が Diagnostic completed、Connection Status が True であること、 必要なテーブルが検出され
-   ていることを確認します。
-   トラブルシューティング（要点）
-   接続エラー時︓ホスト名/ポート、ユーザー名/パスワード、DB名の誤り、PostgreSQL 起動状況、
-   Firewall を確認。
-   マイグレーション失敗時︓エラーメッセージを確認し、DDL/制約（NOT NULL・FK など）や対象テー
-   ブルの有無を⾒直す。
-   タイムゾーン変更後は、⽇時の保存・表⽰が期待通りかをテストする。
+---
 
+#### 4.5.2 Database Settings（タイムゾーン設定）
 
-![図: 画像 1](images/page-035_img-001.png)
+1. **Database Settings** の **Time Zone Settings** でタイムゾーンを選択する。  
+   - 例：`Asia/Tokyo`
+2. **Apply** をクリックして反映する。
+
+![Time Zone Settings](images/page-033_img-001.png)
+
+---
+
+#### 4.5.3 Database Connection Setup（接続設定）
+
+1. **Database Actions** の **Setup / Fix Database Connection** をクリックする。
+2. **Database Connection Setup** 画面が表示されることを確認する。
+
+![Database Connection Setup（入力前）](images/page-033_img-002.png)
+
+3. 接続情報を入力する
+以下の項目を入力する（画像の例）：
+
+- **Host**: `localhost`
+- **Port**: `5432`
+- **Database**: `iblink_wada_masanori`
+- **Username**: `postgres`
+- **Password**: （PostgreSQL のパスワード）
+
+![Database Connection Setup（入力中）](images/page-033_img-003.png)
+
+4. 接続テストを実行する
+5. **Test Connection** をクリックする。
+6. 画面下部に **「Connection successful! Server is reachable.」** と表示されることを確認する。
+
+![Connection successful 表示](images/page-033_img-004.png)
+
+#### 4.5.4 DBセットアップを実行する（必要な場合）
+- 接続テスト成功後、DB作成／初期化が必要な運用の場合は **Setup Database** をクリックする。  
+  ※既存DBに接続するだけの運用では不要な場合があります。
+
+---
+
+#### 4.5.5 診断（任意）
+- **Database Actions** の **Run Diagnostics** をクリックすると、診断結果が表示される。
+- 画面上で **Connected to PostgreSQL database**（接続済み）表示を確認する。
+
+![Diagnostics / Connected 表示](images/page-033_img-001.png)
 
 
 ---
