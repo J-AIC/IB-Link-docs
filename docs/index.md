@@ -3,6 +3,7 @@
 
 IB-Link 操作マニュアル
 ## 更新履歴
+2026/01/23 バージョン4.0対応  
 2025/12/12 モデル切り替えAPI追記  
 2025/11/21 モデル操作修正  
 2025/11/17 Document API利用フロー追記およびRuntime設定修正  
@@ -22,17 +23,17 @@ IB-Link 操作マニュアル
    3.2. モデル選択と起動⼿順  
    3.3. マルチモーダルモデル  
    3.4. IB-Link 停⽌⼿順  
+   3.5. 初期化失敗時の再イニシャライズ（再実行）  
 4. 開発者向け機能  
    4.1. チャットの使い⽅  
    4.2. Runtime（ランタイム）設定  
    4.3. Logs機能  
    4.4. ドキュメント埋め込み  
-   4.5. データベース  
-   4.6. Chat API  
-   4.7. Documents API  
-   4.8. Retriever API
-   4.9. Audio API  
-   4.10. モデル切り替え API  
+   4.5. Chat API  
+   4.6. Documents API  
+   4.7. Retriever API
+   4.8. Audio API  
+   4.9. モデル切り替え API  
 ## 1.システム概要
    ⼤規模⾔語モデル（LLM）をPC上で実⾏・実験できるLLM利⽤アプリケーションです。
 ## 2.機能概要
@@ -360,6 +361,86 @@ LLMを試せます。
 
 
 
+### 3.5 初期化失敗時の再イニシャライズ（再実行）
+
+初回起動（初期化：IB-Link Setup）が途中で失敗した場合、失敗したステップのみを選択して再実行（再イニシャライズ）できます。
+
+#### 3.5.1 事前確認
+
+- IB-Link を起動し、左メニューの `Setup` を開きます。
+- 画面下部の `Activity Log` に失敗理由（例：ネットワークエラー、依存関係の導入失敗など）が表示されている場合は、先に内容を確認します。
+
+#### 3.5.2 ネットワークエラー（Prerequisites）が出る場合
+
+依存コンポーネント（例：Visual C++ Redistributable）の取得でネットワークが必要になる場合があります。
+
+1. `Network Connection Required` の警告が表示されたら、ネットワーク接続を確認します。
+2. 右側の `Retry` をクリックして再試行します。
+3. 繰り返し失敗する場合は、警告内に表示されるダウンロード URL から手動導入し、再度 `Retry` をクリックします。
+
+![図: ネットワーク接続が必要](images/page-040_img-060.png)
+
+#### 3.5.3 再イニシャライズ（再実行）の実施
+
+1. 左メニューから `Setup` を開き、`Initialization Complete`（または Setup 画面）まで進んでいることを確認します。
+2. `Re-run Initialization Steps` で、再実行したいステップにチェックを入れます。
+3. `Re-initialize Selected` をクリックして再実行します。
+
+![図: 再実行ステップ選択（全体）](images/page-040_img-061.png)
+
+##### 3.5.3.1 Prerequisites（前提条件）を再実行する例
+
+1. `Prerequisites` にチェックを入れます。
+2. `Re-initialize Selected` をクリックします。
+
+![図: Prerequisites を選択](images/page-040_img-062.png)
+
+実行中はステップが `In Progress` になり、進捗とログが更新されます。
+
+![図: Prerequisites 再実行中](images/page-040_img-063.png)
+
+完了すると当該ステップが `Done`（緑のチェック）になります。
+
+![図: Prerequisites 完了](images/page-040_img-064.png)
+
+##### 3.5.3.2 Whisper を再実行する例
+
+1. `Whisper` にチェックを入れます。
+2. `Re-initialize Selected` をクリックします。
+
+![図: Whisper を選択](images/page-040_img-065.png)
+
+実行中は `Whisper Setup` が `In Progress` になり、進捗が表示されます。
+
+![図: Whisper 再実行中](images/page-040_img-066.png)
+
+完了すると `Whisper` が `Done` になります。
+
+![図: Whisper 完了](images/page-040_img-067.png)
+
+##### 3.5.3.3 Models（Chat Model）を再実行する例
+
+1. `Models` にチェックを入れます。
+2. `Re-initialize Selected` をクリックします。
+
+![図: Models を選択](images/page-040_img-068.png)
+
+実行中はダウンロード進捗とログが表示されます。
+
+![図: Models 再実行中](images/page-040_img-069.png)
+
+完了すると `Models` が `Done` になります。
+
+![図: Models 完了](images/page-040_img-070.png)
+
+#### 3.5.4 再実行がうまくいかない場合の確認ポイント
+
+- **ログ確認**: `Setup` 画面の `Activity Log` を確認し、失敗要因（ネットワーク、権限、容量、依存導入など）を切り分けます。  
+  例：`C:\Users\<ユーザー名>\.iblink\logs\initialization_*.log`
+- **ネットワーク**: 企業プロキシ／FW 環境では外部取得がブロックされることがあります。必要に応じて手動導入後に再実行します。
+- **権限**: 依存導入で管理者権限が必要になることがあります。
+- **ディスク容量**: `Models` 再実行はモデル取得で容量が必要です。
+
 ## 4. 開発者向け機能
 ### 4.1 チャットの使い⽅
 5. チャットの新規作成
@@ -401,7 +482,8 @@ LLMを試せます。
 ### 4.2 Runtime 設定
 Runtime タブでは、ローカルモデルの実⾏に必要な Llamaサーバー設定 と API設定 を構成できます。
 初期状態 デフォルトの Llama が選択され、使⽤可能な状態になっています。
-ハードウェアに合わせた最適化 ⾃PCの命令セットに合う Llama バイナリを選ぶことで推論速度を最⼤化できます。  
+ハードウェアに合わせた最適化 ⾃PCの命令セットに合う Llama バイナリを選ぶことで推論速度を最⼤化できます。 
+なお、Embedding APIは機能としては提供しておりません。 
 
 1. Llama Server 設定タブ
    ローカル実⾏⽤ Llama サーバーの .exe 実⾏パスを指定し、任意のバージョンを選択またはダウンロードできます。  
@@ -569,69 +651,74 @@ Filter API で対象を絞り、Changes Only をオンにして差分だけを�
 
 
 ---
+### 4.5 イニシャライズ・データベースセットアップ
 
-
-
-### 4.5 データベース
-
-1. Database 画⾯を開く  
-   左メニューの Database を開きます。
-2. データベース接続を設定します。  
-3. 画⾯上部の Setup Database Connection をクリックします。  
-4. 表⽰されたダイアログに接続情報を⼊⼒します（例）  
-   Host: localhost  
-   Port: 5432  
-   Database: iblink  
-   Username: postgres  
-   Password: （PostgreSQL のパスワード）  
-5. Test Connection を押して「Connection successful!」を確認します。  
-6. Setup Database を押して反映します。  
-
-
-![図: 画像 1](images/page-033_img-001.png)
-
+概要
+イニシャライズ状態を確認し、PostgreSQL の接続設定（Database Connection Setup）を行って、接続テスト成功までを確認する。
 
 
 ---
 
+1. 左メニューから **Setup** を開く。
+2. 画面上部のセットアップステップがすべて **Done** になっていることを確認する。  
+   - Prerequisites / Database / App Setup / Whisper / Models / Finalize
+3. **Initialization Complete** が表示され、進捗が **100%** になっていることを確認する。
 
-
-接続後、Database Settings 画⾯の Connection Status が True になっていることを確認します。
-
-3. タイムゾーン設定（任意）
-4. Time Zone Settings の Select Time Zone で Asia/Tokyo を選択。
-5. Apply Time Zone をクリックして保存。
-6. ストレージモード選択
-   既定は Database Storage（バージョン3はデータベース必須）︓会話データを PostgreSQL に保存。
-   JSON File Storage︓ポータビリティ重視のローカル JSON 保存。
-   もし JSON から DB に移⾏する場合は Migrate JSON to Database を実⾏。
-7. SQL マイグレーション（必要に応じて）
-
-
-![図: 画像 1](images/page-034_img-001.png)
-
-
+![IB-Link Setup 完了画面](images/page-033_img-001.png)
 
 ---
 
+#### 4.5.1 再イニシャライズ（必要な場合のみ）
 
+「3.5 初期化失敗時の再イニシャライズ」を参照してください。
 
-1. SQL Migration セクションで Browse SQL File をクリック。
-2. 実⾏したい .sql ファイルを選択。
-3. Apply Migration を押して適⽤。
-4. 診断の実⾏（動作確認）
-5. 右下の Run Diagnostics をクリック。
-6. Status が Diagnostic completed、Connection Status が True であること、 必要なテーブルが検出され
-   ていることを確認します。
-   トラブルシューティング（要点）
-   接続エラー時︓ホスト名/ポート、ユーザー名/パスワード、DB名の誤り、PostgreSQL 起動状況、
-   Firewall を確認。
-   マイグレーション失敗時︓エラーメッセージを確認し、DDL/制約（NOT NULL・FK など）や対象テー
-   ブルの有無を⾒直す。
-   タイムゾーン変更後は、⽇時の保存・表⽰が期待通りかをテストする。
+---
 
+#### 4.5.2 Database Settings（タイムゾーン設定）
 
-![図: 画像 1](images/page-035_img-001.png)
+1. **Database Settings** の **Time Zone Settings** でタイムゾーンを選択する。  
+   - 例：`Asia/Tokyo`
+2. **Apply** をクリックして反映する。
+
+![Time Zone Settings](images/page-033_img-001.png)
+
+---
+
+#### 4.5.3 Database Connection Setup（接続設定）
+
+1. **Database Actions** の **Setup / Fix Database Connection** をクリックする。
+2. **Database Connection Setup** 画面が表示されることを確認する。
+
+![Database Connection Setup（入力前）](images/page-033_img-002.png)
+
+3. 接続情報を入力する
+以下の項目を入力する（画像の例）：
+
+- **Host**: `localhost`
+- **Port**: `5432`
+- **Database**: `iblink_wada_masanori`
+- **Username**: `postgres`
+- **Password**: （PostgreSQL のパスワード）
+
+![Database Connection Setup（入力中）](images/page-033_img-003.png)
+
+4. 接続テストを実行する
+5. **Test Connection** をクリックする。
+6. 画面下部に **「Connection successful! Server is reachable.」** と表示されることを確認する。
+
+![Connection successful 表示](images/page-033_img-004.png)
+
+#### 4.5.4 DBセットアップを実行する（必要な場合）
+- 接続テスト成功後、DB作成／初期化が必要な運用の場合は **Setup Database** をクリックする。  
+  ※既存DBに接続するだけの運用では不要な場合があります。
+
+---
+
+#### 4.5.5 診断（任意）
+- **Database Actions** の **Run Diagnostics** をクリックすると、診断結果が表示される。
+- 画面上で **Connected to PostgreSQL database**（接続済み）表示を確認する。
+
+![Diagnostics / Connected 表示](images/page-033_img-001.png)
 
 
 ---
