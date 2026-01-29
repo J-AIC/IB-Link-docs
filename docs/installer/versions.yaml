@@ -23,7 +23,7 @@
 releases:
   - version: "v4.0.0"
     label: "IB-Link v4.0.0"
-    release_date: "2026-01-30"
+    release_date: "2026-01-29"
     status: "current"
     summary: "新バージョンv4"
     changes:

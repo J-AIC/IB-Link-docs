@@ -1878,7 +1878,7 @@ http://localhost:9000/iblink/v1/llama-server
 
 ---
 
-© 2025 IB-Link / J-AIC   
+© 2026 IB-Link / J-AIC   
 本ドキュメントの無断転載を禁じます。  
 
 ---
