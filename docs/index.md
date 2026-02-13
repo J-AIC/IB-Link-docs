@@ -172,7 +172,7 @@ Intel版で利用できる推奨モデルを以下に示します。
 
 **推奨ファイル:**
 - モデル: `Qwen3-VL-2B-Instruct-1M-UD-Q5_K_XL.gguf`
-- Visionモデル: `mmproj-F16.gguf`
+- Visionエンコーダー: `mmproj-F16.gguf`
 
 ##### 2. unsloth/Qwen3-VL-2B-Thinking-1M-GGUF
 思考プロセスを重視したモデルです。複雑な推論タスクに適しています。
@@ -203,11 +203,18 @@ Intel版で利用できる推奨モデルを以下に示します。
 #### 3.1.4 推奨モデル（Qualcomm版）
 Qualcomm版で利用できる推奨モデルを以下に示します。
 
-##### 1. ggml-org/gemma-3-4b-it-qat-gguf ※マルチモーダル   
+##### 1. unsloth/Qwen3-0.6B-GGUF     
+軽量で扱いやすいモデルです。高精度な量子化で性能を保ちます。
+
+**推奨ファイル:**
+- モデル: `Qwen3-0.6B-UD-Q8_K_XL.gguf`
+
+##### 2. ggml-org/gemma-3-4b-it-qat-gguf ※マルチモーダル   
+画像とテキストの両方を理解できるマルチモーダルモデルです。 
 
 **推奨ファイル:**
 - モデル: `gemma-3-4b-it-qat-Q4_0.gguf`
-- Visionモデル: `mmproj-model-f16-4B.gguf`
+- Visionエンコーダー: `mmproj-model-f16-4B.gguf`
 
 ---
 ### 3.2 モデル選択と起動⼿順
