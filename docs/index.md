@@ -3,6 +3,7 @@
 
 IB-Link 操作マニュアル
 ## 更新履歴
+2026/02/13 推奨モデル追記  
 2026/01/29 バージョン4.0対応  
 2025/12/12 モデル切り替えAPI追記  
 2025/11/21 モデル操作修正  
@@ -161,6 +162,59 @@ LLMを試せます。
 
 5. 「Delete Models」をクリックします。 
 ![図: 画像 1](images/page-007_img-008.png)
+
+---
+#### 3.1.3 推奨モデル（Intel版）
+Intel版で利用できる推奨モデルを以下に示します。
+
+##### 1. unsloth/Qwen3-VL-2B-Instruct-1M-GGUF ※マルチモーダル
+画像とテキストの両方を理解できるマルチモーダルモデルです。  
+
+**推奨ファイル:**
+- モデル: `Qwen3-VL-2B-Instruct-1M-UD-Q5_K_XL.gguf`
+- Visionエンコーダー: `mmproj-F16.gguf`
+
+##### 2. unsloth/Qwen3-VL-2B-Thinking-1M-GGUF
+思考プロセスを重視したモデルです。複雑な推論タスクに適しています。
+
+**推奨ファイル:**
+- モデル: `Qwen3-VL-2B-Thinking-1M-UD-Q5_K_XL.gguf`
+
+##### 3. LiquidAI/LFM2.5-1.2B-JP-GGUF
+日本語に特化した軽量モデルです。日本語タスクで高い性能を発揮します。
+
+**推奨ファイル:**
+- モデル: `LFM2.5-1.2B-JP-Q6_K.gguf`
+
+##### 4. mradermacher/shisa-v2.1-lfm2-1.2b-GGUF
+日本語と英語の両方に対応したモデルです。
+
+**推奨ファイル:**
+- モデル: `shisa-v2.1-lfm2-1.2b.Q6_K.gguf`
+
+##### 5. unsloth/Qwen3-4B-Instruct-2507-GGUF
+汎用的な指示実行タスクに適した4Bパラメータモデルです。
+
+**推奨ファイル:**
+- モデル: `Qwen3-4B-Instruct-2507-UD-Q4_K_XL.gguf`
+
+---
+
+#### 3.1.4 推奨モデル（Qualcomm版）
+Qualcomm版で利用できる推奨モデルを以下に示します。
+
+##### 1. unsloth/Qwen3-0.6B-GGUF     
+軽量で扱いやすいモデルです。高精度な量子化で性能を保ちます。
+
+**推奨ファイル:**
+- モデル: `Qwen3-0.6B-UD-Q8_K_XL.gguf`
+
+##### 2. ggml-org/gemma-3-4b-it-qat-gguf ※マルチモーダル   
+画像とテキストの両方を理解できるマルチモーダルモデルです。 
+
+**推奨ファイル:**
+- モデル: `gemma-3-4b-it-qat-Q4_0.gguf`
+- Visionエンコーダー: `mmproj-model-f16-4B.gguf`
 
 ---
 ### 3.2 モデル選択と起動⼿順
