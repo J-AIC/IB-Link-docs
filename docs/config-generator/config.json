@@ -1,0 +1,488 @@
+{
+  "schemaVersion": 1,
+  "defaultPresetId": "recommended_Qualcomm",
+  "defaults": {
+    "llamaCpp": {
+      "tag": "b7342",
+      "binaries": "llama-b7342-bin-win-arm64"
+    },
+    "ggufModel": {
+      "repository": "unsloth/Qwen3-4B-Instruct-2507-GGUF",
+      "model": "Qwen3-4B-Instruct-2507-UD-Q4_K_XL.gguf"
+    },
+    "serverSettings": {
+      "ctxSize": 16000,
+      "host": "localhost",
+      "port": 8080,
+      "threads": 8,
+      "useGPU": false,
+      "gpuLayers": 28,
+      "batchSize": 2048,
+      "seed": 3407,
+      "prio": 3,
+      "temp": 0.6,
+      "minP": 0.0,
+      "topP": 0.95,
+      "topK": 20
+    },
+    "customArguments": []
+  },
+  "presets": [
+    {
+      "id": "recommended_Intel",
+      "label": "おすすめ (Intel)",
+      "description": "バランス重視の標準設定 (GPU使用)",
+      "config": {
+        "llamaCpp": {
+          "tag": "b7342",
+          "binaries": "llama-b7342-bin-win-vulkan-x64"
+        },
+        "ggufModel": {
+          "repository": "unsloth/Qwen3-4B-Instruct-2507-GGUF",
+          "model": "Qwen3-4B-Instruct-2507-UD-Q4_K_XL.gguf"
+        },
+        "serverSettings": {
+          "ctxSize": 16000,
+          "host": "localhost",
+          "port": 8080,
+          "threads": 8,
+          "useGPU": true,
+          "gpuLayers": 28,
+          "batchSize": 2048,
+          "seed": 3407,
+          "prio": 3,
+          "temp": 0.6,
+          "minP": 0.0,
+          "topP": 0.95,
+          "topK": 20
+        }
+      },
+      "dropdownOptions": {
+        "binaryTags": ["b7342", "b7340", "b7339"],
+        "ggufRepositories": [
+          { "repository": "unsloth/Qwen3-4B-Instruct-2507-GGUF", "model": "Qwen3-4B-Instruct-2507-UD-Q4_K_XL.gguf" },
+          { "repository": "TheBloke/Llama-2-7B-GGUF", "model": "llama-2-7b.Q4_K_M.gguf" },
+          { "repository": "microsoft/Phi-3-mini-4k-instruct-gguf", "model": "Phi-3-mini-4k-instruct-q4.gguf" }
+        ]
+      }
+    },
+    {
+      "id": "recommended_Qualcomm",
+      "label": "おすすめ (Qualcomm)",
+      "description": "バランス重視の標準設定 (CPU使用)",
+      "config": {
+        "llamaCpp": {
+          "tag": "b7342",
+          "binaries": "llama-b7342-bin-win-arm64"
+        },
+        "ggufModel": {
+          "repository": "unsloth/Qwen3-4B-Instruct-2507-GGUF",
+          "model": "Qwen3-4B-Instruct-2507-UD-Q4_K_XL.gguf"
+        },
+        "serverSettings": {
+          "ctxSize": 16000,
+          "host": "localhost",
+          "port": 8080,
+          "threads": 8,
+          "useGPU": false,
+          "gpuLayers": 28,
+          "batchSize": 2048,
+          "seed": 3407,
+          "prio": 3,
+          "temp": 0.6,
+          "minP": 0.0,
+          "topP": 0.95,
+          "topK": 20
+        }
+      },
+      "dropdownOptions": {
+        "binaryTags": ["b7342", "b7340", "b7339"],
+        "ggufRepositories": [
+          { "repository": "unsloth/Qwen3-4B-Instruct-2507-GGUF", "model": "Qwen3-4B-Instruct-2507-UD-Q4_K_XL.gguf" },
+          { "repository": "TheBloke/Llama-2-7B-GGUF", "model": "llama-2-7b.Q4_K_M.gguf" },
+          { "repository": "microsoft/Phi-3-mini-4k-instruct-gguf", "model": "Phi-3-mini-4k-instruct-q4.gguf" }
+        ]
+      }
+    },
+    {
+      "id": "speed_Intel",
+      "label": "速度重視 (Intel)",
+      "description": "応答速度を最優先 (GPU使用)",
+      "config": {
+        "llamaCpp": {
+          "tag": "b7342",
+          "binaries": "llama-b7342-bin-win-vulkan-x64"
+        },
+        "ggufModel": {
+          "repository": "unsloth/LFM2-350M-GGUF",
+          "model": "LFM2-350M-UD-Q8_K_XL.gguf"
+        },
+        "serverSettings": {
+          "ctxSize": 8192,
+          "host": "localhost",
+          "port": 8080,
+          "threads": 8,
+          "useGPU": true,
+          "gpuLayers": 28,
+          "batchSize": 2048,
+          "seed": 3407,
+          "prio": 3,
+          "temp": 0.1,
+          "minP": 0.0,
+          "topP": 0.95,
+          "topK": 20
+        }
+      },
+      "dropdownOptions": {
+        "binaryTags": ["b7342", "b7340", "b7339"],
+        "ggufRepositories": [
+          { "repository": "unsloth/LFM2-350M-GGUF", "model": "LFM2-350M-UD-Q8_K_XL.gguf" },
+          { "repository": "lmstudio-community/gemma-2-2b-it-GGUF", "model": "gemma-2-2b-it-Q4_K_M.gguf" }
+        ]
+      }
+    },
+    {
+      "id": "speed_Qualcomm",
+      "label": "速度重視 (Qualcomm)",
+      "description": "応答速度を最優先 (CPU使用)",
+      "config": {
+        "llamaCpp": {
+          "tag": "b7342",
+          "binaries": "llama-b7342-bin-win-arm64"
+        },
+        "ggufModel": {
+          "repository": "unsloth/LFM2-350M-GGUF",
+          "model": "LFM2-350M-UD-Q8_K_XL.gguf"
+        },
+        "serverSettings": {
+          "ctxSize": 8192,
+          "host": "localhost",
+          "port": 8080,
+          "threads": 8,
+          "useGPU": false,
+          "gpuLayers": 28,
+          "batchSize": 2048,
+          "seed": 3407,
+          "prio": 3,
+          "temp": 0.1,
+          "minP": 0.0,
+          "topP": 0.95,
+          "topK": 20
+        }
+      },
+      "dropdownOptions": {
+        "binaryTags": ["b7342", "b7340", "b7339"],
+        "ggufRepositories": [
+          { "repository": "unsloth/LFM2-350M-GGUF", "model": "LFM2-350M-UD-Q8_K_XL.gguf" },
+          { "repository": "lmstudio-community/gemma-2-2b-it-GGUF", "model": "gemma-2-2b-it-Q4_K_M.gguf" }
+        ]
+      }
+    },
+    {
+      "id": "quality_Intel",
+      "label": "品質重視 (Intel)",
+      "description": "生成品質を最優先 (GPU使用)",
+      "config": {
+        "llamaCpp": {
+          "tag": "b7342",
+          "binaries": "llama-b7342-bin-win-vulkan-x64"
+        },
+        "ggufModel": {
+          "repository": "mradermacher/shisa-v2.1-qwen3-8b-GGUF",
+          "model": "shisa-v2.1-qwen3-8b.Q4_K_M.gguf"
+        },
+        "serverSettings": {
+          "ctxSize": 32000,
+          "host": "localhost",
+          "port": 8080,
+          "threads": 8,
+          "useGPU": true,
+          "gpuLayers": 99,
+          "batchSize": 2048,
+          "seed": 3407,
+          "prio": 3,
+          "temp": 0.7,
+          "minP": 0.0,
+          "topP": 0.95,
+          "topK": 20
+        }
+      },
+      "dropdownOptions": {
+        "binaryTags": ["b7342", "b7340", "b7339"],
+        "ggufRepositories": [
+          { "repository": "mradermacher/shisa-v2.1-qwen3-8b-GGUF", "model": "shisa-v2.1-qwen3-8b.Q4_K_M.gguf" },
+          { "repository": "Qwen/Qwen2.5-7B-Instruct-GGUF", "model": "qwen2.5-7b-instruct-q4_k_m.gguf" },
+          { "repository": "TheBloke/Mistral-7B-v0.1-GGUF", "model": "mistral-7b-v0.1.Q4_K_M.gguf" }
+        ]
+      }
+    },
+    {
+      "id": "quality_Qualcomm",
+      "label": "品質重視 (Qualcomm)",
+      "description": "生成品質を最優先 (CPU使用)",
+      "config": {
+        "llamaCpp": {
+          "tag": "b7342",
+          "binaries": "llama-b7342-bin-win-arm64"
+        },
+        "ggufModel": {
+          "repository": "mradermacher/shisa-v2.1-qwen3-8b-GGUF",
+          "model": "shisa-v2.1-qwen3-8b.Q4_K_M.gguf"
+        },
+        "serverSettings": {
+          "ctxSize": 32000,
+          "host": "localhost",
+          "port": 8080,
+          "threads": 8,
+          "useGPU": false,
+          "gpuLayers": 99,
+          "batchSize": 2048,
+          "seed": 3407,
+          "prio": 3,
+          "temp": 0.7,
+          "minP": 0.0,
+          "topP": 0.95,
+          "topK": 20
+        }
+      },
+      "dropdownOptions": {
+        "binaryTags": ["b7342", "b7340", "b7339"],
+        "ggufRepositories": [
+          { "repository": "mradermacher/shisa-v2.1-qwen3-8b-GGUF", "model": "shisa-v2.1-qwen3-8b.Q4_K_M.gguf" },
+          { "repository": "Qwen/Qwen2.5-7B-Instruct-GGUF", "model": "qwen2.5-7b-instruct-q4_k_m.gguf" },
+          { "repository": "TheBloke/Mistral-7B-v0.1-GGUF", "model": "mistral-7b-v0.1.Q4_K_M.gguf" }
+        ]
+      }
+    },
+    {
+      "id": "custom",
+      "label": "カスタム",
+      "description": "手動で詳細設定を調整",
+      "config": null
+    }
+  ],
+  "settingsSchema": {
+    "llamaCpp": {
+      "tag": {
+        "type": "string",
+        "default": "b7342",
+        "comment": "Llama.cpp release tag"
+      },
+      "binaries": {
+        "type": "string",
+        "default": "llama-b7342-bin-win-arm64",
+        "comment": "Binary archive name"
+      }
+    },
+    "ggufModel": {
+      "repository": {
+        "type": "string",
+        "default": "",
+        "comment": "HuggingFace repository"
+      },
+      "model": {
+        "type": "string",
+        "default": "",
+        "comment": "Model file name"
+      }
+    },
+    "serverSettings": {
+      "ctxSize": {
+        "type": "int",
+        "default": 16000,
+        "min": 128,
+        "max": 131072,
+        "step": 128,
+        "cliFlag": "-c",
+        "comment": "Context size (-c)"
+      },
+      "host": {
+        "type": "string",
+        "default": "localhost",
+        "cliFlag": "--host",
+        "comment": "Host address (--host)"
+      },
+      "port": {
+        "type": "int",
+        "default": 8080,
+        "min": 1,
+        "max": 65535,
+        "step": 1,
+        "cliFlag": "--port",
+        "comment": "Port (--port)"
+      },
+      "threads": {
+        "type": "int",
+        "default": 8,
+        "min": 1,
+        "max": 256,
+        "step": 1,
+        "cliFlag": "-t",
+        "comment": "CPU threads (-t)"
+      },
+      "useGPU": {
+        "type": "bool",
+        "default": false,
+        "comment": "Enable GPU"
+      },
+      "gpuLayers": {
+        "type": "int",
+        "default": 28,
+        "min": 0,
+        "max": 200,
+        "step": 1,
+        "cliFlag": "-ngl",
+        "comment": "GPU layers (-ngl)"
+      },
+      "batchSize": {
+        "type": "int",
+        "default": 2048,
+        "min": 1,
+        "max": 8192,
+        "step": 1,
+        "cliFlag": "-b",
+        "comment": "Batch size (-b)"
+      },
+      "seed": {
+        "type": "int",
+        "default": 3407,
+        "min": -1,
+        "step": 1,
+        "cliFlag": "--seed",
+        "comment": "Random seed (--seed)"
+      },
+      "prio": {
+        "type": "int",
+        "default": 3,
+        "min": 0,
+        "max": 3,
+        "step": 1,
+        "cliFlag": "--prio",
+        "comment": "Priority (--prio)"
+      },
+      "temp": {
+        "type": "float",
+        "default": 0.6,
+        "min": 0,
+        "max": 2,
+        "step": 0.1,
+        "cliFlag": "--temp",
+        "comment": "Temperature (--temp)"
+      },
+      "minP": {
+        "type": "float",
+        "default": 0.0,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "cliFlag": "--min-p",
+        "comment": "Min-P sampling (--min-p)"
+      },
+      "topP": {
+        "type": "float",
+        "default": 0.95,
+        "min": 0,
+        "max": 1,
+        "step": 0.01,
+        "cliFlag": "--top-p",
+        "comment": "Top-P sampling (--top-p)"
+      },
+      "topK": {
+        "type": "int",
+        "default": 20,
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "cliFlag": "--top-k",
+        "comment": "Top-K sampling (--top-k)"
+      }
+    },
+    "customArguments": {
+      "type": "array_of_strings",
+      "default": [],
+      "comment": "Additional llama-server args"
+    }
+  },
+  "dropdownOptions": {
+    "binaryTags": [
+      "b7342",
+      "b7340",
+      "b7339",
+      "b7338",
+      "b7337",
+      "b7335",
+      "b7330",
+      "b7320"
+    ],
+    "ggufRepositories": [
+      {
+        "repository": "unsloth/LFM2-350M-GGUF",
+        "model": "LFM2-350M-UD-Q8_K_XL.gguf"
+      },
+      {
+        "repository": "TheBloke/Llama-2-7B-GGUF",
+        "model": "llama-2-7b.Q4_K_M.gguf"
+      },
+      {
+        "repository": "TheBloke/Mistral-7B-v0.1-GGUF",
+        "model": "mistral-7b-v0.1.Q4_K_M.gguf"
+      },
+      {
+        "repository": "lmstudio-community/gemma-2-2b-it-GGUF",
+        "model": "gemma-2-2b-it-Q4_K_M.gguf"
+      },
+      {
+        "repository": "microsoft/Phi-3-mini-4k-instruct-gguf",
+        "model": "Phi-3-mini-4k-instruct-q4.gguf"
+      },
+      {
+        "repository": "Qwen/Qwen2.5-7B-Instruct-GGUF",
+        "model": "qwen2.5-7b-instruct-q4_k_m.gguf"
+      }
+    ],
+    "commonLlamaServerArgs": [
+      "--parallel",
+      "--timeout",
+      "--threads-http",
+      "--api-key",
+      "--no-webui",
+      "--metrics",
+      "--slots",
+      "--cache-prompt",
+      "--cont-batching",
+      "--ubatch-size",
+      "--flash-attn",
+      "--mlock",
+      "--no-mmap",
+      "--cache-type-k",
+      "--cache-type-v",
+      "--split-mode",
+      "--tensor-split",
+      "--main-gpu",
+      "--device",
+      "--n-predict",
+      "--repeat-penalty",
+      "--repeat-last-n",
+      "--presence-penalty",
+      "--frequency-penalty",
+      "--typical",
+      "--mirostat",
+      "--mirostat-lr",
+      "--mirostat-ent",
+      "--dynatemp-range",
+      "--samplers",
+      "--grammar",
+      "--grammar-file",
+      "--jinja",
+      "--verbose",
+      "--log-disable",
+      "--log-file",
+      "--log-verbosity",
+      "--lora",
+      "--lora-scaled",
+      "--chat-template",
+      "--reasoning-format",
+      "--embedding"
+      ]
+  }
+}

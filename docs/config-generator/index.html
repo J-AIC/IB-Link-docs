@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>コンフィグ生成サイト</title>
+    <!-- <link rel="icon" href="IB_link_logo_48.ico" sizes="48x48" /> -->
+
+    <link href="https://fonts.googleapis.com/css2?family=Consolas:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        /* IB-Link Color Palette */
+        /* Navigation & Primary */
+        --color-nav-bg: #2D2D30;
+        --color-nav-separator: #444444;
+        --color-nav-hover: #383838;
+        --color-nav-active: #333333;
+        
+        /* Main Content & Cards */
+        --color-content-bg: #F5F5F5;
+        --color-card-bg: #FFFFFF;
+        --color-light-bg: #F8F8F8;
+        --color-very-light-bg: #F9F9F9;
+        --color-disabled-bg: #E0E0E0;
+        
+        /* Button Colors */
+        --color-btn-primary: #007BFF;
+        --color-btn-primary-hover: #0078D7;
+        --color-btn-primary-active: #106EBE;
+        --color-btn-success: #28A745;
+        --color-btn-danger: #DC3545;
+        --color-btn-info: #2196F3;
+        --color-btn-warning: #FF9800;
+        --color-btn-neutral: #607D8B;
+        
+        /* Text Colors */
+        --color-text-dark: #333333;
+        --color-text-medium: #495057;
+        --color-text-light: #666666;
+        --color-text-lighter: #777777;
+        --color-text-white: #FFFFFF;
+        
+        /* Border Colors */
+        --color-border-light: #E9ECEF;
+        --color-border-medium: #DDDDDD;
+        
+        /* Typography */
+        --font-family-default: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+        --font-family-mono: "Consolas", "Courier New", monospace;
+        
+        --font-size-h1: 28px;
+        --font-size-h2: 24px;
+        --font-size-h3: 18px;
+        --font-size-body: 14px;
+        --font-size-small: 12px;
+        --font-size-label: 14px;
+        --font-size-caption: 10px;
+        
+        --font-weight-light: 300;
+        --font-weight-normal: 400;
+        --font-weight-medium: 500;
+        --font-weight-semibold: 600;
+        --font-weight-bold: 700;
+        
+        /* Spacing */
+        --spacing-xs: 4px;
+        --spacing-sm: 8px;
+        --spacing-md: 12px;
+        --spacing-lg: 15px;
+        --spacing-xl: 20px;
+        --spacing-xxl: 24px;
+        
+        /* Border Radius */
+        --radius-small: 4px;
+        --radius-medium: 6px;
+        --radius-large: 8px;
+        --radius-xl: 12px;
+        
+        /* Shadow */
+        --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+        --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+        --shadow-focus: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      }
+      
+      body {
+        font-family: var(--font-family-default);
+        background-color: var(--color-content-bg);
+        min-height: 100vh;
+        color: var(--color-text-dark);
+        margin: 0;
+        padding: 0;
+      }
+      
+      .mono {
+        font-family: var(--font-family-mono);
+      }
+      
+      .card {
+        background: var(--color-card-bg);
+        border: 1px solid #E0E0E0;
+        border-radius: 4px;
+      }
+
+      .card:hover {
+        border-color: #D0D0D0;
+      }
+      
+      .input-field {
+        background: var(--color-card-bg);
+        border: 1px solid #E0E0E0;
+        color: var(--color-text-dark);
+        transition: border-color 0.15s ease;
+        font-family: var(--font-family-default);
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .input-field:hover {
+        border-color: #D0D0D0;
+      }
+
+      .input-field:focus {
+        border-color: var(--color-btn-primary);
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+        outline: none;
+      }
+      
+      .input-field:disabled {
+        background: #F5F5F5;
+        border-color: #E0E0E0;
+        color: #AAAAAA;
+        cursor: not-allowed;
+      }
+      
+      .input-field::placeholder {
+        color: #BBBBBB;
+      }
+      
+      .btn-primary {
+        background: var(--color-btn-primary);
+        color: var(--color-text-white);
+        transition: background-color 0.15s ease;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: var(--color-btn-primary-hover);
+      }
+
+      .btn-primary:active:not(:disabled) {
+        background: var(--color-btn-primary-active);
+      }
+      
+      .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      .btn-danger {
+        background: var(--color-btn-danger);
+        color: var(--color-text-white);
+        transition: background-color 0.15s ease;
+      }
+
+      .btn-danger:hover:not(:disabled) {
+        background: #c82333;
+      }
+      
+      .btn-danger:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      .btn-success {
+        background: var(--color-btn-success);
+        color: var(--color-text-white);
+        transition: background-color 0.15s ease;
+      }
+
+      .btn-success:hover:not(:disabled) {
+        background: #218838;
+      }
+      
+      .btn-success:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      .btn-secondary {
+        background: #F8F8F8;
+        border: 1px solid #E0E0E0;
+        color: var(--color-text-dark);
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        background: #F0F0F0;
+        border-color: #D0D0D0;
+      }
+      
+      .btn-secondary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      .code-preview {
+        background: #FAFAFA;
+        border: 1px solid #E0E0E0;
+        font-family: var(--font-family-mono);
+        color: var(--color-text-dark);
+        padding: 16px;
+        border-radius: 4px;
+        line-height: 1.6;
+        font-size: 13px;
+        overflow-x: auto;
+      }
+      
+      .glow-border {
+        box-shadow: none;
+      }
+      
+      /* Heading styles */
+      h1, h2, h3, h4 {
+        letter-spacing: -0.5px;
+      }
+      
+      h1 {
+        font-size: var(--font-size-h1);
+        font-weight: 700;
+        color: var(--color-text-dark);
+        margin-bottom: var(--spacing-lg);
+      }
+      
+      h2 {
+        font-size: var(--font-size-h2);
+        font-weight: 700;
+        color: var(--color-text-dark);
+      }
+      
+      h3 {
+        font-size: var(--font-size-h3);
+        font-weight: 600;
+        color: var(--color-text-dark);
+      }
+      
+      /* Label and text improvements */
+      label {
+        font-weight: 500;
+        color: var(--color-text-dark);
+      }
+      
+      /* Focus-visible for accessibility */
+      button:focus-visible,
+      a:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        outline: 2px solid var(--color-btn-primary);
+        outline-offset: 2px;
+      }
+      
+      /* Scrollbar improvements */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: #CCCCCC;
+        border-radius: 4px;
+        transition: background 0.2s ease;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: #999999;
+      }
+      
+      /* Animations */
+      @keyframes fadeIn {
+        from { 
+          opacity: 0; 
+          transform: translateY(12px); 
+        }
+        to { 
+          opacity: 1; 
+          transform: translateY(0); 
+        }
+      }
+      
+      @keyframes slideInFromLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      .animate-fade-in {
+        animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+      
+      .stagger-1 { animation-delay: 0.1s; }
+      .stagger-2 { animation-delay: 0.2s; }
+      .stagger-3 { animation-delay: 0.3s; }
+      .stagger-4 { animation-delay: 0.4s; }
+      
+    </style>
+
+  <script type="module" crossorigin src="/config-generator/assets/index--A-Ny_S0.js"></script>
+  <link rel="stylesheet" crossorigin href="/config-generator/assets/index-CEYgGLdi.css">
+</head>
+  <body>
+    <div id="root"></div>
+
+</body>
+</html>
