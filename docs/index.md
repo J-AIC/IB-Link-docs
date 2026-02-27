@@ -1087,7 +1087,7 @@ curl http://localhost:6500/iblink/v1/retriever/info
 
 ---
 
-### 4.8 AudioAPI（IB-Link経由: 7000/iblink/v1/audio/*）
+### 4.8 AudioAPI
 概要  
 AudioAPI は、IB-Link（Audio サービス）に対して **音声文字起こし（音声ファイル → テキスト）** と **ヘルス/システム情報取得** を行う HTTP API です（Whisper Server のHTTP/WSは 4.9 を参照）。
 
@@ -1154,7 +1154,7 @@ curl -X POST http://localhost:7000/iblink/v1/audio/transcriptions \
 curl http://localhost:7000/iblink/v1/audio/system/info
 ```
 
-### 4.9 AudioNPUAPI（Whisper Server + Realtime: 8000 + WS）
+### 4.9 AudioNPUAPI
 概要  
 AudioNPUAPI は、Whisper Server（既定: `http://localhost:8000`）に対して **音声文字起こし（HTTP）** と **リアルタイム文字起こし（WebSocket）** を行うためのAPIです。
 
@@ -1397,7 +1397,7 @@ curl -X POST http://localhost:5000/iblink/v1/embeddings \
 
 ---
 
-### 4.11 LlamaServerAPI（推論サーバ管理）
+### 4.11 LlamaServerAPI
 
 ---
 
@@ -1594,7 +1594,7 @@ curl -N http://localhost:9000/iblink/v1/llama-server/logs/stream
 
 ---
 
-### 4.12 FoundryLocalAPI（Foundry Local 管理）
+### 4.12 FoundryLocalAPI
 概要  
 FoundryLocalAPI は、FoundryLocal のローカル推論サーバを **起動/停止/状態確認/モデル切替**するためのHTTP APIです。加えて、モデルの列挙/ダウンロード/削除、ログ取得（SSE）、ヘルス確認を提供します。
 
