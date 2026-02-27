@@ -122,7 +122,7 @@
 ### 判定
 - **案B（公式ドキュメント）だけではMECEにならない**
   - 7000/realtime（Hub）と 7100 管理API が `manual/apidocs` に一次情報として存在しない/一致しないため。
-- **案B＋（4.13〜4.16）をセットにすると、Dアプリ観測範囲ではMECEに近づく**
+- **案B＋（4.13〜4.15）をセットにすると、Dアプリ観測範囲ではMECEに近づく**
   - 境界は「Base URL + Path」で識別可能で、相互に重複しない。
   - 例外（未確定/運用判断が必要）: `FoundryLocalAPI` は設定項目として登場するが、通常経路では無効化されている実装がある。
 
@@ -164,16 +164,6 @@
   - `manual/apidocs/AudioAPI_Usage_Examples.md` は 7000/iblink/v1/audio/* を説明するが、**Dアプリが参照している 7000/realtime の位置づけが章立てとして別物**になりやすい（“Hub” と “API” が混線する）。
 - **新設候補（例）**
   - `manual/apidocs/(仮)_SignalR_Hub_Usage_Examples.md`（※正式名称が確定してから）
-
-### GAP-04: 8500/iblink/v1/chat/completions（補足経路）の扱い
-- **対象**: `http://localhost:8500/iblink/v1/chat/completions`（D-Josys の `IBLinkClient` の baseURL設定次第で到達する可能性）
-- **Dアプリ実装での状況**: 実装上は到達可能な構造がある（`manual/IBUGM/01_DAPP_API_USAGE_MAP.md` の Chat 行に記載）。
-- **なぜ不足か**
-  - OpenAPI に Chat がないため、8500配下の Chat を一次仕様として置けない。
-  - 実運用で “使う” のか “互換の残骸” なのか、現状の情報だけでは断定できず、章タイトルに含めると誤解を生む。
-- **対応案**
-  - 使うことを前提にするなら: OpenAPI と apidocs の両方に追加（=仕様化）。
-  - 使わないなら: Dアプリ側で到達不能化/説明から除外し、4.99（競合/混同）に記録する。
 
 ---
 
@@ -249,12 +239,6 @@
   - Sales: `manual/Dapp/d-sales/src/role_playing/js/roleplaySttChatOrchestrator.signalr.js`（既定hubUrlが `http://localhost:7000/realtime`）
   - Retail: `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/RealtimeTranscriptionClient.js`（SignalR: `http://localhost:7000/realtime`）
   - Retail: `manual/Dapp/d-retail/src/D-Retail/multilingual_service/multilingual.constants.js`（`http://localhost:7000/realtime` / `http://localhost:7000/iblink/v1/audio/health`）
-
-### 4.16 （補足）8500/iblink/v1/chat/completions
-- GAP-04 に対応。
-- これを「APIとして採用する（=仕様化する）」か「互換の残骸として扱う」かは未確定のため、章タイトルで命名しない。
-- **到達可能性がある実装**
-  - D-Josys: `manual/Dapp/d-josys/src/api/IBLinkClient.js`（baseURLの与え方次第で 8500/iblink 配下へ到達し得る構造）
 
 ---
 

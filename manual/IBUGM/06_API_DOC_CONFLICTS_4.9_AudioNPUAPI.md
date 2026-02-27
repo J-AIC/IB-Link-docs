@@ -31,6 +31,9 @@
 - **Retail**
   - `{ language, energy_threshold, ... }` の設定オブジェクトを直接送信（`action` ラッパなし）
   - 根拠: `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/AudioRealtimeClient.js`（`onopen` で `cfg` を送信）
+- **Medical**
+  - `{"action":"start","config":{ vad: { ... } }}` のように `config.vad` をネストして送信する
+  - 根拠: `manual/Dapp/d-medical/assets/js/voice/RealtimeAudioClient.js`（`_sendStartPayload()`）
 
 **判断**:
 - 現時点ではサーバ側が両形式を受理している可能性があるが、互換性を断定しない。

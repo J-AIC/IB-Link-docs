@@ -786,13 +786,13 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 
 #### Base URL
 - `http://localhost:8500/iblink/v1`
-  - 既存実装では `http://localhost:8500/iblink` を base にして `/v1/documents/...` を組み立てるパターンもあります。
+  - `http://localhost:8500/iblink` を base にして `/v1/documents/...` を組み立てる構成もあります。
 
 ---
 
 #### 共通
 - Headers
-  - `Content-Type: application/json`（実装により `application/json; charset=utf-8`）
+  - `Content-Type: application/json`（`charset=utf-8` を付ける場合があります）
 
 ---
 
@@ -804,10 +804,11 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 - 一覧: POST `/documents/list`
 - 削除: DELETE `/documents/delete`
 - 情報: GET `/documents/info`
+- ヘルス: GET `/documents/health`
 
 補足
 - 本節は **`http://localhost:8500/iblink/v1` 配下の `/documents/*`** を扱います。
-- 「意味検索」を行うAPIは **DocumentsAPI（`POST /documents/search`）** と **RetrieverAPI（`POST /retriever`）** が別系統です。Dアプリ実装でどちらを採用しているかはアプリごとの参照先に合わせます。
+- DocumentsAPI（`POST /documents/search`）と RetrieverAPI（`POST /retriever`）は **別系統**です（Base URL が異なり、レスポンス形状も異なります）。
 
 ---
 
@@ -822,7 +823,8 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 #### Request / Response
 
 1) 取り込み（非同期）: POST `/documents/process`  
-必須: `d_app_id`, `project_id`  
+必須: `files` または `directories`, `d_app_id`, `project_id`  
+補足: `files` の要素は「文字列パス」または `{ file_path, enable_ocr }` を指定できます。  
 
 ```json
 {
@@ -855,10 +857,16 @@ curl -X POST http://localhost:8500/iblink/v1/documents/process \
 ```
 
 2) 状態取得: POST `/documents/status`  
-必須: `status_type`  
+（`status_type: "processing"` の例）送信フィールド: `status_type`, `job_id`, `include_files`, `d_app_id`, `project_id`  
 
 ```json
-{ "status_type": "processing", "job_id": "my-app_project-001_20250120_103000", "include_files": true }
+{
+  "status_type": "processing",
+  "d_app_id": "my-app",
+  "project_id": "project-001",
+  "job_id": "my-app_project-001_20250120_103000",
+  "include_files": true
+}
 ```
 
 呼び出し例
@@ -866,7 +874,7 @@ curl -X POST http://localhost:8500/iblink/v1/documents/process \
 ```bash
 curl -X POST http://localhost:8500/iblink/v1/documents/status \
   -H "Content-Type: application/json" \
-  -d '{"status_type":"processing","job_id":"my-app_project-001_20250120_103000","include_files":true}'
+  -d '{"status_type":"processing","d_app_id":"my-app","project_id":"project-001","job_id":"my-app_project-001_20250120_103000","include_files":true}'
 ```
 
 `status_type`
@@ -878,33 +886,35 @@ curl -X POST http://localhost:8500/iblink/v1/documents/status \
 - `jobs`: ジョブ一覧
 
 3) 検索: POST `/documents/search`  
-必須: `query`  
+送信フィールド（例）: `query`, `d_app_id`, `project_id`  
 
 ```json
 {
   "query": "検索クエリ",
+  "d_app_id": "my-app",
   "project_id": "project-001",
   "limit": 5,
   "directories": ["C:\\Documents\\manuals"],
+  "document_ids": ["550e8400-e29b-41d4-a716-446655440000"],
   "similarity_threshold": 0.7,
   "search_mode": "hybrid"
 }
 ```
 
-呼び出し例（Dアプリ実装例）
+呼び出し例
 
 ```bash
 curl -X POST http://localhost:8500/iblink/v1/documents/search \
   -H "Content-Type: application/json" \
-  -d '{"query":"検索クエリ","project_id":"project-001"}'
+  -d '{"query":"検索クエリ","d_app_id":"my-app","project_id":"project-001"}'
 ```
 
 補足
-- 既存実装では `search_mode` を送る例があります。
-- Dアプリ実装では `query` の代わりに `text` を受け取り `query` に補正する例があります（Sales）。
+- 任意: `limit` / `directories` / `document_ids` / `similarity_threshold` / `search_mode` を指定します。
+- 入力キーとして `text` を受け取る場合は、送信前に `query` へ正規化します。
 
 4) 削除: DELETE `/documents/delete`  
-必須: `d_app_id`  
+送信フィールド（例）: `d_app_id`, `project_id`, `file_paths`, `delete_all`  
 
 ```json
 {
@@ -923,7 +933,16 @@ curl -X DELETE http://localhost:8500/iblink/v1/documents/delete \
   -d '{"d_app_id":"my-app","project_id":"project-001","file_paths":["C:\\Documents\\old-doc.pdf"]}'
 ```
 
+プロジェクト全削除（`delete_all`）
+
+```bash
+curl -X DELETE http://localhost:8500/iblink/v1/documents/delete \
+  -H "Content-Type: application/json" \
+  -d '{"d_app_id":"my-app","project_id":"project-001","delete_all":true}'
+```
+
 5) 抽出（埋め込み生成なし）: POST `/documents/extract`
+送信フィールド（例）: `files`, `d_app_id`, `project_id`, `include_metadata`
 
 ```json
 {
@@ -943,6 +962,7 @@ curl -X POST http://localhost:8500/iblink/v1/documents/extract \
 ```
 
 6) 一覧: POST `/documents/list`
+送信フィールド（例）: `list_type`, `d_app_id`, `project_id`, `file_extension`
 
 ```json
 {
@@ -983,13 +1003,12 @@ RetrieverAPI は、取り込み済みドキュメント（チャンク）に対�
 
 #### Base URL
 - `http://localhost:6500/iblink/v1`
-- `http://localhost:6500/iblink/v1/retriever`
 
 ---
 
 #### 共通
 - Headers
-  - `Content-Type: application/json`
+  - `Content-Type: application/json`（JSON body を送るPOSTのみ）
 
 ---
 
@@ -999,7 +1018,7 @@ RetrieverAPI は、取り込み済みドキュメント（チャンク）に対�
 - 情報: GET `/retriever/info`
 
 補足
-- **DocumentsAPI の `POST /documents/search` と RetrieverAPI の `POST /retriever` は別系統**です。Dアプリ実装でどちらを採用しているかは、各アプリの実装に合わせます。
+- DocumentsAPI の `POST /documents/search` と RetrieverAPI の `POST /retriever` は **別系統**です（Base URL が異なり、レスポンス形状も異なります）。
 
 ---
 
@@ -1070,7 +1089,7 @@ curl http://localhost:6500/iblink/v1/retriever/info
 
 ### 4.8 AudioAPI（IB-Link経由: 7000/iblink/v1/audio/*）
 概要  
-AudioAPI は、IB-Link（Audio サービス）に対して **音声文字起こし（音声ファイル → テキスト）** と **ヘルス/システム情報取得** を行う HTTP API です。
+AudioAPI は、IB-Link（Audio サービス）に対して **音声文字起こし（音声ファイル → テキスト）** と **ヘルス/システム情報取得** を行う HTTP API です（Whisper Server のHTTP/WSは 4.9 を参照）。
 
 ---
 
@@ -1078,7 +1097,6 @@ AudioAPI は、IB-Link（Audio サービス）に対して **音声文字起こ�
 - `http://localhost:7000/iblink/v1`
 
 補足
-- `docs/api/openapi.*.yaml` の Audio tag は **`http://localhost:8000`**（`/v1/audio/*` や `/health` 等）を定義しています（= 本書では 4.9 側で扱う対象）。
 - 本節（4.8）は **7000/iblink/v1 の `/audio/*`** を扱います。
 - `http://localhost:7000/realtime`（SignalR / WebSocket）は `/audio/*` とは別系統です（本書では 4.15 側で扱います）。
 
@@ -1093,7 +1111,7 @@ AudioAPI は、IB-Link（Audio サービス）に対して **音声文字起こ�
 
 #### 代表フロー
 1. `GET /audio/health` で到達性/初期化状態を確認する
-2. `POST /audio/transcriptions` に音声ファイルを送信し、`text` を取得してUI/後段処理に渡す
+2. 必要に応じて `POST /audio/transcriptions` に音声ファイルを送信し、`text` を取得してUI/後段処理に渡す
 
 ---
 
@@ -1126,7 +1144,6 @@ Content-Type: `multipart/form-data`（`FormData` を使用）
 
 ```bash
 curl -X POST http://localhost:7000/iblink/v1/audio/transcriptions \
-  -H "Content-Type: multipart/form-data" \
   -F "file=@audio.mp3" \
   -F "model=whisper-1"
 ```
@@ -1146,7 +1163,7 @@ AudioNPUAPI は、Whisper Server（既定: `http://localhost:8000`）に対し�
 #### Base URL
 - HTTP: `http://localhost:8000`
 - WebSocket（Realtime）: `ws://127.0.0.1:8000/v1/audio/realtime`
-  - Dアプリ実装では `localhost` ではなく `127.0.0.1` を既定にする例があります（IPv6 `::1` 解決による接続失敗を避ける意図）。
+  - `localhost` が IPv6 の `::1` を解決する環境では接続に失敗することがあるため、`127.0.0.1` を用いる例があります。
 
 補足
 - 本節（4.9）は **8000系（Whisper Server + WS realtime）** を扱います。
@@ -1164,9 +1181,9 @@ AudioNPUAPI は、Whisper Server（既定: `http://localhost:8000`）に対し�
 ---
 
 #### 代表フロー
-1. `GET /health` で到達性/初期化状態を確認する（Dアプリでは `status=healthy` を待つ実装あり）
-2. リアルタイムの場合は WS `/v1/audio/realtime` に接続し、開始設定を送信してからPCM（16kHz/mono）を送信する
-3. 受信したJSONの `text` をUIへ反映する（`is_final`/`final`/`type` で確定を判定する実装あり）
+1. `GET /health` で到達性/初期化状態を確認する（`status=healthy` を待つ例があります。`whisper.status` が返る場合に `initialized` を待つ例もあります）
+2. リアルタイムの場合は WS `/v1/audio/realtime` に接続し、開始設定（JSON）を送信してからPCM（16kHz/mono）を送信する
+3. 受信したJSONの `text`（または `transcript` 等）をUIへ反映し、`type` / 確定フラグ（例: `is_final` / `final` / `phrase_complete`）で確定を判定する
 
 ---
 
@@ -1205,8 +1222,9 @@ curl -X POST http://localhost:8000/v1/audio/translations \
 5) リアルタイム（WebSocket）: WS `/v1/audio/realtime`
 
 開始設定（実装差分あり）
-- 方式A（D-Josys系）: `{"action":"start","config":{...}}`
-- 方式B（Retail系）: `{...}`（設定オブジェクトをそのまま送信）
+- 方式A: `{"action":"start","config":{...}}`
+- 方式A（別例）: `config.vad` を含める
+- 方式B: `{...}`（設定オブジェクトをそのまま送信）
 
 方式A（送信例）
 
@@ -1226,6 +1244,26 @@ curl -X POST http://localhost:8000/v1/audio/translations \
 }
 ```
 
+方式A（送信例: `config.vad`）
+
+```json
+{
+  "action": "start",
+  "config": {
+    "model": "whisper-large-v3-turbo",
+    "language": "auto",
+    "response_format": "json",
+    "sample_rate": 16000,
+    "vad": {
+      "enabled": true,
+      "energy_threshold": 0.015,
+      "silence_duration_ms": 3000,
+      "min_voice_ms": 120
+    }
+  }
+}
+```
+
 方式B（送信例）
 
 ```json
@@ -1237,14 +1275,36 @@ curl -X POST http://localhost:8000/v1/audio/translations \
 }
 ```
 
+送信
+- 開始設定の送信後、音声フレームを **バイナリ**で送信します（Int16 PCM の `ArrayBuffer` / `Uint8Array` 等）。
+
+```javascript
+// 例: Int16 PCM を送る
+const int16Pcm = new Int16Array([0, 1, -1]);
+ws.send(int16Pcm.buffer);
+```
+
 受信
-- `payload.text` を表示テキストとして扱う
-- 確定判定は `payload.is_final === true` または `payload.final === true`、または `payload.type === "final"` を使う実装があります（D-Josys）
-- `payload.type === "transcription"` を見る実装があります（Retail）
+- `payload.text` / `payload.transcript` / `payload.full_text` 等を表示テキストとして扱う実装があります
+- `payload.type`（例: `partial` / `final` / `transcription`）を見て分岐する実装があります
+- 確定判定は `payload.is_final === true` / `payload.final === true` / `payload.phrase_complete === true`、または `payload.type === "final"` を使う実装があります
+
+受信例
+
+```json
+{ "type": "partial", "text": "こん", "is_final": false }
+```
+
+```json
+{ "type": "final", "text": "こんにちは", "is_final": true }
+```
 
 ### 4.10 EmbeddingsAPI
 概要  
 EmbeddingsAPI は、テキスト入力から **埋め込みベクトル（embeddings）**を生成するHTTP APIです。
+
+補足
+- 現行のDアプリ実装では、本API（`http://localhost:5000/iblink/v1`）の **直接呼び出しは確認できていません**。
 
 ---
 
@@ -1255,7 +1315,7 @@ EmbeddingsAPI は、テキスト入力から **埋め込みベクトル（embedd
 
 #### 共通
 - Headers
-  - `Content-Type: application/json`
+  - `Content-Type: application/json`（JSON body を送るPOSTのみ）
 
 ---
 
@@ -1295,6 +1355,12 @@ curl http://localhost:5000/iblink/v1/models/all-MiniLM-L6-v2
 ```
 
 4) 埋め込み生成（単発）: POST `/embeddings`
+
+送信フィールド（例）
+- `input`: string または string[]
+- `model`: string
+- `encoding_format`: string（例: `float`）
+- `dimensions`: number
 
 ```bash
 curl -X POST http://localhost:5000/iblink/v1/embeddings \
@@ -1345,7 +1411,7 @@ LlamaServerAPI は、`llama-server.exe`（llama.cpp）を **起動/停止/状態
 
 補足
 - `GET /health` は `http://localhost:9000/health`（Base URL 直下）です。
-- `POST /start` / `POST /switch-model` のレスポンスには `endpoint: "http://localhost:{port}/v1"` が含まれます（`/v1/*`）。この `/v1/*` は本章の対象外です（4.13 側で扱います）。
+- `POST /start` / `POST /switch-model` のレスポンスには `endpoint: "http://localhost:{port}/v1"` が含まれます（例: `http://localhost:8080/v1`）。この `/v1/*` は本章の対象外です（4.13 側で扱います）。
 
 ---
 
@@ -1418,7 +1484,8 @@ curl -X POST http://localhost:9000/iblink/v1/llama-server/start \
   -H "Content-Type: application/json" \
   -d '{
     "model_path": "C:\\Models\\model.gguf",
-    "port": 8080
+    "port": 8080,
+    "options": {}
   }'
 ```
 
@@ -1591,19 +1658,55 @@ FoundryLocalAPI は、FoundryLocal のローカル推論サーバを **起動/�
 curl http://localhost:9500/iblink/v1/foundry-local/health
 ```
 
-2) モデル一覧: GET `/models`
+2) 状態: GET `/status`
+
+```bash
+curl http://localhost:9500/iblink/v1/foundry-local/status
+```
+
+3) モデル一覧: GET `/models`
 
 ```bash
 curl http://localhost:9500/iblink/v1/foundry-local/models
 ```
 
-3) ダウンロード: POST `/models/{modelName}/download`
+4) ダウンロード済み一覧: GET `/models/downloaded`
+
+```bash
+curl http://localhost:9500/iblink/v1/foundry-local/models/downloaded
+```
+
+5) ロード済み一覧: GET `/models/loaded`
+
+```bash
+curl http://localhost:9500/iblink/v1/foundry-local/models/loaded
+```
+
+6) ダウンロード: POST `/models/{modelName}/download`
 
 ```bash
 curl -X POST "http://localhost:9500/iblink/v1/foundry-local/models/Qwen2.5-0.5B-Instruct-Q8_0-GGUF/download"
 ```
 
-4) 起動: POST `/start`
+7) ダウンロード（SSE）: POST `/models/{modelName}/download-stream`
+
+```bash
+curl -N -X POST "http://localhost:9500/iblink/v1/foundry-local/models/Qwen2.5-0.5B-Instruct-Q8_0-GGUF/download-stream"
+```
+
+8) 全アンロード: POST `/models/unload-all`
+
+```bash
+curl -X POST http://localhost:9500/iblink/v1/foundry-local/models/unload-all
+```
+
+9) 削除: DELETE `/models/{modelName}`
+
+```bash
+curl -X DELETE "http://localhost:9500/iblink/v1/foundry-local/models/Qwen2.5-0.5B-Instruct-Q8_0-GGUF"
+```
+
+10) 起動: POST `/start`
 
 ```bash
 curl -X POST http://localhost:9500/iblink/v1/foundry-local/start \
@@ -1611,19 +1714,15 @@ curl -X POST http://localhost:9500/iblink/v1/foundry-local/start \
   -d '{"model_name":"Qwen2.5-0.5B-Instruct-Q8_0-GGUF"}'
 ```
 
-5) 状態: GET `/status`
+11) 起動（SSE）: POST `/start-stream`
 
 ```bash
-curl http://localhost:9500/iblink/v1/foundry-local/status
+curl -N -X POST http://localhost:9500/iblink/v1/foundry-local/start-stream \
+  -H "Content-Type: application/json" \
+  -d '{"model_name":"Qwen2.5-0.5B-Instruct-Q8_0-GGUF"}'
 ```
 
-6) 停止: POST `/stop`
-
-```bash
-curl -X POST http://localhost:9500/iblink/v1/foundry-local/stop
-```
-
-7) モデル切替: POST `/switch-model`
+12) モデル切替: POST `/switch-model`
 
 ```bash
 curl -X POST http://localhost:9500/iblink/v1/foundry-local/switch-model \
@@ -1631,7 +1730,37 @@ curl -X POST http://localhost:9500/iblink/v1/foundry-local/switch-model \
   -d '{"model_name":"Qwen2.5-3B-Instruct-Q4_K_M-GGUF"}'
 ```
 
----
+13) 停止: POST `/stop`
+
+```bash
+curl -X POST http://localhost:9500/iblink/v1/foundry-local/stop
+```
+
+14) 情報: GET `/info`
+
+```bash
+curl http://localhost:9500/iblink/v1/foundry-local/info
+```
+
+15) 設定更新: POST `/config`
+
+```bash
+curl -X POST http://localhost:9500/iblink/v1/foundry-local/config \
+  -H "Content-Type: application/json" \
+  -d '{"models_directory":"D:\\AI\\Models"}'
+```
+
+16) ログ取得: GET `/logs`
+
+```bash
+curl "http://localhost:9500/iblink/v1/foundry-local/logs?count=50"
+```
+
+17) ログ配信（SSE）: GET `/logs/stream`
+
+```bash
+curl -N http://localhost:9500/iblink/v1/foundry-local/logs/stream
+```
 
 ---
 
@@ -1649,6 +1778,7 @@ curl -X POST http://localhost:9500/iblink/v1/foundry-local/switch-model \
 補足
 - `.../iblink/v1` 配下のAPI（Documents/Retriever/各管理API）とは **別系統**です。
 - 管理API（4.11/4.12）の `POST /start` レスポンスに含まれる `endpoint` が、この推論Base URLになります。
+- `api_key` がある場合は、推論リクエストで `Authorization: Bearer {api_key}` を送る実装があります。
 
 ---
 
@@ -1659,9 +1789,9 @@ curl -X POST http://localhost:9500/iblink/v1/foundry-local/switch-model \
 ---
 
 #### 代表フロー
-1. `GET /v1/models` で到達性/起動完了を確認する（D-Josys / Medical）
+1. `GET /v1/models` で到達性/起動完了を確認する
 2. `POST /v1/chat/completions` に `messages` を送信する
-3. `stream:true` の場合は、SSE（`data: {json}\n` / `data: [DONE]\n`）を行単位で処理する（Retail）
+3. `stream:true` の場合は、SSE（`data: {json}\n` / `data: [DONE]\n`）を行単位で処理する
 
 ---
 
@@ -1679,6 +1809,7 @@ curl http://localhost:8080/v1/models
 curl -X POST http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
+    "model": "localmodel",
     "messages": [
       { "role": "system", "content": "あなたはアシスタントです。" },
       { "role": "user", "content": "返答をどうぞ。" }
@@ -1694,6 +1825,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 curl -X POST http://localhost:8080/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{
+    "model": "localmodel",
     "messages": [{ "role": "user", "content": "Hello!" }],
     "stream": true
   }' \
@@ -1701,7 +1833,19 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 ```
 
 補足
-- `503` かつ本文に `Loading model` を含む場合に、待機して再試行する実装があります（D-Josys）。
+- `503` かつ本文に `Loading model` を含む場合に、待機して再試行する実装があります。
+
+4) チャット補完（`api_key` を送る例）: POST `/chat/completions`
+
+```bash
+curl -X POST http://127.0.0.1:1234/v1/chat/completions \
+  -H "Authorization: Bearer fl-YourApiKey123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "Qwen/Qwen2.5-0.5B-Instruct-Q8_0-GGUF",
+    "messages": [{ "role": "user", "content": "Hello!" }]
+  }'
+```
 
 ---
 
@@ -1728,9 +1872,9 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 #### 代表フロー
 1. `GET /api/whisperserver/status` で起動済みか確認する
-2. `POST /api/whisperserver/start` で起動する（必要に応じて `model` / `port` 等を指定）
+2. `POST /api/whisperserver/start` で起動する（必要に応じて `model` / `port` / `host` / `detached` を指定）
 3. `GET /api/whisperserver/health` で健全性を確認する
-4. `POST /api/whisperserver/stop` で停止する（Dアプリ側で **startedByApp** を条件に「自分が起動したものだけ止める」安全策あり）
+4. `POST /api/whisperserver/stop` で停止する（誤停止を避けるため「自分が起動したものだけ止める」等の安全策を入れる実装があります）
 
 ---
 
@@ -1744,14 +1888,12 @@ curl "http://127.0.0.1:7100/api/whisperserver/logs?lines=200"
 
 curl -X POST http://127.0.0.1:7100/api/whisperserver/start \
   -H "Content-Type: application/json" \
-  -d '{"model":"base"}'
+  -d '{"model":"base","port":8000,"host":"127.0.0.1","detached":true}'
 
 curl -X POST http://127.0.0.1:7100/api/whisperserver/stop \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
-
----
 
 ---
 
@@ -1769,8 +1911,8 @@ curl -X POST http://127.0.0.1:7100/api/whisperserver/stop \
 
 #### 代表フロー
 1. `http://localhost:7000/realtime`（`/realtime`）へWebSocket接続する
-2. 受信イベント（例: `TranscriptionResult` 等）を購読し、`text` と `isFinal` をUIへ反映する
-3. `UpdateSettings` を呼び、`SendAudio` でPCMのバイト列を送信する（実装で観測）
+2. 受信イベント（例: `TranscriptionResult` 等）を購読し、`text` と完了フラグ（例: `phrase_complete` / `is_final` / `final`）をUIへ反映する
+3. `UpdateSettings` を呼び、`SendAudio` でPCMのバイト列（`Array<number>`）を送信する（実装で観測）。必要に応じて `FlushAudio` を呼ぶ
 
 ---
 
@@ -1785,9 +1927,14 @@ const conn = new signalR.HubConnectionBuilder()
   .build();
 
 conn.on('TranscriptionResult', (payload) => console.log(payload));
+conn.on('Connected', (payload) => console.log(payload));
 await conn.start();
-await conn.invoke('UpdateSettings', { chunkDurationMs: 2000, enableVAD: true });
-// 音声フレームは conn.invoke('SendAudio', byteArray) の形で送信する実装が存在
+await conn.invoke('UpdateSettings', { chunkDurationMs: 2000, language: null, returnFinalOnly: false, enableVAD: true });
+// 音声フレーム: Int16 PCM -> Uint8Array -> Array<number>
+const byteArray = new Uint8Array(int16Pcm.buffer);
+await conn.invoke('SendAudio', Array.from(byteArray));
+// 終了時（必要に応じて）
+await conn.invoke('FlushAudio');
 ```
 
 到達性確認（HTTP）
@@ -1795,19 +1942,6 @@ await conn.invoke('UpdateSettings', { chunkDurationMs: 2000, enableVAD: true });
 ```bash
 curl http://localhost:7000/iblink/v1/audio/health
 ```
-
----
-
----
-
-### 4.16 8500/iblink/v1/chat/completions
-概要  
-本節は、Dアプリ実装に **`http://localhost:8500/iblink/v1/chat/completions` を組み立てて呼び出す実装**が存在するため、経路として補足記録します。
-
----
-
-#### Base URL / Path
-- `http://localhost:8500/iblink/v1/chat/completions`
 
 ---
 
