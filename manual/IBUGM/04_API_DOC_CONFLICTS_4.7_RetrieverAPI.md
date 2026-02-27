@@ -36,6 +36,21 @@
 
 ---
 
+## CONFLICT-03: `/retriever/test` の一次仕様（apidocsに記載、OpenAPIに未定義）
+
+- **apidocs**
+  - `GET /retriever/test` の例が存在（`manual/apidocs/RetrieverAPI_Usage_Examples.md`）
+- **OpenAPI**
+  - `paths` に `/retriever/test` が存在しない（`docs/api/openapi.*.yaml`）
+- **Dアプリ実装**
+  - 現時点の抽出範囲では直接呼び出し未検出
+
+**判断**:
+- マニュアル側では「apidocsのみの補足（OpenAPI未収録）」として扱う。
+- 仕様化する場合は OpenAPI 側へ `/retriever/test` を追加する。
+
+---
+
 ## 更新履歴
 - 2026-02-27: 初版作成（RetrieverAPIの章リライトに伴う差分整理）
 

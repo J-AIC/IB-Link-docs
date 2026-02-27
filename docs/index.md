@@ -837,6 +837,14 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 }
 ```
 
+呼び出し例（apidocs）
+
+```bash
+curl -X POST http://localhost:8500/iblink/v1/documents/process \
+  -H "Content-Type: application/json" \
+  -d '{"files":["C:\\Documents\\report.pdf"],"d_app_id":"my-app","project_id":"project-001"}'
+```
+
 レスポンス（例: 202）
 
 ```json
@@ -852,6 +860,14 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 
 ```json
 { "status_type": "processing", "job_id": "my-app_project-001_20250120_103000", "include_files": true }
+```
+
+呼び出し例（apidocs）
+
+```bash
+curl -X POST http://localhost:8500/iblink/v1/documents/status \
+  -H "Content-Type: application/json" \
+  -d '{"status_type":"processing","job_id":"my-app_project-001_20250120_103000","include_files":true}'
 ```
 
 `status_type`（OpenAPI）
@@ -876,6 +892,14 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 }
 ```
 
+呼び出し例（Dアプリ実装例）
+
+```bash
+curl -X POST http://localhost:8500/iblink/v1/documents/search \
+  -H "Content-Type: application/json" \
+  -d '{"query":"検索クエリ","project_id":"project-001"}'
+```
+
 補足（実装差分）
 - 既存実装では `search_mode` を送る例があります（OpenAPI ではフィールド未定義）。
 - Dアプリ実装では `query` の代わりに `text` を受け取り `query` に補正する例があります（Sales）。
@@ -890,6 +914,64 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
   "file_paths": ["C:\\Documents\\old-doc.pdf"],
   "delete_all": false
 }
+```
+
+呼び出し例（apidocs）
+
+```bash
+curl -X DELETE http://localhost:8500/iblink/v1/documents/delete \
+  -H "Content-Type: application/json" \
+  -d '{"d_app_id":"my-app","project_id":"project-001","file_paths":["C:\\Documents\\old-doc.pdf"]}'
+```
+
+5) 抽出（埋め込み生成なし）: POST `/documents/extract`
+
+```json
+{
+  "d_app_id": "my-app",
+  "project_id": "project-001",
+  "files": ["C:\\Documents\\report.pdf"],
+  "include_metadata": true
+}
+```
+
+呼び出し例（apidocs）
+
+```bash
+curl -X POST http://localhost:8500/iblink/v1/documents/extract \
+  -H "Content-Type: application/json" \
+  -d '{"files":["C:\\Documents\\report.pdf"],"d_app_id":"my-app","project_id":"project-001"}'
+```
+
+6) 一覧: POST `/documents/list`
+
+```json
+{
+  "list_type": "documents",
+  "d_app_id": "my-app",
+  "project_id": "project-001",
+  "file_extension": ".pdf"
+}
+```
+
+呼び出し例（apidocs）
+
+```bash
+curl -X POST http://localhost:8500/iblink/v1/documents/list \
+  -H "Content-Type: application/json" \
+  -d '{"list_type":"documents","d_app_id":"my-app","project_id":"project-001"}'
+```
+
+7) 情報: GET `/documents/info`
+
+```bash
+curl http://localhost:8500/iblink/v1/documents/info
+```
+
+8) ヘルス（apidocsのみ）: GET `/documents/health`
+
+```bash
+curl http://localhost:8500/iblink/v1/documents/health
 ```
 
 ---
@@ -932,6 +1014,7 @@ RetrieverAPI は、取り込み済みドキュメント（チャンク）に対�
 - 検索: POST `/retriever`
 - ヘルス: GET `/retriever/health`
 - 情報: GET `/retriever/info`
+  - 補足（apidocsのみ）: GET `/retriever/test`（OpenAPI未定義、Dアプリ実装でも未検出）
 
 補足（混線防止）
 - **DocumentsAPI の `POST /documents/search` と RetrieverAPI の `POST /retriever` は別系統**です。Dアプリ実装でどちらを採用しているかは、各アプリの実装（参照先）に合わせます。
@@ -961,6 +1044,14 @@ RetrieverAPI は、取り込み済みドキュメント（チャンク）に対�
 }
 ```
 
+呼び出し例（apidocs）
+
+```bash
+curl -X POST http://localhost:6500/iblink/v1/retriever \
+  -H "Content-Type: application/json" \
+  -d '{"text":"検索クエリ","d_app_id":"app-123","project_id":"proj-456","limit":10,"search_mode":"vector"}'
+```
+
 レスポンス（例）
 
 ```json
@@ -988,6 +1079,17 @@ RetrieverAPI は、取り込み済みドキュメント（チャンク）に対�
 2) ヘルス: GET `/retriever/health`  
 3) 情報: GET `/retriever/info`
 
+```bash
+curl http://localhost:6500/iblink/v1/retriever/health
+curl http://localhost:6500/iblink/v1/retriever/info
+```
+
+4) テスト（apidocsのみ）: GET `/retriever/test`
+
+```bash
+curl http://localhost:6500/iblink/v1/retriever/test
+```
+
 ---
 
 #### 既存実装例（参照先）
@@ -1001,315 +1103,296 @@ RetrieverAPI は、取り込み済みドキュメント（チャンク）に対�
 ---
 
 ### 4.8 AudioAPI（IB-Link経由: 7000/iblink/v1/audio/*）
-（この節は `manual/apidocs/AudioAPI_Usage_Examples.md` と `docs/api/openapi.*.yaml`（Audio tag）に合わせて、後続ステップで内容を移行する）
+概要  
+AudioAPI は、IB-Link（Audio サービス）に対して **音声文字起こし（音声ファイル → テキスト）** と **ヘルス/システム情報取得** を行う HTTP API です。
+
+---
+
+#### Base URL
+- `http://localhost:7000/iblink/v1`
+
+補足（混線防止）
+- `docs/api/openapi.*.yaml` の Audio tag は **`http://localhost:8000`**（`/v1/audio/*` や `/health` 等）を定義しています（= 本書では 4.9 側で扱う対象）。
+- 本節（4.8）は **7000/iblink/v1 の `/audio/*`** を扱います。
+- `http://localhost:7000/realtime`（SignalR Hub）は `/audio/*` とは別系統です（本書では「第4章後半（名称未定）Audio Hub / Realtime Hub」側で扱います）。
+
+---
+
+#### Endpoints（apidocs）
+- 文字起こし: POST `/audio/transcriptions`（`multipart/form-data`）
+- ヘルス: GET `/audio/health`
+- システム情報: GET `/audio/system/info`
+
+---
+
+#### 代表フロー（Dアプリ側の実装観点）
+1. `GET /audio/health` で到達性/初期化状態を確認する
+2. `POST /audio/transcriptions` に音声ファイルを送信し、`text` を取得してUI/後段処理に渡す
+
+---
+
+#### Request / Response（最小の実装参照）
+
+1) ヘルス: GET `/audio/health`
+
+```json
+{ "status": "healthy" }
+```
+
+呼び出し例（apidocs）
+
+```bash
+curl http://localhost:7000/iblink/v1/audio/health
+```
+
+2) 文字起こし: POST `/audio/transcriptions`  
+Content-Type: `multipart/form-data`（`FormData` を使用）
+- 必須: `file`
+- 例（apidocs）: `model=whisper-1`
+
+レスポンス（例）
+
+```json
+{ "text": "This is the transcribed text from the audio file." }
+```
+
+呼び出し例（apidocs）
+
+```bash
+curl -X POST http://localhost:7000/iblink/v1/audio/transcriptions \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@audio.mp3" \
+  -F "model=whisper-1"
+```
+
+3) システム情報: GET `/audio/system/info`
+
+```bash
+curl http://localhost:7000/iblink/v1/audio/system/info
+```
+
+---
+
+#### 既存実装例（参照先）
+- Retail
+  - `manual/Dapp/d-retail/src/D-Retail/multilingual_service/multilingual.constants.js`
+    - `AUDIO_HEALTH_URL = 'http://localhost:7000/iblink/v1/audio/health'`（ヘルスURLの定数化）
 
 ---
 
 ### 4.9 AudioNPUAPI（Whisper Server + Realtime: 8000 + WS）
-概要
-Audio API Server は、OpenAI 互換の⾳声⽂字起こし（Transcription）API を提供し、リアルタイムストリーミング機能を備えたサーバーです。Snapdragon NPU による⾼速化をサポートしつつ、CPU フォールバックにも対応しています。  
-
-注意点
-- 動作確認はCopilot PCに搭載されているマイクで行っております。
-- IB-Linkで録音、文字起こしを行っているため、フロントエンド側でのマイク入力は不要です。
-
-ベースURL
-`http://localhost:8000`
-
-認証
-デフォルトでは認証は不要です。 API キー認証を有効にするには、.env ファイルに API_KEY を設定します。
-
-エンドポイント
-
-1. ヘルスチェック
-   - GET `/health`
-   - サーバーが稼働しているかを確認します。
-   - レスポンス例
-
-```json
-{ "status": "healthy", "timestamp": "2025-01-08T12:00:00Z" }
-```
-
-2. サーバーステータス
-   - GET `/status`
-   - サーバーの詳細な稼働状況と設定を取得します。
-   - レスポンス例
-
-```json
-{
-  "status": "running",
-  "uptime": 3600,
-  "total_requests": 150,
-  "active_connections": 2,
-  "config": {
-    "model": "whisper-large-v3-turbo",
-    "npu_enabled": true,
-    "target_runtime": "qnn_dlc"
-  }
-}
-```
-
-3. ⾳声⽂字起こし（OpenAI 互換）
-   - POST `/v1/audio/transcriptions`
-   - ⾳声をテキストに変換します。
-   - Content-Type: `multipart/form-data`
-   - 主なパラメータ: `file`(必須), `model`, `language`, `response_format`, `prompt`, `temperature`
-   - リクエスト例
-
-```bash
-curl -X POST http://localhost:8000/v1/audio/transcriptions \
-  -F "file=@audio.wav" \
-  -F "model=whisper-large-v3-turbo" \
-  -F "response_format=verbose_json"
-```
-
-   - レスポンス例（verbose_json）
-
-```json
-{
-  "task": "transcribe",
-  "language": "en",
-  "duration": 30.0,
-  "text": "This is the transcribed text...",
-  "segments": [
-    {
-      "id": 0,
-      "seek": 0,
-      "start": 0.0,
-      "end": 5.0,
-      "text": "This is the transcribed text",
-      "tokens": [50364, 1668, 307, 264, 1145, 17820, 2078],
-      "temperature": 0.0,
-      "avg_logprob": -0.25,
-      "compression_ratio": 1.2,
-      "no_speech_prob": 0.01
-    }
-  ]
-}
-```
-
-   - レスポンス例（json）
-
-```json
-{ "text": "This is the transcribed text..." }
-```
-
-   - レスポンス例（text）
-
-```
-This is the transcribed text...
-```
-
-4. ⾳声翻訳
-   - POST `/v1/audio/translations`
-   - ⾳声を英語テキストに翻訳します（リクエスト/レスポンスは⾳声⽂字起こしと同様、結果が英語）。
-
-5. WebSocket ストリーミング
-   - WS `/v1/audio/stream`
-   - リアルタイムで⾳声をストリーミングしながら⽂字起こしします。
-   - 接続例
-
-```javascript
-const ws = new WebSocket('ws://localhost:8000/v1/audio/stream');
-
-ws.onopen = () => {
-  ws.send(JSON.stringify({
-    model: 'whisper-large-v3-turbo',
-    language: 'auto',
-    response_format: 'json'
-  }));
-  streamAudioChunks(ws);
-};
-
-ws.onmessage = (event) => {
-  const result = JSON.parse(event.data);
-  console.log('Transcription:', result.text);
-};
-```
-
-プロトコル
-- 1) 設定を送信（JSON）
-
-```json
-{ "model": "whisper-large-v3-turbo", "language": "auto", "response_format": "json" }
-```
-
-- 2) ⾳声データを送信（バイナリ: 16kHz/16bit/モノラル PCM またはファイルチャンク）
-- 3) 結果を受信（JSON）
-  - 部分結果（partial）
-
-```json
-{ "type": "partial", "text": "This is being transcribed", "timestamp": 1704715200, "segment_id": 0 }
-```
-
-  - 最終結果（final）
-
-```json
-{ "type": "final", "text": "This is being transcribed in real time.", "timestamp": 1704715205, "segment_id": 0, "segments": [] }
-```
-
-6. リアルタイム⾳声⼊⼒（マイク）
-   - WS `/v1/audio/realtime`
-   - マイク⼊⼒からリアルタイムで⽂字起こしします。
-   - 接続時の設定
-      - model: 文字起こしに使用するモデル
-      - language: 何語として文字起こしを行うかの設定、autoの場合は自動判別を行う
-      - response_format: 期待するレスポンスの形式
-      - vad_enabled: 発話区間を検出するかどうか
-      - energy_threshold: 音声と認識する音声の大きさ
-      - record_timeout: 一度に文字起こしする音声の秒数
-      - phrase_timeout: 一つのフレーズとして確定するまでの無音検知秒数
-
-```json
-{
-  "action": "start",
-  "config": {
-      "model": "whisper-large-v3-turbo",
-      "language": "auto",
-      "response_format": "json",
-      "sample_rate": 16000,
-      "vad_enabled": true,
-      "energy_threshold": 1000,
-      "record_timeout": 2.0,
-      "phrase_timeout": 1.0
-      }
-}
-```
-
-   - 制御コマンド
-
-```json
-{ "action": "pause" }
-{ "action": "resume" }
-{ "action": "stop" }
-```
-
-   - 結果の受信
-
-```json
-{ "type": "transcription", "text": "Hello, this is real-time transcription", "is_final": true, "confidence": 0.95, "timestamp": 1704715200 }
-```
+概要  
+AudioNPUAPI は、Whisper Server（既定: `http://localhost:8000`）に対して **音声文字起こし（HTTP）** と **リアルタイム文字起こし（WebSocket）** を行うためのAPIです。Dアプリは、本節のフローと既存実装（参照先）に合わせて呼び出します。
 
 ---
 
-エラーレスポンス形式
+#### Base URL
+- HTTP: `http://localhost:8000`
+- WebSocket（Realtime）: `ws://127.0.0.1:8000/v1/audio/realtime`
+  - Dアプリ実装では `localhost` ではなく `127.0.0.1` を既定にする例があります（IPv6 `::1` 解決による接続失敗を避ける意図）。
 
-```json
-{ "error": { "message": "エラー説明", "type": "error_type", "code": "ERROR_CODE" } }
-```
+補足（混線防止）
+- 本節（4.9）は **8000系（Whisper Server + WS realtime）** を扱います。
+- 7100（`/api/whisperserver/*` の起動/停止/状態）は **別系統（名称未定：音声“管理”エンドポイント）**です。
 
-⼀般的なエラーコード
-- INVALID_AUDIO（400）: 無効または破損した⾳声ファイル
-- FILE_TOO_LARGE（413）: ファイルサイズが上限を超過
-- UNSUPPORTED_FORMAT（415）: ⾮対応の⾳声形式
-- MODEL_NOT_FOUND（404）: 指定モデルが存在しない
-- NPU_ERROR（500）: NPU 処理失敗（CPU フォールバックあり）
-- TIMEOUT（408）: リクエストタイムアウト
+---
 
-レート制限
-- デフォルト（変更可能）: 1分あたり 100 リクエスト / IP、同時接続 10 / IP、最⼤ファイルサイズ 100MB
+#### Endpoints（OpenAPI / apidocs）
+- ヘルス: GET `/health`
+- ステータス: GET `/status`
+- 文字起こし（音声ファイル）: POST `/v1/audio/transcriptions`（`multipart/form-data`）
+- 翻訳（音声ファイル→英語）: POST `/v1/audio/translations`（`multipart/form-data`）
+- リアルタイム（WebSocket）: WS `/v1/audio/realtime`
 
-レスポンスフォーマット
-SRT 形式
+---
 
-```
-1
-00:00:00,000 --> 00:00:05,000
-This is the first subtitle.
+#### 代表フロー（Dアプリ側の実装観点）
+1. `GET /health` で到達性/初期化状態を確認する（Dアプリでは `status=healthy` を待つ実装あり）
+2. リアルタイムの場合は WS `/v1/audio/realtime` に接続し、開始設定を送信してからPCM（16kHz/mono）を送信する
+3. 受信したJSONの `text` をUIへ反映する（`is_final`/`final`/`type` で確定を判定する実装あり）
 
-2
-00:00:05,000 --> 00:00:10,000
-This is the second subtitle.
-```
+---
 
-VTT 形式
+#### Request / Response（最小の実装参照）
 
-```
-WEBVTT
-
-00:00:00.000 --> 00:00:05.000
-This is the first subtitle.
-
-00:00:05.000 --> 00:00:10.000
-This is the second subtitle.
-```
-
-クライアント実装例
-
-```python
-# Python
-import requests
-
-with open("audio.wav", "rb") as f:
-    response = requests.post(
-        "http://localhost:8000/v1/audio/transcriptions",
-        files={"file": f},
-        data={
-            "model": "whisper-large-v3-turbo",
-            }
-    )
-    print(response.json()["text"])
-```
-
-```javascript
-# JavaScript / Node.js
-const FormData = require('form-data');
-const fs = require('fs');
-const axios = require('axios');
-
-const form = new FormData();
-form.append('file', fs.createReadStream('audio.wav'));
-form.append('model', 'whisper-large-v3-turbo');
-
-axios.post('http://localhost:8000/v1/audio/transcriptions', form)
-  .then(response => console.log(response.data.text));
-```
+1) ヘルス: GET `/health`
 
 ```bash
-# cURL
+curl http://localhost:8000/health
+```
+
+2) ステータス: GET `/status`
+
+```bash
+curl http://localhost:8000/status
+```
+
+3) 文字起こし（音声ファイル）: POST `/v1/audio/transcriptions`
+
+```bash
 curl -X POST http://localhost:8000/v1/audio/transcriptions \
-  -H "Content-Type: multipart/form-data" \
   -F "file=@audio.wav" \
   -F "model=whisper-large-v3-turbo" \
   -F "response_format=json"
 ```
 
+4) 翻訳（音声ファイル→英語）: POST `/v1/audio/translations`
+
+```bash
+curl -X POST http://localhost:8000/v1/audio/translations \
+  -F "file=@audio.wav" \
+  -F "model=whisper-large-v3-turbo" \
+  -F "response_format=json"
+```
+
+5) リアルタイム（WebSocket）: WS `/v1/audio/realtime`
+
+開始設定（実装差分あり）
+- 方式A（D-Josys系）: `{"action":"start","config":{...}}`
+- 方式B（Retail系）: `{...}`（設定オブジェクトをそのまま送信）
+
+方式A（送信例）
+
+```json
+{
+  "action": "start",
+  "config": {
+    "model": "whisper-large-v3-turbo",
+    "language": "auto",
+    "response_format": "json",
+    "sample_rate": 16000,
+    "vad_enabled": true,
+    "energy_threshold": 1000,
+    "record_timeout": 2.0,
+    "phrase_timeout": 1.0
+  }
+}
+```
+
+方式B（送信例）
+
+```json
+{
+  "language": "auto",
+  "energy_threshold": 1000,
+  "record_timeout": 2.0,
+  "phrase_timeout": 1.0
+}
+```
+
+受信（Dアプリ実装での扱い）
+- `payload.text` を表示テキストとして扱う
+- 確定判定は `payload.is_final === true` または `payload.final === true`、または `payload.type === "final"` を使う実装があります（D-Josys）
+- `payload.type === "transcription"` を見る実装があります（Retail）
+
 ---
 
-パフォーマンス向上のヒント
-- NPU 加速を利⽤すると 5〜10倍⾼速化
-- ⻑い⾳声は 30 秒ごとに分割すると最適化可能
-- VAD（Voice Activity Detection）を有効化して無⾳部分をスキップ
-- 精度設定の最適化︓NPU では `w8a8`、CPU では `float32`
-- 単⼀ワーカープロセスで NPU の競合を回避
-- ストリーミングを活⽤してリアルタイム⽤途に最適化
-
-OpenAI 互換性
-- この API は OpenAI の Whisper API と互換性があり、既存のクライアントを簡単に置き換えることができます。
-
-```python
-# OpenAI クライアント（従来）
-from openai import OpenAI
-client = OpenAI(api_key="...")
-transcription = client.audio.transcriptions.create(
-  model="whisper-1",
-  file=audio_file
-)
-```
-
-```python
-# この API を利⽤する場合
-from openai import OpenAI
-client = OpenAI(api_key="not-needed", base_url="http://localhost:8000/v1")
-transcription = client.audio.transcriptions.create(
-  model="whisper-large-v3-turbo",
-  file=audio_file
-)
-```
-
+#### 既存実装例（参照先）
+- D-Josys
+  - `manual/Dapp/d-josys/src/assets/js/voice/PARealtimeTranscriptionClient.js`（WS `/v1/audio/realtime`。`action:start` 形式、`is_final` 判定）
+- Sales
+  - `manual/Dapp/d-sales/src/assets/js/voiceSettingsModal.js`（WS URL から `http://{host}/health` を導出して健全性待機）
+  - `manual/Dapp/d-sales/src/role_playing/js/PARealtimeTranscriptionClient.js`（WS `/v1/audio/realtime`）
+- Retail
+  - `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/audio_config.js`（既定WS URL）
+  - `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/AudioRealtimeClient.js`（WS `/v1/audio/realtime`。設定オブジェクト送信、`type:"transcription"` を処理）
+- Medical
+  - `manual/Dapp/d-medical/assets/js/voice/RealtimeAudioClient.js`（WS `/v1/audio/realtime`。partial/final を扱う）
 
 ### 4.10 EmbeddingsAPI
-（この節は `manual/apidocs/EmbeddingsAPI_Usage_Examples.md` に合わせて、後続ステップで内容を移行する）
+概要  
+EmbeddingsAPI は、テキスト入力から **埋め込みベクトル（embeddings）**を生成するHTTP APIです。本節は `manual/apidocs/EmbeddingsAPI_Usage_Examples.md` を一次情報として、フロントエンドが直接呼ぶ場合の最小手順をまとめます。
+
+---
+
+#### Base URL
+- `http://localhost:5000/iblink/v1`
+
+---
+
+#### 共通
+- Headers
+  - `Content-Type: application/json`
+
+---
+
+#### Endpoints（apidocs）
+- 埋め込み生成: POST `/embeddings`
+- モデル一覧: GET `/models`
+- モデル情報: GET `/models/{modelId}`
+- ヘルス: GET `/embeddings/health`
+
+補足（一次仕様）
+- `docs/api/openapi.*.yaml` には EmbeddingsAPI は定義されません（本節は apidocs を一次情報として扱います）。
+
+---
+
+#### 代表フロー（フロントエンド側の実装観点）
+1. `GET /embeddings/health` で到達性を確認する
+2. `GET /models` で利用可能な `model` を選ぶ
+3. `POST /embeddings` に `input` と `model` を送信し、`data[].embedding` を取得する
+
+---
+
+#### Request / Response（最小の実装参照）
+
+1) ヘルス: GET `/embeddings/health`
+
+```bash
+curl http://localhost:5000/iblink/v1/embeddings/health
+```
+
+2) モデル一覧: GET `/models`
+
+```bash
+curl http://localhost:5000/iblink/v1/models
+```
+
+3) モデル情報: GET `/models/{modelId}`
+
+```bash
+curl http://localhost:5000/iblink/v1/models/all-MiniLM-L6-v2
+```
+
+4) 埋め込み生成（単発）: POST `/embeddings`
+
+```bash
+curl -X POST http://localhost:5000/iblink/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": "The quick brown fox jumps over the lazy dog",
+    "model": "all-MiniLM-L6-v2"
+  }'
+```
+
+レスポンス（例）
+
+```json
+{
+  "object": "list",
+  "data": [
+    { "object": "embedding", "embedding": [0.023064375, -0.009327292], "index": 0 }
+  ],
+  "model": "all-MiniLM-L6-v2",
+  "usage": { "prompt_tokens": 12, "total_tokens": 12 }
+}
+```
+
+5) 埋め込み生成（バッチ）: POST `/embeddings`
+
+```bash
+curl -X POST http://localhost:5000/iblink/v1/embeddings \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": ["text-1", "text-2"],
+    "model": "all-MiniLM-L6-v2"
+  }'
+```
+
+---
+
+#### 既存実装例（参照先）
+- 現時点のDアプリ実装コードでは `http://localhost:5000/iblink/v1` を **直接呼ぶ箇所は未検出**です（バックエンド構成上の間接依存になっている可能性があります）。
 
 ---
 
