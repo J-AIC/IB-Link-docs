@@ -780,7 +780,7 @@ Filter API で対象を絞り、Changes Only をオンにして差分だけを�
 
 ### 4.6 DocumentsAPI
 概要  
-DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュメント取り込み（非同期）/状態取得/検索/抽出/一覧/削除** を行う HTTP API です。Dアプリ（フロントエンド）は、本節のフローと既存実装（参照先）に合わせて呼び出します。
+DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュメント取り込み（非同期）/状態取得/検索/抽出/一覧/削除** を行う HTTP API です。
 
 ---
 
@@ -796,7 +796,7 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 
 ---
 
-#### Endpoints（OpenAPI / apidocs）
+#### Endpoints
 - 取り込み（非同期）: POST `/documents/process`
 - 状態取得: POST `/documents/status`
 - 検索: POST `/documents/search`
@@ -805,10 +805,9 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 - 削除: DELETE `/documents/delete`
 - 情報: GET `/documents/info`
 
-補足（混線防止）
+補足
 - 本節は **`http://localhost:8500/iblink/v1` 配下の `/documents/*`** を扱います。
 - 「意味検索」を行うAPIは **DocumentsAPI（`POST /documents/search`）** と **RetrieverAPI（`POST /retriever`）** が別系統です。Dアプリ実装でどちらを採用しているかはアプリごとの参照先に合わせます。
-- `manual/apidocs` には `GET /documents/health` の例が存在しますが、`docs/api/openapi.*.yaml` には定義がありません（採用する場合はOpenAPI側に追記して仕様化します）。
 
 ---
 
@@ -823,7 +822,7 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 #### Request / Response（最小の実装参照）
 
 1) 取り込み（非同期）: POST `/documents/process`  
-必須: `d_app_id`, `project_id`（OpenAPI）  
+必須: `d_app_id`, `project_id`  
 
 ```json
 {
@@ -837,7 +836,7 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 }
 ```
 
-呼び出し例（apidocs）
+呼び出し例
 
 ```bash
 curl -X POST http://localhost:8500/iblink/v1/documents/process \
@@ -856,13 +855,13 @@ curl -X POST http://localhost:8500/iblink/v1/documents/process \
 ```
 
 2) 状態取得: POST `/documents/status`  
-必須: `status_type`（OpenAPI）  
+必須: `status_type`  
 
 ```json
 { "status_type": "processing", "job_id": "my-app_project-001_20250120_103000", "include_files": true }
 ```
 
-呼び出し例（apidocs）
+呼び出し例
 
 ```bash
 curl -X POST http://localhost:8500/iblink/v1/documents/status \
@@ -870,7 +869,7 @@ curl -X POST http://localhost:8500/iblink/v1/documents/status \
   -d '{"status_type":"processing","job_id":"my-app_project-001_20250120_103000","include_files":true}'
 ```
 
-`status_type`（OpenAPI）
+`status_type`
 - `processing`: ジョブ進捗
 - `queue`: キュー状態
 - `quota`: 使用量
@@ -879,7 +878,7 @@ curl -X POST http://localhost:8500/iblink/v1/documents/status \
 - `jobs`: ジョブ一覧
 
 3) 検索: POST `/documents/search`  
-必須: `query`（OpenAPI）  
+必須: `query`  
 
 ```json
 {
@@ -901,11 +900,11 @@ curl -X POST http://localhost:8500/iblink/v1/documents/search \
 ```
 
 補足（実装差分）
-- 既存実装では `search_mode` を送る例があります（OpenAPI ではフィールド未定義）。
+- 既存実装では `search_mode` を送る例があります。
 - Dアプリ実装では `query` の代わりに `text` を受け取り `query` に補正する例があります（Sales）。
 
 4) 削除: DELETE `/documents/delete`  
-必須: `d_app_id`（OpenAPI）  
+必須: `d_app_id`  
 
 ```json
 {
@@ -916,7 +915,7 @@ curl -X POST http://localhost:8500/iblink/v1/documents/search \
 }
 ```
 
-呼び出し例（apidocs）
+呼び出し例
 
 ```bash
 curl -X DELETE http://localhost:8500/iblink/v1/documents/delete \
@@ -935,7 +934,7 @@ curl -X DELETE http://localhost:8500/iblink/v1/documents/delete \
 }
 ```
 
-呼び出し例（apidocs）
+呼び出し例
 
 ```bash
 curl -X POST http://localhost:8500/iblink/v1/documents/extract \
@@ -954,7 +953,7 @@ curl -X POST http://localhost:8500/iblink/v1/documents/extract \
 }
 ```
 
-呼び出し例（apidocs）
+呼び出し例
 
 ```bash
 curl -X POST http://localhost:8500/iblink/v1/documents/list \
@@ -968,25 +967,11 @@ curl -X POST http://localhost:8500/iblink/v1/documents/list \
 curl http://localhost:8500/iblink/v1/documents/info
 ```
 
-8) ヘルス（apidocsのみ）: GET `/documents/health`
+8) ヘルス: GET `/documents/health`
 
 ```bash
 curl http://localhost:8500/iblink/v1/documents/health
 ```
-
----
-
-#### 既存実装例（参照先）
-- D-Josys
-  - `manual/Dapp/d-josys/src/api/IBLinkClient.js`（`/documents/{process,status,search,extract,list,delete}` をラップ）
-  - `manual/Dapp/d-josys/src/assets/js/apiClient.js`（`POST /v1/documents/search` を直接呼ぶ）
-- Sales
-  - `manual/Dapp/d-sales/src/api/IBLinkClient.js`（`/documents/*` ラップ。`text`→`query` 補正・固定パラメータ付与の例あり）
-  - `manual/Dapp/d-sales/src/preload.js`（`window.iblinkProcessDocuments` が `POST /documents/process` を直接呼ぶ。`duplicate_strategy:"sync"`）
-- Retail
-  - `manual/Dapp/d-retail/src/main.js`（Main 側で `POST /v1/documents/process`、`POST /v1/documents/search`、`DELETE /v1/documents/delete` を中継。`project_id` ゼロUUID補正、`file_path`/`file_paths` 正規化）
-- Medical
-  - 現時点の実装コードでは DocumentsAPI 呼び出しは未検出
 
 ---
 
@@ -998,9 +983,7 @@ RetrieverAPI は、取り込み済みドキュメント（チャンク）に対�
 
 #### Base URL
 - `http://localhost:6500/iblink/v1`
-  - OpenAPI はこのBase URLに対して `/retriever` を呼びます。
 - `http://localhost:6500/iblink/v1/retriever`
-  - `manual/apidocs` のUsage Examplesは、このURLを「Base URL」として例示しています（`POST` は同URL、`GET` は `/health` や `/info` を付与）。
 
 ---
 
@@ -1010,14 +993,13 @@ RetrieverAPI は、取り込み済みドキュメント（チャンク）に対�
 
 ---
 
-#### Endpoints（OpenAPI / apidocs）
+#### Endpoints
 - 検索: POST `/retriever`
 - ヘルス: GET `/retriever/health`
 - 情報: GET `/retriever/info`
-  - 補足（apidocsのみ）: GET `/retriever/test`（OpenAPI未定義、Dアプリ実装でも未検出）
 
-補足（混線防止）
-- **DocumentsAPI の `POST /documents/search` と RetrieverAPI の `POST /retriever` は別系統**です。Dアプリ実装でどちらを採用しているかは、各アプリの実装（参照先）に合わせます。
+補足
+- **DocumentsAPI の `POST /documents/search` と RetrieverAPI の `POST /retriever` は別系統**です。Dアプリ実装でどちらを採用しているかは、各アプリの実装に合わせます。
 
 ---
 
@@ -1030,7 +1012,7 @@ RetrieverAPI は、取り込み済みドキュメント（チャンク）に対�
 #### Request / Response（最小の実装参照）
 
 1) 検索: POST `/retriever`  
-必須: `text`（OpenAPI）  
+必須: `text`  
 
 ```json
 {
@@ -1044,7 +1026,7 @@ RetrieverAPI は、取り込み済みドキュメント（チャンク）に対�
 }
 ```
 
-呼び出し例（apidocs）
+呼び出し例
 
 ```bash
 curl -X POST http://localhost:6500/iblink/v1/retriever \
@@ -1084,22 +1066,6 @@ curl http://localhost:6500/iblink/v1/retriever/health
 curl http://localhost:6500/iblink/v1/retriever/info
 ```
 
-4) テスト（apidocsのみ）: GET `/retriever/test`
-
-```bash
-curl http://localhost:6500/iblink/v1/retriever/test
-```
-
----
-
-#### 既存実装例（参照先）
-- D-Josys
-  - `manual/Dapp/d-josys/src/index.js`（Main側 `iblink:documentRetriever` は **無効化（501）**。DocumentsAPI の `searchDocuments`（`POST /documents/search`）を使用する方針）
-- Sales
-  - `manual/Dapp/d-sales/src/Tasks/cf/renderer.js`（検証用UI: `POST ${apiUrl}/iblink/v1/retriever`。`text`/`search_mode`/`files_directories`/`documents_id` を送信）
-- Retail / Medical
-  - 現時点の実装コードでは RetrieverAPI 呼び出しは未検出
-
 ---
 
 ### 4.8 AudioAPI（IB-Link経由: 7000/iblink/v1/audio/*）
@@ -1111,14 +1077,14 @@ AudioAPI は、IB-Link（Audio サービス）に対して **音声文字起こ�
 #### Base URL
 - `http://localhost:7000/iblink/v1`
 
-補足（混線防止）
+補足
 - `docs/api/openapi.*.yaml` の Audio tag は **`http://localhost:8000`**（`/v1/audio/*` や `/health` 等）を定義しています（= 本書では 4.9 側で扱う対象）。
 - 本節（4.8）は **7000/iblink/v1 の `/audio/*`** を扱います。
 - `http://localhost:7000/realtime`（SignalR / WebSocket）は `/audio/*` とは別系統です（本書では 4.15 側で扱います）。
 
 ---
 
-#### Endpoints（apidocs）
+#### Endpoints
 - 文字起こし: POST `/audio/transcriptions`（`multipart/form-data`）
 - ヘルス: GET `/audio/health`
 - システム情報: GET `/audio/system/info`
@@ -1139,7 +1105,7 @@ AudioAPI は、IB-Link（Audio サービス）に対して **音声文字起こ�
 { "status": "healthy" }
 ```
 
-呼び出し例（apidocs）
+呼び出し例
 
 ```bash
 curl http://localhost:7000/iblink/v1/audio/health
@@ -1148,7 +1114,7 @@ curl http://localhost:7000/iblink/v1/audio/health
 2) 文字起こし: POST `/audio/transcriptions`  
 Content-Type: `multipart/form-data`（`FormData` を使用）
 - 必須: `file`
-- 例（apidocs）: `model=whisper-1`
+- 例: `model=whisper-1`
 
 レスポンス（例）
 
@@ -1156,7 +1122,7 @@ Content-Type: `multipart/form-data`（`FormData` を使用）
 { "text": "This is the transcribed text from the audio file." }
 ```
 
-呼び出し例（apidocs）
+呼び出し例
 
 ```bash
 curl -X POST http://localhost:7000/iblink/v1/audio/transcriptions \
@@ -1171,18 +1137,9 @@ curl -X POST http://localhost:7000/iblink/v1/audio/transcriptions \
 curl http://localhost:7000/iblink/v1/audio/system/info
 ```
 
----
-
-#### 既存実装例（参照先）
-- Retail
-  - `manual/Dapp/d-retail/src/D-Retail/multilingual_service/multilingual.constants.js`
-    - `AUDIO_HEALTH_URL = 'http://localhost:7000/iblink/v1/audio/health'`（ヘルスURLの定数化）
-
----
-
 ### 4.9 AudioNPUAPI（Whisper Server + Realtime: 8000 + WS）
 概要  
-AudioNPUAPI は、Whisper Server（既定: `http://localhost:8000`）に対して **音声文字起こし（HTTP）** と **リアルタイム文字起こし（WebSocket）** を行うためのAPIです。Dアプリは、本節のフローと既存実装（参照先）に合わせて呼び出します。
+AudioNPUAPI は、Whisper Server（既定: `http://localhost:8000`）に対して **音声文字起こし（HTTP）** と **リアルタイム文字起こし（WebSocket）** を行うためのAPIです。
 
 ---
 
@@ -1191,13 +1148,13 @@ AudioNPUAPI は、Whisper Server（既定: `http://localhost:8000`）に対し�
 - WebSocket（Realtime）: `ws://127.0.0.1:8000/v1/audio/realtime`
   - Dアプリ実装では `localhost` ではなく `127.0.0.1` を既定にする例があります（IPv6 `::1` 解決による接続失敗を避ける意図）。
 
-補足（混線防止）
+補足
 - 本節（4.9）は **8000系（Whisper Server + WS realtime）** を扱います。
 - 7100（`/api/whisperserver/*` の起動/停止/状態）は **別系統（4.14）**です。
 
 ---
 
-#### Endpoints（OpenAPI / apidocs）
+#### Endpoints
 - ヘルス: GET `/health`
 - ステータス: GET `/status`
 - 文字起こし（音声ファイル）: POST `/v1/audio/transcriptions`（`multipart/form-data`）
@@ -1280,28 +1237,14 @@ curl -X POST http://localhost:8000/v1/audio/translations \
 }
 ```
 
-受信（Dアプリ実装での扱い）
+受信（最小）
 - `payload.text` を表示テキストとして扱う
 - 確定判定は `payload.is_final === true` または `payload.final === true`、または `payload.type === "final"` を使う実装があります（D-Josys）
 - `payload.type === "transcription"` を見る実装があります（Retail）
 
----
-
-#### 既存実装例（参照先）
-- D-Josys
-  - `manual/Dapp/d-josys/src/assets/js/voice/PARealtimeTranscriptionClient.js`（WS `/v1/audio/realtime`。`action:start` 形式、`is_final` 判定）
-- Sales
-  - `manual/Dapp/d-sales/src/assets/js/voiceSettingsModal.js`（WS URL から `http://{host}/health` を導出して健全性待機）
-  - `manual/Dapp/d-sales/src/role_playing/js/PARealtimeTranscriptionClient.js`（WS `/v1/audio/realtime`）
-- Retail
-  - `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/audio_config.js`（既定WS URL）
-  - `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/AudioRealtimeClient.js`（WS `/v1/audio/realtime`。設定オブジェクト送信、`type:"transcription"` を処理）
-- Medical
-  - `manual/Dapp/d-medical/assets/js/voice/RealtimeAudioClient.js`（WS `/v1/audio/realtime`。partial/final を扱う）
-
 ### 4.10 EmbeddingsAPI
 概要  
-EmbeddingsAPI は、テキスト入力から **埋め込みベクトル（embeddings）**を生成するHTTP APIです。本節は `manual/apidocs/EmbeddingsAPI_Usage_Examples.md` を一次情報として、フロントエンドが直接呼ぶ場合の最小手順をまとめます。
+EmbeddingsAPI は、テキスト入力から **埋め込みベクトル（embeddings）**を生成するHTTP APIです。
 
 ---
 
@@ -1316,14 +1259,11 @@ EmbeddingsAPI は、テキスト入力から **埋め込みベクトル（embedd
 
 ---
 
-#### Endpoints（apidocs）
+#### Endpoints
 - 埋め込み生成: POST `/embeddings`
 - モデル一覧: GET `/models`
 - モデル情報: GET `/models/{modelId}`
 - ヘルス: GET `/embeddings/health`
-
-補足（一次仕様）
-- `docs/api/openapi.*.yaml` には EmbeddingsAPI は定義されません（本節は apidocs を一次情報として扱います）。
 
 ---
 
@@ -1391,11 +1331,6 @@ curl -X POST http://localhost:5000/iblink/v1/embeddings \
 
 ---
 
-#### 既存実装例（参照先）
-- 現時点のDアプリ実装コードでは `http://localhost:5000/iblink/v1` を **直接呼ぶ箇所は未検出**です（バックエンド構成上の間接依存になっている可能性があります）。
-
----
-
 ### 4.11 LlamaServerAPI（推論サーバ管理）
 
 ---
@@ -1408,7 +1343,7 @@ LlamaServerAPI は、`llama-server.exe`（llama.cpp）を **起動/停止/状態
 #### Base URL
 - `http://localhost:9000/iblink/v1/llama-server`
 
-補足（混線防止）
+補足
 - `GET /health` は `http://localhost:9000/health`（Base URL 直下）です。
 - `POST /start` / `POST /switch-model` のレスポンスには `endpoint: "http://localhost:{port}/v1"` が含まれます（`/v1/*`）。この `/v1/*` は本章の対象外です（4.13 側で扱います）。
 
@@ -1420,7 +1355,7 @@ LlamaServerAPI は、`llama-server.exe`（llama.cpp）を **起動/停止/状態
 
 ---
 
-#### Endpoints（apidocs）
+#### Endpoints
 - Server Management
   - 起動: POST `/start`
   - 停止: POST `/stop`
@@ -1445,9 +1380,6 @@ LlamaServerAPI は、`llama-server.exe`（llama.cpp）を **起動/停止/状態
   - ログ取得: GET `/logs`（query: `lines`, `level`）
   - ログ配信（SSE）: GET `/logs/stream`
   - APIヘルス: GET `http://localhost:9000/health`
-
-補足（一次仕様）
-- `docs/api/openapi.*.yaml` には LlamaServerAPI は定義されません（本節は apidocs を一次情報として扱います）。
 
 ---
 
@@ -1595,11 +1527,6 @@ curl -N http://localhost:9000/iblink/v1/llama-server/logs/stream
 
 ---
 
-#### 既存実装例（参照先）
-- 現時点のDアプリ実装コードでは `http://localhost:9000/iblink/v1/llama-server` を **直接呼ぶ箇所は未検出**です（採用する場合は本節の呼び出し例に合わせます）。
-
----
-
 ### 4.12 FoundryLocalAPI（Foundry Local 管理）
 概要  
 FoundryLocalAPI は、FoundryLocal のローカル推論サーバを **起動/停止/状態確認/モデル切替**するためのHTTP APIです。加えて、モデルの列挙/ダウンロード/削除、ログ取得（SSE）、ヘルス確認を提供します。
@@ -1609,7 +1536,7 @@ FoundryLocalAPI は、FoundryLocal のローカル推論サーバを **起動/�
 #### Base URL
 - `http://localhost:9500/iblink/v1/foundry-local`
 
-補足（混線防止）
+補足
 - `POST /start` / `POST /switch-model` のレスポンスには `endpoint: "http://127.0.0.1:{port}/v1"` と `api_key` が含まれます（`/v1/*`）。この `/v1/*` は本章の対象外です（4.13 側で扱います）。
 - モデル一覧: `GET http://localhost:9500/v1/models`（Base URL 直下ではありません。詳細は 4.13 側で扱います）
 
@@ -1621,7 +1548,7 @@ FoundryLocalAPI は、FoundryLocal のローカル推論サーバを **起動/�
 
 ---
 
-#### Endpoints（apidocs）
+#### Endpoints
 - Server Management
   - 起動: POST `/start`
   - 起動（SSE）: POST `/start-stream`
@@ -1644,9 +1571,6 @@ FoundryLocalAPI は、FoundryLocal のローカル推論サーバを **起動/�
   - ログ配信（SSE）: GET `/logs/stream`
 - Health
   - ヘルス: GET `/health`
-
-補足（一次仕様）
-- `docs/api/openapi.*.yaml` には FoundryLocalAPI は定義されません（本節は apidocs を一次情報として扱います）。
 
 ---
 
@@ -1709,12 +1633,6 @@ curl -X POST http://localhost:9500/iblink/v1/foundry-local/switch-model \
 
 ---
 
-#### 既存実装例（参照先）
-- D-Josys / Sales / Retail
-  - `manual/Dapp/*/src/utils/LLMResourceManager.js`
-    - `foundryLocalApi.apiBaseUrl = "http://localhost:9500/iblink/v1/foundry-local"` が **設定項目として存在**
-    - `normalizePolicy()` が `llm.mode = "llamaServerApi"` に固定しており、FoundryLocalAPI を実運用で使う経路は未確定（案Bの注記に合わせる）
-
 ---
 
 ### 4.13 LLM推論エンドポイント（`/v1/chat/completions`）
@@ -1728,14 +1646,13 @@ curl -X POST http://localhost:9500/iblink/v1/foundry-local/switch-model \
   - Dアプリ既定の例: `http://localhost:8080/v1`
 - FoundryLocal の起動レスポンスが返す例: `http://127.0.0.1:{port}/v1`（`api_key` を伴う）
 
-補足（混線防止）
+補足
 - `.../iblink/v1` 配下のAPI（Documents/Retriever/各管理API）とは **別系統**です。
 - 管理API（4.11/4.12）の `POST /start` レスポンスに含まれる `endpoint` が、この推論Base URLになります。
-- **OpenAPI** は `docs/api/openapi.*.yaml` のような「API仕様書（YAML）」を指します（用語が近いため混同しない）。
 
 ---
 
-#### Endpoints（Dアプリ実装で観測）
+#### Endpoints
 - モデル一覧: GET `/models`
 - チャット補完: POST `/chat/completions`
 
@@ -1783,7 +1700,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
   -N
 ```
 
-補足（実装での例外扱い）
+補足
 - `503` かつ本文に `Loading model` を含む場合に、待機して再試行する実装があります（D-Josys）。
 
 ---
@@ -1799,7 +1716,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 ---
 
-#### Endpoints（Dアプリ実装で観測）
+#### Endpoints
 - 状態: GET `/api/whisperserver/status`
 - ヘルス: GET `/api/whisperserver/health`
 - 情報: GET `/api/whisperserver/info`
@@ -1836,12 +1753,6 @@ curl -X POST http://127.0.0.1:7100/api/whisperserver/stop \
 
 ---
 
-#### 既存実装例（参照先）
-- Retail
-  - `manual/Dapp/d-retail/src/utils/VoiceResourceManager.js`（7100系のHTTP呼び出し、startedByApp安全策）
-- Sales
-  - `manual/Dapp/d-sales/src/assets/js/voiceSettingsModal.js`（`ws_voice_mgmt_api_url` に既定 `http://127.0.0.1:7100` を保存）
-
 ---
 
 ### 4.15 7000/realtime（SignalR / WebSocket）
@@ -1850,7 +1761,7 @@ curl -X POST http://127.0.0.1:7100/api/whisperserver/stop \
 
 ---
 
-#### URL / 関連URL（Dアプリ実装で観測）
+#### URL / 関連URL
 - `http://localhost:7000/realtime`（SignalR / WebSocket）
 - ヘルス（HTTP）: `http://localhost:7000/iblink/v1/audio/health`
 
@@ -1887,12 +1798,6 @@ curl http://localhost:7000/iblink/v1/audio/health
 
 ---
 
-#### 既存実装例（参照先）
-- D-Josys
-  - `manual/Dapp/d-josys/src/assets/js/voice/RealtimeTranscriptionClient.js`（`/realtime` へ接続、`UpdateSettings` / `SendAudio`）
-- Retail
-  - `manual/Dapp/d-retail/src/D-Retail/multilingual_service/multilingual.constants.js`（`AUDIO_HUB_URL` / `AUDIO_HEALTH_URL` の定数化）
-
 ---
 
 ### 4.16 （補足）8500/iblink/v1/chat/completions
@@ -1901,18 +1806,8 @@ curl http://localhost:7000/iblink/v1/audio/health
 
 ---
 
-#### Base URL / Path（Dアプリ実装で観測）
+#### Base URL / Path
 - `http://localhost:8500/iblink/v1/chat/completions`
-
-補足（一次仕様）
-- OpenAPI / `manual/apidocs` に一次仕様として定義がありません（採用可否は未確定）。
-
----
-
-#### 既存実装例（参照先）
-- D-Josys
-  - `manual/Dapp/d-josys/src/api/IBLinkClient.js`
-    - `baseURL = "http://localhost:8500/iblink"` + `version="v1"` + `chatCompletion()` が `POST /chat/completions` を呼び出す（= 8500/iblink/v1/chat/completions）
 
 ---
 
