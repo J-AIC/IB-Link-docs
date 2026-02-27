@@ -82,7 +82,7 @@
 #### 実装根拠から確定している事実（後工程で本文に残す/揃えるポイント）
 - Dアプリ実装では **WebSocket realtime**（例: `ws://127.0.0.1:8000/v1/audio/realtime`）を利用する実装が存在する（D-Josys / Sales / Retail / Medicalで観測）。
 - 同時に、Dアプリ側には **音声“管理API”**（既定 `http://127.0.0.1:7100`）を前提にした `voiceManager` / `VoiceResourceManager` が存在する（= 8000のAudio APIとは別系統で、現行4.9の説明と混線しやすい）。
-- Retailでは **Audio Hub / Realtime Hub**（例: `http://localhost:7000/realtime`, `http://localhost:7000/iblink/v1/audio/health`）も定数化されており、これも 8000/7100 と別系統。
+- Retailでは **7000/realtime（SignalR / WebSocket）**（例: `http://localhost:7000/realtime`, `http://localhost:7000/iblink/v1/audio/health`）も定数化されており、これも 8000/7100 と別系統。
 
 ### 4.10 モデル切り替え API（`docs/index.md` L1656〜）
 - **マーケティング/設計思想の記述が中心で“実装参考”として過剰**
@@ -149,7 +149,7 @@
 
 ### 実装で観測された追加カテゴリ候補（※4.6〜4.10の範囲外として扱うか要検討）
 - **Voice 管理API（7100）**: `http://127.0.0.1:7100`（音声サーバ管理・起動停止等）
-- **Audio Hub / Realtime Hub（7000）**: `http://localhost:7000/realtime` 等（Retail側で定数化）
+- **7000/realtime（SignalR / WebSocket）**: `http://localhost:7000/realtime` 等（Retail側で定数化）
 - **Foundry Local API（9500）**: `http://localhost:9500/iblink/v1/foundry-local`（LLM系の別バックエンド）
 
 > 上記は「4.6〜4.10を削ぎ落として事実化する」作業の中で、4.99（競合一覧）または別章（将来）として切り出す判断を行う。

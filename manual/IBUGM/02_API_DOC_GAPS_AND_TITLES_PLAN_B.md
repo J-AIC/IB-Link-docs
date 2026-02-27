@@ -10,9 +10,9 @@
 ### 公式名称を優先する
 - `manual/apidocs/*.md` の先頭見出し（例: `# DocumentsAPI - Usage Examples`）に存在する名称は **公式名称**として扱う。
 
-### 公式名称が存在しない場合は「名称未定」として扱う（勝手に命名しない）
+### 公式名称が存在しない場合の扱い（勝手に命名しない）
 - OpenAPI / `manual/apidocs` / Dアプリ実装内に **API名として明示されていない**ものは、章タイトルで “API名っぽく” 命名しない。
-- その場合は **「名称未定（観測されるエンドポイント: ...）」**の形式で記載し、**第4章の後半（追加/補足）へ集約**する。
+- その場合は **「観測されるエンドポイント: ...」**の形式で記載し、**第4章の後半（追加/補足）へ集約**する。
 
 ---
 
@@ -20,7 +20,7 @@
 
 ### `docs/api/openapi.(ja|en).yaml` の対象
 - OpenAPI は **Documents / Retriever / Audio（8000系）**のみを統合した仕様。
-- **LLM推論（/v1/chat/completions）・モデル管理（LlamaServer/FoundryLocal）・Embeddings（5000）・音声管理（7100）・Audio Hub（7000）**は OpenAPI の対象外。
+- **LLM推論（/v1/chat/completions）・モデル管理（LlamaServer/FoundryLocal）・Embeddings（5000）・音声管理（7100）・7000/realtime（SignalR / WebSocket）**は OpenAPI の対象外。
 
 根拠: `docs/api/openapi.ja.yaml` の `info.description` / `tags` / `paths`。
 
@@ -86,7 +86,7 @@
   - `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/audio_config.js`（既定 `ws://127.0.0.1:8000/v1/audio/realtime` を設定）
   - `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/AudioRealtimeClient.js`（`ws://127.0.0.1:8000/v1/audio/realtime` へWebSocket接続し、PCMをバイナリ送信）
   - `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/AudioServerMicClient.js`（`ws://127.0.0.1:8000/v1/audio/realtime` へWebSocket接続。録音は行わずサーバマイク前提）
-  - 併存: `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/RealtimeTranscriptionClient.js`（`http://localhost:7000/realtime` のSignalR Hubを利用）
+  - 併存: `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/RealtimeTranscriptionClient.js`（`http://localhost:7000/realtime`（SignalR / WebSocket）を利用）
 
 ### EmbeddingsAPI（`manual/apidocs/EmbeddingsAPI_Usage_Examples.md`）
 - **Dアプリ実装から `http://localhost:5000/iblink/v1` を直接呼ぶ箇所は未検出**
@@ -111,10 +111,10 @@
 - **Retriever（`http://localhost:6500/iblink/v1/retriever`）**
 - **Audio（7000系）**
   - AudioAPI（`http://localhost:7000/iblink/v1/audio/*`）
-  - Audio Hub（`http://localhost:7000/realtime`）※SignalR Hub（音声イベント/文字起こし）
+  - 7000/realtime（`http://localhost:7000/realtime`）（SignalR / WebSocket）
 - **Whisper/Realtime（8000系）**: `ws://127.0.0.1:8000/v1/audio/realtime`（PCM送信）/ `http://{derived}/health` 等
 - **音声管理（7100系）**: `http://127.0.0.1:7100/api/whisperserver/*`（start/stop/status…）
-- **LLM推論（OpenAI互換 `/v1`）**: `http://localhost:{port}/v1/*`（models/chat-completions）
+- **LLM推論（`/v1`）**: `http://localhost:{port}/v1/*`（models/chat-completions）
 - **推論サーバ管理**
   - LlamaServerAPI（`http://localhost:9000/iblink/v1/llama-server`）
   - FoundryLocalAPI（`http://localhost:9500/iblink/v1/foundry-local`）
@@ -122,7 +122,7 @@
 ### 判定
 - **案B（公式ドキュメント）だけではMECEにならない**
   - 7000/realtime（Hub）と 7100 管理API が `manual/apidocs` に一次情報として存在しない/一致しないため。
-- **案B＋「第4章後半（名称未定）」をセットにすると、Dアプリ観測範囲ではMECEに近づく**
+- **案B＋（4.13〜4.16）をセットにすると、Dアプリ観測範囲ではMECEに近づく**
   - 境界は「Base URL + Path」で識別可能で、相互に重複しない。
   - 例外（未確定/運用判断が必要）: `FoundryLocalAPI` は設定項目として登場するが、通常経路では無効化されている実装がある。
 
@@ -132,17 +132,17 @@
 
 > “不足”の定義: **Dアプリ実装で使用が観測される**、または章立て上の混同が必ず起きるのに、`docs/api/openapi.*.yaml` と `manual/apidocs` のいずれにも **単独で一次情報として置けるページが存在しない**状態。
 
-### GAP-01: 名称未定（LLM推論エンドポイント: OpenAI互換 `/v1/chat/completions`）
+### GAP-01: LLM推論エンドポイント（`/v1/chat/completions`）
 - **対象**: `http://localhost:{port}/v1/models` / `http://localhost:{port}/v1/chat/completions`
 - **Dアプリ実装での使用**: D-Josys / Sales / Retail / Medical の各 `src` で利用（`manual/IBUGM/01_DAPP_API_USAGE_MAP.md` の Chat 行が根拠）。
 - **なぜ不足か**
   - OpenAPI に Chat が存在しない。
   - `manual/apidocs` には **推論エンドポイント単独の Usage Examples が存在しない**（FoundryLocal の “OpenAI Compatibility” と、LlamaServer の “start後 endpoint が /v1” が断片として存在するのみ）。
 - **新設候補（例）**
-  - `manual/apidocs/(名称未定)_ChatCompletions_Usage_Examples.md`（※ファイル名/見出しは“正式名称が確定してから”確定する）
+  - `manual/apidocs/(仮)_ChatCompletions_Usage_Examples.md`（※ファイル名/見出しは“正式名称が確定してから”確定する）
   - 収録範囲は最小（Base URL、/v1/models、/v1/chat/completions、messages、stream=SSE、代表レスポンス抽出）に限定。
 
-### GAP-02: 名称未定（音声“管理”エンドポイント: 7100）
+### GAP-02: 音声“管理”エンドポイント（7100）
 - **対象**: `http://127.0.0.1:7100`（音声サーバの起動/停止/状態など）
 - **Dアプリ実装での使用**
   - Sales: `manual/Dapp/d-sales/src/assets/js/voiceSettingsModal.js`（既定 `mgmtUrl: 'http://127.0.0.1:7100'`）
@@ -152,9 +152,9 @@
   - OpenAPI に 7100 の管理APIは存在しない。
   - `manual/apidocs/AudioNPUAPI_Usage_Examples.md` は 8000（Whisper Server）中心で、Dアプリ実装が叩いている `7100/api/whisperserver/*`（起動/停止/状態）の仕様を代表しない。
 - **新設候補（例）**
-  - `manual/apidocs/(名称未定)_Voice_Management_Usage_Examples.md`（※正式名称が確定してから）
+  - `manual/apidocs/(仮)_Voice_Management_Usage_Examples.md`（※正式名称が確定してから）
 
-### GAP-03: 名称未定（Audio Hub / Realtime Hub: 7000）
+### GAP-03: 7000/realtime（SignalR / WebSocket）
 - **対象**: `http://localhost:7000/realtime` / `http://localhost:7000/iblink/v1/audio/health`
 - **Dアプリ実装での使用**:
   - Retail: `multilingual.constants.js` に `AUDIO_HUB_URL` / `AUDIO_HEALTH_URL` が定数化
@@ -163,9 +163,9 @@
 - **なぜ不足か**
   - `manual/apidocs/AudioAPI_Usage_Examples.md` は 7000/iblink/v1/audio/* を説明するが、**Dアプリが参照している 7000/realtime の位置づけが章立てとして別物**になりやすい（“Hub” と “API” が混線する）。
 - **新設候補（例）**
-  - `manual/apidocs/(名称未定)_AudioHub_Usage_Examples.md`（※正式名称が確定してから）
+  - `manual/apidocs/(仮)_SignalR_Hub_Usage_Examples.md`（※正式名称が確定してから）
 
-### GAP-04: “IB-Link経由 Chat”（8500/iblink/v1/chat/completions）の扱い
+### GAP-04: 8500/iblink/v1/chat/completions（補足経路）の扱い
 - **対象**: `http://localhost:8500/iblink/v1/chat/completions`（D-Josys の `IBLinkClient` の baseURL設定次第で到達する可能性）
 - **Dアプリ実装での状況**: 実装上は到達可能な構造がある（`manual/IBUGM/01_DAPP_API_USAGE_MAP.md` の Chat 行に記載）。
 - **なぜ不足か**
@@ -177,7 +177,7 @@
 
 ---
 
-## 章立て案B（`manual/apidocs` と 1:1 対応）— 公式名称のみを本体に置き、名称未定は後半へ集約する
+## 章立て案B（`manual/apidocs` と 1:1 対応）— 公式名称のみを本体に置き、未定義分は後半へ集約する
 
 > 目的: “章タイトル＝バックエンドのサービス単位”に揃え、OpenAPI・apidocs・Dアプリ実装境界の不一致を最小化する。
 
@@ -211,13 +211,13 @@
 
 ---
 
-## 第4章後半（追加/補足）に集約する項目（公式名称なし＝名称未定）
+## 第4章後半（追加/補足）に集約する項目（公式名称なし）
 
 > ここに集約することで、「存在しないAPI名を勝手に付けた」状態を避ける。
 
-### （名称未定）LLM推論エンドポイント（OpenAI互換 `/v1/chat/completions`）
+### 4.13 LLM推論エンドポイント（`/v1/chat/completions`）
 - GAP-01 に対応。
-- 章見出しは「名称未定」で固定し、**URL/パス**で識別する。
+- 見出しは **URL/パス**で識別する。
 - **Dアプリ実装での利用箇所（実行コード）**
   - **D-Josys**
     - `manual/Dapp/d-josys/src/assets/js/apiClient.js`（`GET /v1/models` → `POST /v1/chat/completions`、SSE/503待機）
@@ -234,14 +234,14 @@
   - **Medical**
     - `manual/Dapp/d-medical/assets/js/apiClient.js`（`GET /v1/models` → `POST /v1/chat/completions`、`report_metadata` 付与）
 
-### （名称未定）音声“管理”エンドポイント（7100）
+### 4.14 音声“管理”エンドポイント（7100）
 - GAP-02 に対応。
 - **Dアプリ実装での利用箇所（実行コード）**
   - Sales: `manual/Dapp/d-sales/src/assets/js/voiceSettingsModal.js`（既定 `http://127.0.0.1:7100`）
   - Retail: `manual/Dapp/d-retail/src/utils/VoiceResourceManager.js`（`/api/whisperserver/*`）
   - Medical: `manual/Dapp/d-medical/assets/js/voice/voiceSettingsModal.js`（既定 `http://127.0.0.1:7100`）
 
-### （名称未定）Audio Hub / Realtime Hub（7000/realtime 等）
+### 4.15 7000/realtime（SignalR / WebSocket）
 - GAP-03 に対応。
 - **Dアプリ実装での利用箇所（実行コード）**
   - D-Josys: `manual/Dapp/d-josys/src/assets/js/voice/RealtimeTranscriptionClient.js`（SignalR: `http://localhost:7000/realtime`）
@@ -250,7 +250,7 @@
   - Retail: `manual/Dapp/d-retail/src/D-Retail/assets/js/voice/RealtimeTranscriptionClient.js`（SignalR: `http://localhost:7000/realtime`）
   - Retail: `manual/Dapp/d-retail/src/D-Retail/multilingual_service/multilingual.constants.js`（`http://localhost:7000/realtime` / `http://localhost:7000/iblink/v1/audio/health`）
 
-### （補足）“IB-Link経由 Chat”（8500/iblink/v1/chat/completions）
+### 4.16 （補足）8500/iblink/v1/chat/completions
 - GAP-04 に対応。
 - これを「APIとして採用する（=仕様化する）」か「互換の残骸として扱う」かは未確定のため、章タイトルで命名しない。
 - **到達可能性がある実装**

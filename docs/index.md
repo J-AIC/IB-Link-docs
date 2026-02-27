@@ -1114,7 +1114,7 @@ AudioAPI は、IB-Link（Audio サービス）に対して **音声文字起こ�
 補足（混線防止）
 - `docs/api/openapi.*.yaml` の Audio tag は **`http://localhost:8000`**（`/v1/audio/*` や `/health` 等）を定義しています（= 本書では 4.9 側で扱う対象）。
 - 本節（4.8）は **7000/iblink/v1 の `/audio/*`** を扱います。
-- `http://localhost:7000/realtime`（SignalR Hub）は `/audio/*` とは別系統です（本書では「第4章後半（名称未定）Audio Hub / Realtime Hub」側で扱います）。
+- `http://localhost:7000/realtime`（SignalR / WebSocket）は `/audio/*` とは別系統です（本書では 4.15 側で扱います）。
 
 ---
 
@@ -1193,7 +1193,7 @@ AudioNPUAPI は、Whisper Server（既定: `http://localhost:8000`）に対し�
 
 補足（混線防止）
 - 本節（4.9）は **8000系（Whisper Server + WS realtime）** を扱います。
-- 7100（`/api/whisperserver/*` の起動/停止/状態）は **別系統（名称未定：音声“管理”エンドポイント）**です。
+- 7100（`/api/whisperserver/*` の起動/停止/状態）は **別系統（4.14）**です。
 
 ---
 
@@ -1400,345 +1400,519 @@ curl -X POST http://localhost:5000/iblink/v1/embeddings \
 
 ---
 
-概要
-**モデル切り替え API** は、llama-server（llama.cpp）インスタンスのライフサイクルを完全に管理する、高機能な REST API サービスです。
-インテリジェントな競合検出、自動解決、ヘルスモニタリング、IB-Link エコシステムとのシームレスな統合など、エンタープライズ向けの機能を備えています。
+概要  
+LlamaServerAPI は、`llama-server.exe`（llama.cpp）を **起動/停止/状態確認/モデル切り替え**するためのHTTP APIです。加えて、ローカルGGUFモデルの列挙/削除や、HuggingFaceからのモデル取得（SSE進捗）等を提供します。
 
+---
 
-主な機能
+#### Base URL
+- `http://localhost:9000/iblink/v1/llama-server`
 
-* **サーバーライフサイクルのフル管理** – llama-server インスタンスの起動、停止、再起動、監視
-* **インテリジェントな競合検出** – ポート競合、プロセス競合、リソース制約を自動検出して解決
-* **デュアルモードアーキテクチャ** – スタンドアロン、または IB-Link アプリケーションに統合して動作
-* **リアルタイム監視** – ライブログ配信、ヘルスチェック、パフォーマンスメトリクス
-* **GGUF モデル管理** – モデルの探索、検証、シームレスな切り替え
-* **自動リカバリ** – プロセス監視と再起動による自己修復機能
-* **本番運用で鍛えられた設計** – スレッドセーフな処理、包括的なエラーハンドリング、リソースクリーンアップ
+補足（混線防止）
+- `GET /health` は `http://localhost:9000/health`（Base URL 直下）です。
+- `POST /start` / `POST /switch-model` のレスポンスには `endpoint: "http://localhost:{port}/v1"` が含まれます（`/v1/*`）。この `/v1/*` は本章の対象外です（4.13 側で扱います）。
 
+---
 
-コア機能
+#### 共通
+- Headers
+  - `Content-Type: application/json`（JSON body を送るPOSTのみ）
 
-**包括的なサーバー管理**
+---
 
-* 任意の GGUF モデルで llama-server を起動／停止
-* 設定変更なしでの動的なモデル切り替え
-* 自動クリーンアップ付きのグレースフルシャットダウン
-* プロセスのライフサイクル監視
+#### Endpoints（apidocs）
+- Server Management
+  - 起動: POST `/start`
+  - 停止: POST `/stop`
+  - 状態: GET `/status`
+  - モデル切替: POST `/switch-model`
+- Model Management
+  - ローカルモデル一覧: GET `/models`
+  - ローカルモデル削除: DELETE `/models`（query: `modelPath`）
+- Model Download（HuggingFace）
+  - 検索: POST `/models/search`
+  - リポジトリ情報: GET `/models/info`（query: `repository`）
+  - ダウンロード: POST `/models/download`
+  - ダウンロード（SSE）: POST `/models/download-stream`
+- Binary Management
+  - バイナリ一覧: GET `/binaries`
+  - バイナリ情報: GET `/binaries/info`（query: `binaryPath`）
+  - バイナリ設定: POST `/binaries/set`
+- Configuration
+  - 情報: GET `/info`
+  - 設定更新: POST `/config`
+- Monitoring
+  - ログ取得: GET `/logs`（query: `lines`, `level`）
+  - ログ配信（SSE）: GET `/logs/stream`
+  - APIヘルス: GET `http://localhost:9000/health`
 
-**インテリジェントな競合解決**
+補足（一次仕様）
+- `docs/api/openapi.*.yaml` には LlamaServerAPI は定義されません（本節は apidocs を一次情報として扱います）。
 
-* システム全体の llama-server プロセスを検出
-* 起動前にポート競合を検出
-* 競合するプロセスの自動終了
-* リソース（RAM、ディスク容量）の利用可能性チェック
-* ファイルロックの検出と処理
+---
 
-**リアルタイム監視**
+#### 代表フロー（フロントエンド側の実装観点）
+1. `GET http://localhost:9000/health` で到達性を確認する
+2. `GET /models` で利用可能なGGUFモデルを確認する
+3. `POST /start`（または `POST /switch-model`）で推論サーバを起動し、レスポンスの `endpoint`（`http://localhost:{port}/v1`）を取得する
+4. 必要に応じて `GET /status` / `GET /logs` で状態を監視し、`POST /stop` で停止する
 
-* サーバーステータスとヘルスチェック
-* Server-Sent Events（SSE）によるログストリーミング
-* パフォーマンスメトリクス（tokens/sec、評価時間など）
-* プロセス終了コードのトラッキング
+---
 
-**モデル管理**
+#### Request / Response（最小の実装参照）
 
-* GGUF モデルの自動検出
-* モデルの検証とメタデータ取得
-* サイズ・互換性チェック
-* すべての GGUF 量子化フォーマットに対応
-* **新機能:** HuggingFace からモデルを直接ダウンロード
-* **新機能:** 複数ファイル／分割モデルのサポート
-* **新機能:** ダウンロード進捗のリアルタイムトラッキング
-
-**エンタープライズ向け機能**
-
-* OpenAPI/Swagger ドキュメント
-* 構造化されたエラーレスポンス
-* 詳細なログ出力
-* Web クライアント向けの CORS サポート
-* 設定のホットリロード
-
-高度な機能
-
-**スレッドセーフなオペレーション**
-
-* ロックを用いた並行リクエスト処理
-* レースコンディションの防止
-* クリティカルセクションのアトミックな処理
-
-**スマートなプロセス管理**
-
-* 孤立プロセス（orphan）のクリーンアップ
-* ゾンビプロセスの検出
-* 想定外終了の検知
-* 複数インスタンスの協調制御
-
-**拡張ログ機能**
-
-* llama-server のコンソール出力の取得
-* ログレベルフィルタリング
-* ログ履歴を保持するリングバッファ
-* info／error ストリームの分離
-
-Architecture（アーキテクチャ）
-
-システムアーキテクチャ
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                        IB-Link Application                   │
-│  ┌─────────────────────────────────────────────────────┐   │
-│  │            StandaloneApiProcessManager              │   │
-│  └─────────────────┬───────────────────────────────────┘   │
-│                    │ Manages                                │
-└────────────────────┼────────────────────────────────────────┘
-                     │
-     ┌───────────────▼───────────────┐
-     │   IB-Link.LlamaServerAPI      │
-     │  ┌─────────────────────────┐  │
-     │  │    Controllers          │  │◄─── HTTP Requests
-     │  │  - LlamaServerController│  │
-     │  └───────────┬─────────────┘  │
-     │              │                 │
-     │  ┌───────────▼─────────────┐  │
-     │  │      Services           │  │
-     │  │ - LlamaServerApiService │  │
-     │  │ - ModelDiscoveryService │  │
-     │  │ - ConflictManager       │  │
-     │  └───────────┬─────────────┘  │
-     │              │                 │
-     │  ┌───────────▼─────────────┐  │
-     │  │    Core Services        │  │
-     │  │  - LlamaServerService   │  │
-     │  │  - ServerConfiguration  │  │
-     │  └───────────┬─────────────┘  │
-     └──────────────┼─────────────────┘
-                    │
-     ┌──────────────▼─────────────────┐
-     │     llama-server.exe           │
-     │   (llama.cpp inference server) │
-     └────────────────────────────────┘
-```
-
-実行モード
-
-1. **スタンドアロンモード**
-
-* 独立プロセスとして独自の設定で動作
-* `dotnet run` で直接実行
-* ローカルの appsettings.json を使用
-* 開発・テスト用途に最適
-
-2. **ホストモード**
-
-* IB-Link メインアプリケーションにより管理
-* 親プロセスから設定を継承
-* StandaloneApiProcessManager によるライフサイクル制御
-* 本番環境でのデプロイモード
-
-コンポーネントの役割
-
-| コンポーネント                   | 役割                                   |
-| ------------------------- | ------------------------------------ |
-| **LlamaServerController** | HTTP エンドポイントの処理、リクエストバリデーション、レスポンス整形 |
-| **LlamaServerApiService** | ビジネスロジックのオーケストレーション、イベント集約、ログ管理      |
-| **LlamaServerService**    | プロセスライフサイクル、ヘルスモニタリング、コマンド実行         |
-| **ConflictManager**       | 競合検出、解決戦略、リソースチェック                   |
-| **ModelDiscoveryService** | GGUF ファイルのスキャン、メタデータ抽出、検証            |
-| **ServerConfiguration**   | パス解決、デフォルト設定、ランタイム検出                 |
-
-
-API の起動
+1) APIヘルス: GET `http://localhost:9000/health`
 
 ```bash
-# スタンドアロンモード
-cd src/IB-Link.LlamaServerAPI
-dotnet run
-
-# ポートを指定して起動
-dotnet run --urls "http://localhost:5000"
-```
-
-基本的な利用フロー
-
-```bash
-# 1. API のヘルスチェック
 curl http://localhost:9000/health
+```
 
-# 2. 利用可能なモデルとバイナリの一覧
+2) 状態: GET `/status`
+
+```bash
+curl http://localhost:9000/iblink/v1/llama-server/status
+```
+
+3) ローカルモデル一覧: GET `/models`
+
+```bash
 curl http://localhost:9000/iblink/v1/llama-server/models
-curl http://localhost:9000/iblink/v1/llama-server/binaries
+```
 
-# 3. 互換性のあるバイナリを設定（必要に応じて）
-curl -X POST http://localhost:9000/iblink/v1/llama-server/binaries/set `
-  -H "Content-Type: application/json" `
-  -d '{"binary_path": "C:\\path\\to\\x64\\llama-server.exe"}'
+4) 起動: POST `/start`
 
-# 4. サーバー起動
-curl -X POST http://localhost:9000/iblink/v1/llama-server/start `
-  -H "Content-Type: application/json" `
+```bash
+curl -X POST http://localhost:9000/iblink/v1/llama-server/start \
+  -H "Content-Type: application/json" \
   -d '{
     "model_path": "C:\\Models\\model.gguf",
     "port": 8080
   }'
+```
 
-# 5. ステータス確認とリクエスト送信
-curl http://localhost:9000/iblink/v1/llama-server/status
-curl -X POST http://localhost:8080/v1/chat/completions `
-  -H "Content-Type: application/json" `
-  -d '{
-    "messages": [{"role": "user", "content": "Hello!"}],
-    "max_tokens": 100
-  }'
+5) 停止: POST `/stop`
 
-# 6. モニタリングと停止
-curl "http://localhost:9000/iblink/v1/llama-server/logs?lines=10"
+```bash
 curl -X POST http://localhost:9000/iblink/v1/llama-server/stop
 ```
 
-モデルダウンロードのワークフロー
+6) モデル切替: POST `/switch-model`
 
 ```bash
-# 1. HuggingFace でモデルを検索
-curl -X POST http://localhost:9000/iblink/v1/llama-server/models/search `
-  -H "Content-Type: application/json" `
-  -d '{"query": "gemma gguf"}'
-
-# 2. モデルリポジトリの詳細情報を取得
-curl "http://localhost:9000/iblink/v1/llama-server/models/info?repository=ggml-org/gemma-2-2b-it-Q4_K_M-GGUF"
-
-# 3. モデルをダウンロード
-curl -X POST http://localhost:9000/iblink/v1/llama-server/models/download `
-  -H "Content-Type: application/json" `
+curl -X POST http://localhost:9000/iblink/v1/llama-server/switch-model \
+  -H "Content-Type: application/json" \
   -d '{
-    "repository": "ggml-org/gemma-2-2b-it-Q4_K_M-GGUF",
-    "files": ["gemma-2-2b-it-Q4_K_M.gguf"]
+    "model_path": "C:\\Models\\Different-Model.gguf",
+    "binary_path": "C:\\llama-cpp\\x64\\llama-server.exe"
   }'
-
-# 4. ダウンロード済みモデルはローカルモデル一覧に表示される
-curl http://localhost:9000/iblink/v1/llama-server/models
 ```
 
-> **PowerShell ユーザー向け:** `curl` コマンドの代わりに、PowerShell 組み込みの `curl`（エイリアス）や `Invoke-RestMethod` を使用すると JSON の扱いがしやすくなります。
+7) モデル削除: DELETE `/models`（query: `modelPath`）
 
-API Documentation（API ドキュメント）
-
-ベース URL
-
-```text
-http://localhost:9000/iblink/v1/llama-server
+```bash
+curl -X DELETE "http://localhost:9000/iblink/v1/llama-server/models?modelPath=C:\\Models\\model-to-delete.gguf"
 ```
 
-エンドポイント一覧
+8) HuggingFace検索: POST `/models/search`
+
+```bash
+curl -X POST http://localhost:9000/iblink/v1/llama-server/models/search \
+  -H "Content-Type: application/json" \
+  -d '{"query":"gemma gguf"}'
+```
+
+9) リポジトリ情報: GET `/models/info`
+
+```bash
+curl "http://localhost:9000/iblink/v1/llama-server/models/info?repository=ggml-org/gemma-2-2b-it-Q4_K_M-GGUF"
+```
+
+10) ダウンロード: POST `/models/download`
+
+```bash
+curl -X POST http://localhost:9000/iblink/v1/llama-server/models/download \
+  -H "Content-Type: application/json" \
+  -d '{
+    "repository":"ggml-org/gemma-2-2b-it-Q4_K_M-GGUF",
+    "files":["gemma-2-2b-it-Q4_K_M.gguf"]
+  }'
+```
+
+11) ダウンロード（SSE）: POST `/models/download-stream`
+
+```bash
+curl -X POST http://localhost:9000/iblink/v1/llama-server/models/download-stream \
+  -H "Content-Type: application/json" \
+  -d '{"repository":"ggml-org/gemma-2-2b-it-Q4_K_M-GGUF","files":["gemma-2-2b-it-Q4_K_M.gguf"]}' \
+  -N
+```
+
+12) バイナリ一覧: GET `/binaries`
+
+```bash
+curl http://localhost:9000/iblink/v1/llama-server/binaries
+```
+
+13) バイナリ情報: GET `/binaries/info`
+
+```bash
+curl "http://localhost:9000/iblink/v1/llama-server/binaries/info?binaryPath=C:\\llama-cpp\\x64\\llama-server.exe"
+```
+
+14) バイナリ設定: POST `/binaries/set`
+
+```bash
+curl -X POST http://localhost:9000/iblink/v1/llama-server/binaries/set \
+  -H "Content-Type: application/json" \
+  -d '{"binary_path":"C:\\llama-cpp\\x64\\llama-server.exe"}'
+```
+
+15) 情報: GET `/info`
+
+```bash
+curl http://localhost:9000/iblink/v1/llama-server/info
+```
+
+16) 設定更新: POST `/config`
+
+```bash
+curl -X POST http://localhost:9000/iblink/v1/llama-server/config \
+  -H "Content-Type: application/json" \
+  -d '{"models_directory":"D:\\AI\\Models"}'
+```
+
+17) ログ取得: GET `/logs`
+
+```bash
+curl "http://localhost:9000/iblink/v1/llama-server/logs?lines=50"
+```
+
+18) ログ配信（SSE）: GET `/logs/stream`
+
+```bash
+curl -N http://localhost:9000/iblink/v1/llama-server/logs/stream
+```
 
 ---
 
-* **Server Management（サーバー管理）**
-
-  * `POST /start` – llama-server の起動（リクエストスキーマ／レスポンスを日本語で説明）
-  * `POST /stop` – サーバー停止
-  * `GET /status` – サーバーステータス取得
-  * `POST /switch-model` – モデル切り替え
-
-* **Model Management（モデル管理）**
-
-  * `GET /models` – ローカルの GGUF モデル一覧取得
-
-* **Model Download（モデルダウンロード）**
-
-  * `POST /models/search` – HuggingFace 上の GGUF モデル検索
-  * `GET /models/info` – 特定リポジトリのファイル構造や分割モデル情報取得
-  * `POST /models/download` – モデルファイルのダウンロード
-  * `POST /models/download-stream` – SSE によるダウンロード進捗ストリーミング
-  * `DELETE /models` – ローカルモデルファイルの削除（注意書き付き）
-
-* **Binary Management（バイナリ管理）**
-
-  * `GET /binaries` – 利用可能な llama-server.exe バイナリ一覧
-  * `GET /binaries/info` – 特定バイナリの詳細情報
-  * `POST /binaries/set` – 使用するバイナリの設定
-
-* **Configuration（設定）**
-
-  * `GET /info` – API の設定と機能一覧
-  * `POST /config` – 設定の動的更新
-
-* **Monitoring（監視）**
-
-  * `GET /logs` – 直近ログの取得
-  * `GET /logs/stream` – SSE によるリアルタイムログストリーミング
-  * `GET /health` – API ヘルスチェック
-
-* **Error Responses（エラーレスポンス形式）**
-
-  * 共通の JSON フォーマットと error_type の種類を日本語で解説
+#### 既存実装例（参照先）
+- 現時点のDアプリ実装コードでは `http://localhost:9000/iblink/v1/llama-server` を **直接呼ぶ箇所は未検出**です（採用する場合は本節の呼び出し例に合わせます）。
 
 ---
 
 ### 4.12 FoundryLocalAPI（Foundry Local 管理）
-（この節は `manual/apidocs/FoundryLocalAPI_Usage_Examples.md` に合わせて、後続ステップで内容を移行する）
+概要  
+FoundryLocalAPI は、FoundryLocal のローカル推論サーバを **起動/停止/状態確認/モデル切替**するためのHTTP APIです。加えて、モデルの列挙/ダウンロード/削除、ログ取得（SSE）、ヘルス確認を提供します。
 
 ---
 
-### 4.90 第4章後半（追加/補足：公式名称なし＝名称未定）
+#### Base URL
+- `http://localhost:9500/iblink/v1/foundry-local`
 
-#### （名称未定）LLM推論エンドポイント（OpenAI互換 `/v1/chat/completions`）
-概要
-Chat API は、LLMとのチャット機能を提供する API サービスです。
+補足（混線防止）
+- `POST /start` / `POST /switch-model` のレスポンスには `endpoint: "http://127.0.0.1:{port}/v1"` と `api_key` が含まれます（`/v1/*`）。この `/v1/*` は本章の対象外です（4.13 側で扱います）。
+- モデル一覧: `GET http://localhost:9500/v1/models`（Base URL 直下ではありません。詳細は 4.13 側で扱います）
 
-クイックスタート
-- ベースURL: `http://localhost:8080/iblink/v1`
-- コンテンツタイプ: すべてのリクエストに `Content-Type: application/json` を指定
+---
 
-API エンドポイント
+#### 共通
+- Headers
+  - `Content-Type: application/json`（JSON body を送るPOSTのみ）
 
-1. LLM質問応答（⾮同期）
-   - LLMに投入された指示や質問に対する返答を出力します。
-   - エンドポイント: POST `/chat/completions`
-   - リクエスト例
+---
 
-```json
-{
-  "model": "localmodel",
-  "message": [
-         { "role": "system", "content": "あなたはチャッピーです。" },
-         { "role": "user", "content": "返答をどうぞ。" }
-      ],
-  "temperature": 0.1,
-  "max_tokens": 500,
-  "stream": true,
-}
+#### Endpoints（apidocs）
+- Server Management
+  - 起動: POST `/start`
+  - 起動（SSE）: POST `/start-stream`
+  - 停止: POST `/stop`
+  - 状態: GET `/status`
+  - モデル切替: POST `/switch-model`
+- Model Management
+  - モデル一覧: GET `/models`
+  - ダウンロード済み一覧: GET `/models/downloaded`
+  - ロード済み一覧: GET `/models/loaded`
+  - 全アンロード: POST `/models/unload-all`
+  - ダウンロード: POST `/models/{modelName}/download`
+  - ダウンロード（SSE）: POST `/models/{modelName}/download-stream`
+  - 削除: DELETE `/models/{modelName}`
+- Configuration and Info
+  - 情報: GET `/info`
+  - 設定更新: POST `/config`
+- Logging
+  - ログ取得: GET `/logs`（query: `count`）
+  - ログ配信（SSE）: GET `/logs/stream`
+- Health
+  - ヘルス: GET `/health`
+
+補足（一次仕様）
+- `docs/api/openapi.*.yaml` には FoundryLocalAPI は定義されません（本節は apidocs を一次情報として扱います）。
+
+---
+
+#### 代表フロー（フロントエンド側の実装観点）
+1. `GET /health` で到達性を確認する
+2. `GET /models` で利用可能な `model_name` を確認する
+3. 必要なら `POST /models/{modelName}/download` でモデルを取得する
+4. `POST /start`（または `POST /switch-model`）で推論サーバを起動し、レスポンスの `endpoint`（`http://127.0.0.1:{port}/v1`）と `api_key` を取得する
+5. 必要に応じて `GET /status` / `GET /logs` で状態を監視し、`POST /stop` で停止する
+
+---
+
+#### Request / Response（最小の実装参照）
+
+1) ヘルス: GET `/health`
+
+```bash
+curl http://localhost:9500/iblink/v1/foundry-local/health
 ```
 
-   - 主要パラメータ
-     - `model`: モデル名（IB-Link内で設定するため無効）
-     - `message`: LLMに投入する指示や質問
-     - `temperature`: LLMの出力の揺らぎ度合い
-     - `max_tokens`: LLMの出力の最大トークン数制限
-     - `stream`: 部分的な進捗を出力するかどうかの設定
+2) モデル一覧: GET `/models`
 
-   - レスポンス例（202 Accepted）
-
-```json
-{
-  "text": "私はチャッピーです。",
-}
+```bash
+curl http://localhost:9500/iblink/v1/foundry-local/models
 ```
 
-   - 詳細については以下のページも参照してください。
-      - https://github.com/ggml-org/llama.cpp/tree/master/tools/server
+3) ダウンロード: POST `/models/{modelName}/download`
+
+```bash
+curl -X POST "http://localhost:9500/iblink/v1/foundry-local/models/Qwen2.5-0.5B-Instruct-Q8_0-GGUF/download"
+```
+
+4) 起動: POST `/start`
+
+```bash
+curl -X POST http://localhost:9500/iblink/v1/foundry-local/start \
+  -H "Content-Type: application/json" \
+  -d '{"model_name":"Qwen2.5-0.5B-Instruct-Q8_0-GGUF"}'
+```
+
+5) 状態: GET `/status`
+
+```bash
+curl http://localhost:9500/iblink/v1/foundry-local/status
+```
+
+6) 停止: POST `/stop`
+
+```bash
+curl -X POST http://localhost:9500/iblink/v1/foundry-local/stop
+```
+
+7) モデル切替: POST `/switch-model`
+
+```bash
+curl -X POST http://localhost:9500/iblink/v1/foundry-local/switch-model \
+  -H "Content-Type: application/json" \
+  -d '{"model_name":"Qwen2.5-3B-Instruct-Q4_K_M-GGUF"}'
+```
 
 ---
 
-#### （名称未定）音声“管理”エンドポイント（7100）
+#### 既存実装例（参照先）
+- D-Josys / Sales / Retail
+  - `manual/Dapp/*/src/utils/LLMResourceManager.js`
+    - `foundryLocalApi.apiBaseUrl = "http://localhost:9500/iblink/v1/foundry-local"` が **設定項目として存在**
+    - `normalizePolicy()` が `llm.mode = "llamaServerApi"` に固定しており、FoundryLocalAPI を実運用で使う経路は未確定（案Bの注記に合わせる）
 
 ---
 
-#### （名称未定）Audio Hub / Realtime Hub（7000/realtime 等）
+### 4.13 LLM推論エンドポイント（`/v1/chat/completions`）
+概要  
+本節は、Dアプリが利用している推論エンドポイント（`/v1/models`, `/v1/chat/completions`）を「URL/パス」で識別してまとめます。
 
 ---
 
-#### （補足）“IB-Link経由 Chat”（8500/iblink/v1/chat/completions）
+#### Base URL（推論サーバ）
+- `http://localhost:{port}/v1`
+  - Dアプリ既定の例: `http://localhost:8080/v1`
+- FoundryLocal の起動レスポンスが返す例: `http://127.0.0.1:{port}/v1`（`api_key` を伴う）
+
+補足（混線防止）
+- `.../iblink/v1` 配下のAPI（Documents/Retriever/各管理API）とは **別系統**です。
+- 管理API（4.11/4.12）の `POST /start` レスポンスに含まれる `endpoint` が、この推論Base URLになります。
+- **OpenAPI** は `docs/api/openapi.*.yaml` のような「API仕様書（YAML）」を指します（用語が近いため混同しない）。
+
+---
+
+#### Endpoints（Dアプリ実装で観測）
+- モデル一覧: GET `/models`
+- チャット補完: POST `/chat/completions`
+
+---
+
+#### 代表フロー（Dアプリ側の実装観点）
+1. `GET /v1/models` で到達性/起動完了を確認する（D-Josys / Medical）
+2. `POST /v1/chat/completions` に `messages` を送信する
+3. `stream:true` の場合は、SSE（`data: {json}\n` / `data: [DONE]\n`）を行単位で処理する（Retail）
+
+---
+
+#### Request / Response（最小の実装参照）
+
+1) モデル一覧: GET `/models`
+
+```bash
+curl http://localhost:8080/v1/models
+```
+
+2) チャット補完（非ストリーミング）: POST `/chat/completions`
+
+```bash
+curl -X POST http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      { "role": "system", "content": "あなたはアシスタントです。" },
+      { "role": "user", "content": "返答をどうぞ。" }
+    ],
+    "temperature": 0.3,
+    "max_tokens": 200
+  }'
+```
+
+3) チャット補完（ストリーミング）: POST `/chat/completions`（SSE）
+
+```bash
+curl -X POST http://localhost:8080/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [{ "role": "user", "content": "Hello!" }],
+    "stream": true
+  }' \
+  -N
+```
+
+補足（実装での例外扱い）
+- `503` かつ本文に `Loading model` を含む場合に、待機して再試行する実装があります（D-Josys）。
+
+---
+
+### 4.14 音声“管理”エンドポイント（7100）
+概要  
+本節は、Whisper Server（8000）の起動/停止を制御する **音声“管理”エンドポイント**（7100系）を「URL/パス」で識別してまとめます（7000/realtime や Whisper 本体とは別系統）。
+
+---
+
+#### Base URL
+- `http://127.0.0.1:7100`
+
+---
+
+#### Endpoints（Dアプリ実装で観測）
+- 状態: GET `/api/whisperserver/status`
+- ヘルス: GET `/api/whisperserver/health`
+- 情報: GET `/api/whisperserver/info`
+- ログ: GET `/api/whisperserver/logs`（query: `lines`）
+- 起動: POST `/api/whisperserver/start`
+- 停止: POST `/api/whisperserver/stop`
+
+---
+
+#### 代表フロー（Dアプリ側の実装観点）
+1. `GET /api/whisperserver/status` で起動済みか確認する
+2. `POST /api/whisperserver/start` で起動する（必要に応じて `model` / `port` 等を指定）
+3. `GET /api/whisperserver/health` で健全性を確認する
+4. `POST /api/whisperserver/stop` で停止する（Dアプリ側で **startedByApp** を条件に「自分が起動したものだけ止める」安全策あり）
+
+---
+
+#### 呼び出し例（最小）
+
+```bash
+curl http://127.0.0.1:7100/api/whisperserver/status
+curl http://127.0.0.1:7100/api/whisperserver/health
+curl http://127.0.0.1:7100/api/whisperserver/info
+curl "http://127.0.0.1:7100/api/whisperserver/logs?lines=200"
+
+curl -X POST http://127.0.0.1:7100/api/whisperserver/start \
+  -H "Content-Type: application/json" \
+  -d '{"model":"base"}'
+
+curl -X POST http://127.0.0.1:7100/api/whisperserver/stop \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+---
+
+#### 既存実装例（参照先）
+- Retail
+  - `manual/Dapp/d-retail/src/utils/VoiceResourceManager.js`（7100系のHTTP呼び出し、startedByApp安全策）
+- Sales
+  - `manual/Dapp/d-sales/src/assets/js/voiceSettingsModal.js`（`ws_voice_mgmt_api_url` に既定 `http://127.0.0.1:7100` を保存）
+
+---
+
+### 4.15 7000/realtime（SignalR / WebSocket）
+概要  
+本節は、音声のリアルタイム文字起こしで利用される `http://localhost:7000/realtime` を、**URL/パス**で識別してまとめます（通信方式は SignalR の WebSocket です）。
+
+---
+
+#### URL / 関連URL（Dアプリ実装で観測）
+- `http://localhost:7000/realtime`（SignalR / WebSocket）
+- ヘルス（HTTP）: `http://localhost:7000/iblink/v1/audio/health`
+
+---
+
+#### 代表フロー（Dアプリ側の実装観点）
+1. `http://localhost:7000/realtime`（`/realtime`）へWebSocket接続する
+2. 受信イベント（例: `TranscriptionResult` 等）を購読し、`text` と `isFinal` をUIへ反映する
+3. `UpdateSettings` を呼び、`SendAudio` でPCMのバイト列を送信する（実装で観測）
+
+---
+
+#### 実装参照（最小）
+
+```javascript
+// SignalR（WebSocket）接続（最小）
+const hubUrl = 'http://localhost:7000/realtime';
+const conn = new signalR.HubConnectionBuilder()
+  .withUrl(hubUrl, { skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets })
+  .withAutomaticReconnect([0, 2000, 10000, 30000])
+  .build();
+
+conn.on('TranscriptionResult', (payload) => console.log(payload));
+await conn.start();
+await conn.invoke('UpdateSettings', { chunkDurationMs: 2000, enableVAD: true });
+// 音声フレームは conn.invoke('SendAudio', byteArray) の形で送信する実装が存在
+```
+
+到達性確認（HTTP）
+
+```bash
+curl http://localhost:7000/iblink/v1/audio/health
+```
+
+---
+
+#### 既存実装例（参照先）
+- D-Josys
+  - `manual/Dapp/d-josys/src/assets/js/voice/RealtimeTranscriptionClient.js`（`/realtime` へ接続、`UpdateSettings` / `SendAudio`）
+- Retail
+  - `manual/Dapp/d-retail/src/D-Retail/multilingual_service/multilingual.constants.js`（`AUDIO_HUB_URL` / `AUDIO_HEALTH_URL` の定数化）
+
+---
+
+### 4.16 （補足）8500/iblink/v1/chat/completions
+概要  
+本節は、Dアプリ実装に **`http://localhost:8500/iblink/v1/chat/completions` を組み立てて呼び出す実装**が存在するため、経路として補足記録します。
+
+---
+
+#### Base URL / Path（Dアプリ実装で観測）
+- `http://localhost:8500/iblink/v1/chat/completions`
+
+補足（一次仕様）
+- OpenAPI / `manual/apidocs` に一次仕様として定義がありません（採用可否は未確定）。
+
+---
+
+#### 既存実装例（参照先）
+- D-Josys
+  - `manual/Dapp/d-josys/src/api/IBLinkClient.js`
+    - `baseURL = "http://localhost:8500/iblink"` + `version="v1"` + `chatCompletion()` が `POST /chat/completions` を呼び出す（= 8500/iblink/v1/chat/completions）
 
 ---
 
