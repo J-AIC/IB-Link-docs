@@ -778,88 +778,7 @@ Filter API で対象を絞り、Changes Only をオンにして差分だけを�
 ---
 
 
-### 4.6 Chat API
-概要  
-Chat API は、Dアプリから **ローカル推論サーバ（OpenAI互換）**へチャット補完を行うためのHTTP APIです。  
-本節は `manual/Dapp/*` の既存実装で実際に使用されている呼び出し形式のみを記載します。
-
----
-
-#### Base URL（事実）
-- `http://localhost:{port}`
-  - 既定ポートは **8080** として扱う実装が存在します。
-  - Dアプリ実装では `window.llmManager.getPolicy()` の `llamaServerApi.port` から `http://localhost:{port}` を構成する実装が存在します（例: Sales/Retail/Medical）。
-  - 固定で `http://localhost:8080` を用いる実装も存在します（例: D-Josys）。
-
----
-
-#### Endpoints（事実）
-1. モデル一覧（到達性/ロード待ち確認で使用）
-   - GET `/v1/models`
-2. チャット補完（OpenAI互換）
-   - POST `/v1/chat/completions`
-
----
-
-#### Request（事実）
-- Headers
-  - `Content-Type: application/json`（実装により `application/json; charset=utf-8`）
-- Body（例：非ストリーミング）
-
-```json
-{
-  "model": "localmodel",
-  "messages": [
-    { "role": "system", "content": "システム指示" },
-    { "role": "user", "content": "ユーザー入力" }
-  ],
-  "temperature": 0.7,
-  "max_tokens": 2000,
-  "stream": false
-}
-```
-
----
-
-#### Response（事実）
-- 非ストリーミング（`stream:false`）
-  - `choices[0].message.content` を本文として扱う実装が存在します。
-- ストリーミング（`stream:true`）
-  - `Response.body` を読み取り、SSE（行単位）の `data: ...` をパースする実装が存在します。
-
----
-
-#### Streaming（SSE）の扱い（事実）
-- `stream:true` の場合、SSE形式（`data: {json}\n`）を想定して行単位に処理する実装が存在します。  
-- 終端は `data: [DONE]` を扱う実装が存在します。  
-- 差分は `choices[0].delta.content` を連結して表示する実装が存在します。
-
----
-
-#### エラー/リトライ（事実）
-- 起動直後に `503` と本文 `Loading model` が返る前提で、`/v1/models` による到達性確認＋待機/再試行を行う実装が存在します。
-
----
-
-#### 既存実装例（参照先）
-- D-Josys
-  - `manual/Dapp/d-josys/src/assets/js/apiClient.js`（`/v1/models`、`/v1/chat/completions`、`503 Loading model` の吸収）
-  - `manual/Dapp/d-josys/src/api/IBLinkClient.js`（`/chat/completions` を `baseURL + /v1` に対して呼ぶ）
-- Sales
-  - `manual/Dapp/d-sales/src/assets/js/apiClient.js`（ポリシーから `port` を解決して `/v1/chat/completions`）
-- Retail
-  - `manual/Dapp/d-retail/src/main.js`（`/v1/chat/completions` の中継）
-  - `manual/Dapp/d-retail/src/D-Retail/product_assistant/product_assistant.services.chat.js`（SSE `data:` と `[DONE]` のパース）
-- Medical
-  - `manual/Dapp/d-medical/assets/js/apiClient.js`（`/v1/models` で待機→`/v1/chat/completions`）
-   
-
-
----
-
-
-
-### 4.7 Documents API
+### 4.6 DocumentsAPI
 概要
 Documents API は、ドキュメントの処理、埋め込み（embedding）⽣成、セマンティック検索を提供する RESTful API サービスです。ドキュメントを⾮同期で処理し、意味的な類似検索のためのベクトル埋め込みを⽣成し、包括的なドキュメント管理機能を備えています。ドキュメントは、作成するアプリ（テナント）およびアプリ内のプロジェクト単位で管理が可能な形になっています。
 
@@ -1240,7 +1159,7 @@ searchResults.results.forEach(r => {
 
 ---
 
-### 4.8 Retriever API
+### 4.7 RetrieverAPI
 概要
 Retriever API は、ドキュメントの埋め込み（embedding）を活⽤したセマンティック検索およびドキュメント取得を⾏う独⽴型サービスです。ベクトルベース検索とハイブリッド検索の両⽅をサポートし、類似度検索と全⽂検索を統合したインターフェースを提供します。
 
@@ -1379,7 +1298,12 @@ API エンドポイント
 
 ---
 
-### 4.9 Audio API
+### 4.8 AudioAPI（IB-Link経由: 7000/iblink/v1/audio/*）
+（この節は `manual/apidocs/AudioAPI_Usage_Examples.md` と `docs/api/openapi.*.yaml`（Audio tag）に合わせて、後続ステップで内容を移行する）
+
+---
+
+### 4.9 AudioNPUAPI（Whisper Server + Realtime: 8000 + WS）
 概要
 Audio API Server は、OpenAI 互換の⾳声⽂字起こし（Transcription）API を提供し、リアルタイムストリーミング機能を備えたサーバーです。Snapdragon NPU による⾼速化をサポートしつつ、CPU フォールバックにも対応しています。  
 
@@ -1682,7 +1606,12 @@ transcription = client.audio.transcriptions.create(
 ```
 
 
-### 4.10 モデル切り替え API
+### 4.10 EmbeddingsAPI
+（この節は `manual/apidocs/EmbeddingsAPI_Usage_Examples.md` に合わせて、後続ステップで内容を移行する）
+
+---
+
+### 4.11 LlamaServerAPI（推論サーバ管理）
 
 ---
 
@@ -1958,6 +1887,73 @@ http://localhost:9000/iblink/v1/llama-server
 * **Error Responses（エラーレスポンス形式）**
 
   * 共通の JSON フォーマットと error_type の種類を日本語で解説
+
+---
+
+### 4.12 FoundryLocalAPI（Foundry Local 管理）
+（この節は `manual/apidocs/FoundryLocalAPI_Usage_Examples.md` に合わせて、後続ステップで内容を移行する）
+
+---
+
+### 4.90 第4章後半（追加/補足：公式名称なし＝名称未定）
+
+#### （名称未定）LLM推論エンドポイント（OpenAI互換 `/v1/chat/completions`）
+概要
+Chat API は、LLMとのチャット機能を提供する API サービスです。
+
+クイックスタート
+- ベースURL: `http://localhost:8080/iblink/v1`
+- コンテンツタイプ: すべてのリクエストに `Content-Type: application/json` を指定
+
+API エンドポイント
+
+1. LLM質問応答（⾮同期）
+   - LLMに投入された指示や質問に対する返答を出力します。
+   - エンドポイント: POST `/chat/completions`
+   - リクエスト例
+
+```json
+{
+  "model": "localmodel",
+  "message": [
+         { "role": "system", "content": "あなたはチャッピーです。" },
+         { "role": "user", "content": "返答をどうぞ。" }
+      ],
+  "temperature": 0.1,
+  "max_tokens": 500,
+  "stream": true,
+}
+```
+
+   - 主要パラメータ
+     - `model`: モデル名（IB-Link内で設定するため無効）
+     - `message`: LLMに投入する指示や質問
+     - `temperature`: LLMの出力の揺らぎ度合い
+     - `max_tokens`: LLMの出力の最大トークン数制限
+     - `stream`: 部分的な進捗を出力するかどうかの設定
+
+   - レスポンス例（202 Accepted）
+
+```json
+{
+  "text": "私はチャッピーです。",
+}
+```
+
+   - 詳細については以下のページも参照してください。
+      - https://github.com/ggml-org/llama.cpp/tree/master/tools/server
+
+---
+
+#### （名称未定）音声“管理”エンドポイント（7100）
+
+---
+
+#### （名称未定）Audio Hub / Realtime Hub（7000/realtime 等）
+
+---
+
+#### （補足）“IB-Link経由 Chat”（8500/iblink/v1/chat/completions）
 
 ---
 
