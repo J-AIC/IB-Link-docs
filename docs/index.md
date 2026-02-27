@@ -811,7 +811,7 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 
 ---
 
-#### 代表フロー（Dアプリ実装での使い方）
+#### 代表フロー
 1. **取り込み**（POST `/documents/process`）でジョブ作成 → `job_id` を受け取る
 2. **進捗/完了確認**（POST `/documents/status`）を `status_type: "processing"` でポーリングする
 3. **検索**（POST `/documents/search`）で取り込み済みコンテンツを参照する
@@ -819,7 +819,7 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 
 ---
 
-#### Request / Response（最小の実装参照）
+#### Request / Response
 
 1) 取り込み（非同期）: POST `/documents/process`  
 必須: `d_app_id`, `project_id`  
@@ -899,7 +899,7 @@ curl -X POST http://localhost:8500/iblink/v1/documents/search \
   -d '{"query":"検索クエリ","project_id":"project-001"}'
 ```
 
-補足（実装差分）
+補足
 - 既存実装では `search_mode` を送る例があります。
 - Dアプリ実装では `query` の代わりに `text` を受け取り `query` に補正する例があります（Sales）。
 
@@ -1003,13 +1003,13 @@ RetrieverAPI は、取り込み済みドキュメント（チャンク）に対�
 
 ---
 
-#### 代表フロー（Dアプリ側の実装観点）
+#### 代表フロー
 1. DocumentsAPI（4.6）でドキュメントを取り込む（埋め込み作成が完了している前提を作る）
 2. RetrieverAPI（POST `/retriever`）へクエリを投げ、`results[]` の `text` と `metadata` をUI/プロンプトへ利用する
 
 ---
 
-#### Request / Response（最小の実装参照）
+#### Request / Response
 
 1) 検索: POST `/retriever`  
 必須: `text`  
@@ -1091,13 +1091,13 @@ AudioAPI は、IB-Link（Audio サービス）に対して **音声文字起こ�
 
 ---
 
-#### 代表フロー（Dアプリ側の実装観点）
+#### 代表フロー
 1. `GET /audio/health` で到達性/初期化状態を確認する
 2. `POST /audio/transcriptions` に音声ファイルを送信し、`text` を取得してUI/後段処理に渡す
 
 ---
 
-#### Request / Response（最小の実装参照）
+#### Request / Response
 
 1) ヘルス: GET `/audio/health`
 
@@ -1163,14 +1163,14 @@ AudioNPUAPI は、Whisper Server（既定: `http://localhost:8000`）に対し�
 
 ---
 
-#### 代表フロー（Dアプリ側の実装観点）
+#### 代表フロー
 1. `GET /health` で到達性/初期化状態を確認する（Dアプリでは `status=healthy` を待つ実装あり）
 2. リアルタイムの場合は WS `/v1/audio/realtime` に接続し、開始設定を送信してからPCM（16kHz/mono）を送信する
 3. 受信したJSONの `text` をUIへ反映する（`is_final`/`final`/`type` で確定を判定する実装あり）
 
 ---
 
-#### Request / Response（最小の実装参照）
+#### Request / Response
 
 1) ヘルス: GET `/health`
 
@@ -1237,7 +1237,7 @@ curl -X POST http://localhost:8000/v1/audio/translations \
 }
 ```
 
-受信（最小）
+受信
 - `payload.text` を表示テキストとして扱う
 - 確定判定は `payload.is_final === true` または `payload.final === true`、または `payload.type === "final"` を使う実装があります（D-Josys）
 - `payload.type === "transcription"` を見る実装があります（Retail）
@@ -1267,14 +1267,14 @@ EmbeddingsAPI は、テキスト入力から **埋め込みベクトル（embedd
 
 ---
 
-#### 代表フロー（フロントエンド側の実装観点）
+#### 代表フロー
 1. `GET /embeddings/health` で到達性を確認する
 2. `GET /models` で利用可能な `model` を選ぶ
 3. `POST /embeddings` に `input` と `model` を送信し、`data[].embedding` を取得する
 
 ---
 
-#### Request / Response（最小の実装参照）
+#### Request / Response
 
 1) ヘルス: GET `/embeddings/health`
 
@@ -1383,7 +1383,7 @@ LlamaServerAPI は、`llama-server.exe`（llama.cpp）を **起動/停止/状態
 
 ---
 
-#### 代表フロー（フロントエンド側の実装観点）
+#### 代表フロー
 1. `GET http://localhost:9000/health` で到達性を確認する
 2. `GET /models` で利用可能なGGUFモデルを確認する
 3. `POST /start`（または `POST /switch-model`）で推論サーバを起動し、レスポンスの `endpoint`（`http://localhost:{port}/v1`）を取得する
@@ -1391,7 +1391,7 @@ LlamaServerAPI は、`llama-server.exe`（llama.cpp）を **起動/停止/状態
 
 ---
 
-#### Request / Response（最小の実装参照）
+#### Request / Response
 
 1) APIヘルス: GET `http://localhost:9000/health`
 
@@ -1574,7 +1574,7 @@ FoundryLocalAPI は、FoundryLocal のローカル推論サーバを **起動/�
 
 ---
 
-#### 代表フロー（フロントエンド側の実装観点）
+#### 代表フロー
 1. `GET /health` で到達性を確認する
 2. `GET /models` で利用可能な `model_name` を確認する
 3. 必要なら `POST /models/{modelName}/download` でモデルを取得する
@@ -1583,7 +1583,7 @@ FoundryLocalAPI は、FoundryLocal のローカル推論サーバを **起動/�
 
 ---
 
-#### Request / Response（最小の実装参照）
+#### Request / Response
 
 1) ヘルス: GET `/health`
 
@@ -1658,14 +1658,14 @@ curl -X POST http://localhost:9500/iblink/v1/foundry-local/switch-model \
 
 ---
 
-#### 代表フロー（Dアプリ側の実装観点）
+#### 代表フロー
 1. `GET /v1/models` で到達性/起動完了を確認する（D-Josys / Medical）
 2. `POST /v1/chat/completions` に `messages` を送信する
 3. `stream:true` の場合は、SSE（`data: {json}\n` / `data: [DONE]\n`）を行単位で処理する（Retail）
 
 ---
 
-#### Request / Response（最小の実装参照）
+#### Request / Response
 
 1) モデル一覧: GET `/models`
 
@@ -1705,7 +1705,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 ---
 
-### 4.14 音声“管理”エンドポイント（7100）
+### 4.14 音声管理エンドポイント（7100）
 概要  
 本節は、Whisper Server（8000）の起動/停止を制御する **音声“管理”エンドポイント**（7100系）を「URL/パス」で識別してまとめます（7000/realtime や Whisper 本体とは別系統）。
 
@@ -1726,7 +1726,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 ---
 
-#### 代表フロー（Dアプリ側の実装観点）
+#### 代表フロー
 1. `GET /api/whisperserver/status` で起動済みか確認する
 2. `POST /api/whisperserver/start` で起動する（必要に応じて `model` / `port` 等を指定）
 3. `GET /api/whisperserver/health` で健全性を確認する
@@ -1734,7 +1734,7 @@ curl -X POST http://localhost:8080/v1/chat/completions \
 
 ---
 
-#### 呼び出し例（最小）
+#### 呼び出し例
 
 ```bash
 curl http://127.0.0.1:7100/api/whisperserver/status
@@ -1767,17 +1767,17 @@ curl -X POST http://127.0.0.1:7100/api/whisperserver/stop \
 
 ---
 
-#### 代表フロー（Dアプリ側の実装観点）
+#### 代表フロー
 1. `http://localhost:7000/realtime`（`/realtime`）へWebSocket接続する
 2. 受信イベント（例: `TranscriptionResult` 等）を購読し、`text` と `isFinal` をUIへ反映する
 3. `UpdateSettings` を呼び、`SendAudio` でPCMのバイト列を送信する（実装で観測）
 
 ---
 
-#### 実装参照（最小）
+#### 実装参照
 
 ```javascript
-// SignalR（WebSocket）接続（最小）
+// SignalR（WebSocket）接続
 const hubUrl = 'http://localhost:7000/realtime';
 const conn = new signalR.HubConnectionBuilder()
   .withUrl(hubUrl, { skipNegotiation: true, transport: signalR.HttpTransportType.WebSockets })
@@ -1800,7 +1800,7 @@ curl http://localhost:7000/iblink/v1/audio/health
 
 ---
 
-### 4.16 （補足）8500/iblink/v1/chat/completions
+### 4.16 8500/iblink/v1/chat/completions
 概要  
 本節は、Dアプリ実装に **`http://localhost:8500/iblink/v1/chat/completions` を組み立てて呼び出す実装**が存在するため、経路として補足記録します。
 
