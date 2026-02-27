@@ -779,383 +779,127 @@ Filter API で対象を絞り、Changes Only をオンにして差分だけを�
 
 
 ### 4.6 DocumentsAPI
-概要
-Documents API は、ドキュメントの処理、埋め込み（embedding）⽣成、セマンティック検索を提供する RESTful API サービスです。ドキュメントを⾮同期で処理し、意味的な類似検索のためのベクトル埋め込みを⽣成し、包括的なドキュメント管理機能を備えています。ドキュメントは、作成するアプリ（テナント）およびアプリ内のプロジェクト単位で管理が可能な形になっています。
+概要  
+DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュメント取り込み（非同期）/状態取得/検索/抽出/一覧/削除** を行う HTTP API です。Dアプリ（フロントエンド）は、本節のフローと既存実装（参照先）に合わせて呼び出します。
 
-クイックスタート
-- ベースURL: `http://localhost:8500/iblink/v1`
-- コンテンツタイプ: すべてのリクエストに `Content-Type: application/json` を指定
+---
 
-基本的な利⽤フロー
-- 1. ドキュメントを処理して埋め込みを作成（POST `/documents/process`）
-- 2. 処理状況を確認（POST `/documents/status`）
-- 3. 全ドキュメントを一覧表示（GET `/documents/list`）
-- 4. ⾃然⾔語で検索（POST `/documents/search`）
-- 5. 埋め込みを作成せずに内容を抽出（POST `/documents/extract`）
-- 6. ドキュメントを削除（DELETE `/documents/delete`）
+#### Base URL
+- `http://localhost:8500/iblink/v1`
+  - 既存実装では `http://localhost:8500/iblink` を base にして `/v1/documents/...` を組み立てるパターンもあります。
 
-サポートされるファイル形式
-- ドキュメント
-  - Office: `.docx`, `.xlsx`, `.pptx`, `.doc`, `.xls`, `.ppt`
-  - PDF: `.pdf`（OCR対応）
-  - テキスト: `.txt`, `.md`, `.rtf`
-  - Web: `.html`, `.htm`, `.xml`, `.json`
-  - データ: `.csv`, `.ipynb`（Jupyter Notebook）
-  - フィード: `.rss`, `.atom`
-- 画像（OCR対応）
-  - `.jpg`, `.jpeg`, `.png`, `.bmp`, `.tiff`, `.tif`, `.gif`, `.webp`
+---
 
-API エンドポイント
+#### 共通
+- Headers
+  - `Content-Type: application/json`（実装により `application/json; charset=utf-8`）
 
-1. ドキュメント処理（⾮同期）
-   - 埋め込みを⾮同期で作成します。システムへのファイル取り込みの主要なエンドポイントです。
-   - エンドポイント: POST `/documents/process`
-   - リクエスト例
+---
+
+#### Endpoints（OpenAPI / apidocs）
+- 取り込み（非同期）: POST `/documents/process`
+- 状態取得: POST `/documents/status`
+- 検索: POST `/documents/search`
+- 抽出（埋め込み生成なし）: POST `/documents/extract`
+- 一覧: POST `/documents/list`
+- 削除: DELETE `/documents/delete`
+- 情報: GET `/documents/info`
+
+---
+
+#### 代表フロー（Dアプリ実装での使い方）
+1. **取り込み**（POST `/documents/process`）でジョブ作成 → `job_id` を受け取る
+2. **進捗/完了確認**（POST `/documents/status`）を `status_type: "processing"` でポーリングする
+3. **検索**（POST `/documents/search`）で取り込み済みコンテンツを参照する
+4. **削除**（DELETE `/documents/delete`）で対象を消す（必要に応じてファイル側も削除する）
+
+---
+
+#### Request / Response（最小の実装参照）
+
+1) 取り込み（非同期）: POST `/documents/process`  
+必須: `d_app_id`, `project_id`（OpenAPI）  
 
 ```json
 {
+  "d_app_id": "my-app",
+  "project_id": "project-001",
+  "duplicate_strategy": "sync",
   "files": [
-    "C:/documents/report.pdf",
-    {
-      "file_path": "C:/images/diagram.png",
-      "enable_ocr": true
-    }
-  ],
-  "directories": ["C:/documents/project"],
-  "d_app_id": "my-app-123",
-  "project_id": "project-456",
-  "chunk_size": 500,
-  "chunk_overlap": 50,
-  "enable_ocr": false,
-  "batch_processing": true,
-  "duplicate_strategy": "skip",
-  "force_update": false
-}
-```
-
-   - 主要パラメータ
-     - `files`: ファイルパスまたはファイル設定オブジェクトの配列
-     - `directories`: 再帰的に処理するディレクトリ⼀覧
-     - `d_app_id`: テナント識別⼦
-     - `project_id`: プロジェクト識別⼦
-     - `chunk_size`: テキスト分割サイズ
-     - `chunk_overlap`: チャンク間の重なり
-     - `enable_ocr`: OCR 有効化
-     - `duplicate_strategy`: 重複時の動作（`skip`/`update`/`add`/`sync`）
-
-   - レスポンス例（202 Accepted）
-
-```json
-{
-  "job_id": "my-app-123_project-456_job_20250129_143022",
-  "status": "queued",
-  "message": "Document processing job created successfully",
-  "status_url": "/iblink/v1/documents/status",
-  "created_at": "2025-01-29T14:30:22Z"
-}
-```
-
-2. 処理状況の確認
-   - ジョブの進捗やキュー状態を確認します。
-   - エンドポイント: POST `/documents/status`
-   - リクエスト例
-
-```json
-{
-  "status_type": "processing",
-  "job_id": "my-app-123_project-456_job_20250129_143022",
-  "include_files": true
-}
-```
-
-   - 主な `status_type`
-     - `processing`: 特定ジョブの進捗
-     - `queue`: キューの状態
-     - `quota`: リソース使⽤量
-     - `health`: サービスの健全性
-     - `dependency`: 外部依存の状態
-     - `jobs`: すべてのジョブ⼀覧
-
-   - レスポンス例（処理中）
-
-```json
-{
-  "status_type": "processing",
-  "status": "processing",
-  "processing": {
-    "progress": 45,
-    "total_files": 10,
-    "processed_files": 4,
-    "current_file": "document5.pdf",
-    "started_at": "2025-01-29T14:30:23Z",
-    "estimated_completion": "2025-01-29T14:35:00Z"
-  }
-}
-```
-
-3. ドキュメント検索
-   - 処理済みのドキュメントを意味的類似度で検索します。
-   - エンドポイント: POST `/documents/search`
-   - リクエスト例
-
-```json
-{
-  "query": "How to configure authentication in the system?",
-  "d_app_id": "my-app-123",
-  "project_id": "project-456",
-  "directories": ["C:/documents/guides"],
-  "limit": 10,
-  "similarity_threshold": 0.7
-}
-```
-
-   - レスポンス例
-
-```json
-{
-  "query": "How to configure authentication in the system?",
-  "results": [
-    {
-      "document_id": "550e8400-e29b-41d4-a716-446655440001",
-      "content": "To configure authentication, first navigate to the Settings > Security section...",
-      "similarity_score": 0.92,
-      "file_name": "security-guide.pdf",
-      "file_path": "C:/documents/guides/security-guide.pdf",
-      "page_range": "12-13"
-    }
-  ],
-  "total_results": 2
-}
-```
-
-4. コンテンツ抽出
-   - 埋め込みを⽣成せずにテキストを抽出します。
-   - エンドポイント: POST `/documents/extract`
-   - リクエスト例
-
-```json
-{
-  "files": [
-    "C:/documents/report.pdf",
-    {
-      "file_path": "C:/images/scan.jpg",
-      "enable_ocr": true
-    }
-  ],
-  "d_app_id": "my-app-123",
-  "project_id": "project-456",
-  "include_metadata": true
-}
-```
-
-   - レスポンス例
-
-```json
-{
-  "status": "success",
-  "extracted_files": [
-    {
-      "file_name": "report.pdf",
-      "content": "Annual Report 2024...",
-      "content_length": 8542,
-      "metadata": {
-        "file_type": ".pdf",
-        "file_size": 2048576
-      }
-    }
+    { "file_path": "C:\\Documents\\report.pdf", "enable_ocr": false },
+    { "file_path": "C:\\Scans\\receipt.png", "enable_ocr": true }
   ]
 }
 ```
 
-5. ドキュメント⼀覧
-   - 処理済みのドキュメントまたはプロジェクトIDの⼀覧を取得します。
-   - エンドポイント: POST `/documents/list`
-   - リクエスト例（ドキュメント⼀覧）
+レスポンス（例: 202）
 
 ```json
 {
-  "list_type": "documents",
-  "d_app_id": "my-app-123",
-  "project_id": "project-456",
-  "file_extension": ".pdf"
+  "job_id": "my-app_project-001_20250120_103000",
+  "status": "pending",
+  "status_url": "/iblink/v1/documents/status"
 }
 ```
 
-   - レスポンス例
+2) 状態取得: POST `/documents/status`  
+必須: `status_type`（OpenAPI）  
+
+```json
+{ "status_type": "processing", "job_id": "my-app_project-001_20250120_103000", "include_files": true }
+```
+
+`status_type`（OpenAPI）
+- `processing`: ジョブ進捗
+- `queue`: キュー状態
+- `quota`: 使用量
+- `health`: ヘルス
+- `dependency`: 依存状態
+- `jobs`: ジョブ一覧
+
+3) 検索: POST `/documents/search`  
+必須: `query`（OpenAPI）  
 
 ```json
 {
-  "documents": [
-    {
-      "document_id": "550e8400-e29b-41d4-a716-446655440004",
-      "file_name": "user-manual.pdf",
-      "file_size": 5242880,
-      "created_at": "2025-01-28T09:30:00Z"
-    }
-  ],
-  "total_count": 2
+  "query": "検索クエリ",
+  "project_id": "project-001",
+  "limit": 5,
+  "directories": ["C:\\Documents\\manuals"],
+  "similarity_threshold": 0.7,
+  "search_mode": "hybrid"
 }
 ```
 
-6. ドキュメント削除
-   - 埋め込み済みのドキュメントを削除します。
-   - エンドポイント: DELETE `/documents/delete`
-   - リクエスト例
+補足（実装差分）
+- 既存実装では `search_mode` を送る例があります（OpenAPI ではフィールド未定義）。
+- Dアプリ実装では `query` の代わりに `text` を受け取り `query` に補正する例があります（Sales）。
+
+4) 削除: DELETE `/documents/delete`  
+必須: `d_app_id`（OpenAPI）  
 
 ```json
 {
-  "d_app_id": "my-app-123",
-  "project_id": "project-456",
-  "file_paths": ["C:/documents/old-doc.pdf"],
+  "d_app_id": "my-app",
+  "project_id": "project-001",
+  "file_paths": ["C:\\Documents\\old-doc.pdf"],
   "delete_all": false
 }
 ```
 
-   - レスポンス例
+---
 
-```json
-{
-  "status": "success",
-  "deleted_count": 3,
-  "message": "Successfully deleted 3 document(s) with 45 total embeddings"
-}
-```
-
-7. サービス状態確認（POST `/documents/status`）
-   - 健康状態チェック
-
-```json
-{ "status_type": "health" }
-```
-
-   - キュー状態確認
-
-```json
-{ "status_type": "queue", "d_app_id": "my-app-123" }
-```
-
-   - クオータ確認
-
-```json
-{ "status_type": "quota", "d_app_id": "my-app-123" }
-```
-
-8. API情報取得
-   - エンドポイント: GET `/documents/info`
-   - レスポンス例
-
-```json
-{
-  "service": "IB-Link Documents API (Standalone)",
-  "version": "1.0.0",
-  "description": "Enhanced document processing and embedding generation service",
-  "supported_file_types": [".pdf", ".txt", ".md", ".docx", ".xlsx", ".pptx"],
-  "database": { "provider": "PostgreSQL with pgvector" }
-}
-```
-
-エラーハンドリング
-- 標準的なエラーレスポンス
-
-```json
-{
-  "error": "エラーの概要",
-  "message": "詳細な説明",
-  "timestamp": "2025-01-29T15:20:00Z"
-}
-```
-
-よく使われるHTTPステータスコード
-- 200 OK: 成功
-- 202 Accepted: ⾮同期ジョブ作成成功
-- 400 Bad Request: パラメータ不備
-- 404 Not Found: ジョブ/ドキュメントが存在しない
-- 429 Too Many Requests: レート/キュー制限超過
-- 500 Internal Server Error: サーバー内部エラー
-- 503 Service Unavailable: 依存サービスが利⽤不可
-- 507 Insufficient Storage: 容量制限超過
-
-ベストプラクティス
-- バッチ処理を推奨（複数ファイルを⼀度に送信）
-- 適切なチャンクサイズを選択（⼩規模: 300〜500 / ⼤規模: 500〜1000）
-- ジョブ状態を定期的に確認（ポーリング活⽤）
-- OCR は必要な場合のみ有効化（パフォーマンス最適化）
-- 重複戦略を活⽤（更新時は `update`、完全同期は `sync`）
-
-統合サンプル
-
-```python
-# Python
-client = DocumentsAPIClient()
-
-result = client.process_documents(
-    files=["report.pdf", "guide.docx"],
-    d_app_id="my-app",
-    project_id="docs"
-)
-print(f"Processed {result['successful_files']} files successfully")
-
-results = client.search("authentication", "my-app")
-for r in results["results"]:
-    print(f"Score: {r['similarity_score']} - {r['file_name']}")
-```
-
-```javascript
-// Node.js
-const client = new DocumentsAPIClient();
-
-const result = await client.processDocuments(
-  ['report.pdf', 'guide.docx'],
-  'my-app',
-  'docs'
-);
-console.log(`Processed ${result.successful_files} files successfully`);
-
-const searchResults = await client.search('authentication', 'my-app');
-searchResults.results.forEach(r => {
-  console.log(`Score: ${r.similarity_score} - ${r.file_name}`);
-});
-```
-
-設定例
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Database=iblink_documents;Username=postgres;Password=your_password"
-  },
-  "DocumentsApi": {
-    "ChunkSize": 500,
-    "EnableOcr": true
-  },
-  "EmbeddingApi": {
-    "BaseUrl": "http://localhost:5000",
-    "Model": "cl_nagoya_ruri_v3_310m_optimized_onnx"
-  }
-}
-```
-
-トラブルシューティング
-- ジョブが進まない場合: ログ確認・依存サービスのヘルスチェック
-- OCR が動作しない: Tesseract のデータやパスを確認
-- 検索結果が出ない: 埋め込み⽣成完了の確認、しきい値を下げる
-- 容量制限超過: 古いドキュメントを削除または管理者に拡張を依頼
-
-パフォーマンス最適化
-- 10〜50 ファイルを⼀括処理
-- OCR は必要なときだけ有効化
-- 低レイテンシの埋め込み API 接続を確保
-- 結果キャッシュを活⽤
-
-セキュリティ
-- `d_app_id` によるマルチテナント分離
-- ディレクトリトラバーサル防⽌、SQL インジェクション対策
-- データはローカルに保存、外部送信なし（埋め込み API 先を除く）
-
-サポート
-- `logs/` ディレクトリのアプリログを確認
-- ステータスエンドポイントで依存状況を確認
-- 提供されている cURL サンプルで動作確認
+#### 既存実装例（参照先）
+- D-Josys
+  - `manual/Dapp/d-josys/src/api/IBLinkClient.js`（`/documents/{process,status,search,extract,list,delete}` をラップ）
+  - `manual/Dapp/d-josys/src/assets/js/apiClient.js`（`POST /v1/documents/search` を直接呼ぶ）
+- Sales
+  - `manual/Dapp/d-sales/src/api/IBLinkClient.js`（`/documents/*` ラップ。`text`→`query` 補正・固定パラメータ付与の例あり）
+  - `manual/Dapp/d-sales/src/preload.js`（`window.iblinkProcessDocuments` が `POST /documents/process` を直接呼ぶ。`duplicate_strategy:"sync"`）
+- Retail
+  - `manual/Dapp/d-retail/src/main.js`（Main 側で `POST /v1/documents/process`、`POST /v1/documents/search`、`DELETE /v1/documents/delete` を中継。`project_id` ゼロUUID補正、`file_path`/`file_paths` 正規化）
+- Medical
+  - 現時点の実装コードでは DocumentsAPI 呼び出しは未検出
 
 ---
 
