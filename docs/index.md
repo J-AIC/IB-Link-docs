@@ -805,6 +805,11 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 - 削除: DELETE `/documents/delete`
 - 情報: GET `/documents/info`
 
+補足（混線防止）
+- 本節は **`http://localhost:8500/iblink/v1` 配下の `/documents/*`** を扱います。
+- 「意味検索」を行うAPIは **DocumentsAPI（`POST /documents/search`）** と **RetrieverAPI（`POST /retriever`）** が別系統です。Dアプリ実装でどちらを採用しているかはアプリごとの参照先に合わせます。
+- `manual/apidocs` には `GET /documents/health` の例が存在しますが、`docs/api/openapi.*.yaml` には定義がありません（採用する場合はOpenAPI側に追記して仕様化します）。
+
 ---
 
 #### 代表フロー（Dアプリ実装での使い方）
@@ -904,34 +909,45 @@ DocumentsAPI は、IB-Link（Documents サービス）に対して **ドキュ�
 ---
 
 ### 4.7 RetrieverAPI
-概要
-Retriever API は、ドキュメントの埋め込み（embedding）を活⽤したセマンティック検索およびドキュメント取得を⾏う独⽴型サービスです。ベクトルベース検索とハイブリッド検索の両⽅をサポートし、類似度検索と全⽂検索を統合したインターフェースを提供します。
+概要  
+RetrieverAPI は、取り込み済みドキュメント（チャンク）に対して **ベクトル検索/ハイブリッド検索** を実行し、該当チャンク（`results[]`）を返すHTTP APIです。
 
-主な機能
-- ベクトルセマンティック検索: 埋め込みを使って意味的に類似したドキュメントを検索
-- ハイブリッド検索: ベクトル類似度と全⽂検索を組み合わせて精度向上
-- ハイブリッド RRF 検索: Reciprocal Rank Fusion を使って複数のランキング信号を統合
-- マルチテナント対応: `d_app_id` と `project_id` によるデータ分離
-- ドキュメントフィルタリング: ドキュメント ID やディレクトリパスで絞り込み可能
-- PostgreSQL + pgvector: 効率的なベクトル演算を実現
+---
 
-アーキテクチャ構成
-1. コントローラ層
-   - メイン API エンドポイント: POST `/iblink/v1/retriever`
-   - ヘルスチェック: GET `/iblink/v1/retriever/health`
-   - API 情報: GET `/iblink/v1/retriever/info`
-2. サービス層
-   - すべての検索モードのロジックを実装
-   - DB クエリ管理と結果の整形を担当
-   - 埋め込み⽣成に外部の埋め込み API を使⽤（デフォルト: `http://localhost:5000/iblink/v1/embeddings`）
-3. データ層
-   - PostgreSQL + pgvector 拡張を使⽤
-   - `DocumentEmbeddings` テーブルを管理
+#### Base URL
+- `http://localhost:6500/iblink/v1`
+  - OpenAPI はこのBase URLに対して `/retriever` を呼びます。
+- `http://localhost:6500/iblink/v1/retriever`
+  - `manual/apidocs` のUsage Examplesは、このURLを「Base URL」として例示しています（`POST` は同URL、`GET` は `/health` や `/info` を付与）。
 
-API エンドポイント
-- メイン検索エンドポイント（POST `/iblink/v1/retriever`）
-  - ベクトル類似度および/または全⽂検索を⽤いてドキュメント検索を実⾏します。
-  - リクエスト例
+---
+
+#### 共通
+- Headers
+  - `Content-Type: application/json`
+
+---
+
+#### Endpoints（OpenAPI / apidocs）
+- 検索: POST `/retriever`
+- ヘルス: GET `/retriever/health`
+- 情報: GET `/retriever/info`
+
+補足（混線防止）
+- **DocumentsAPI の `POST /documents/search` と RetrieverAPI の `POST /retriever` は別系統**です。Dアプリ実装でどちらを採用しているかは、各アプリの実装（参照先）に合わせます。
+
+---
+
+#### 代表フロー（Dアプリ側の実装観点）
+1. DocumentsAPI（4.6）でドキュメントを取り込む（埋め込み作成が完了している前提を作る）
+2. RetrieverAPI（POST `/retriever`）へクエリを投げ、`results[]` の `text` と `metadata` をUI/プロンプトへ利用する
+
+---
+
+#### Request / Response（最小の実装参照）
+
+1) 検索: POST `/retriever`  
+必須: `text`（OpenAPI）  
 
 ```json
 {
@@ -940,105 +956,47 @@ API エンドポイント
   "project_id": "proj-456",
   "limit": 10,
   "search_mode": "vector",
-  "files_directories": ["dir1", "dir2"],
-  "file_paths": ["/path/to/file1.pdf", "/path/to/file2.txt"],
-  "documents_id": ["guid1", "guid2"],
-  "vector_weight": 0.7,
-  "text_weight": 0.3,
-  "rrf_k": 60,
-  "enable_phrase_matching": true
+  "files_directories": ["C:\\Docs\\Guides"],
+  "documents_id": ["550e8400-e29b-41d4-a716-446655440000"]
 }
 ```
 
-  - レスポンス例
+レスポンス（例）
 
 ```json
 {
   "query": "検索クエリ",
-  "d_app_id": "app-123",
   "project_id": "proj-456",
+  "d_app_id": "app-123",
   "total_results": 10,
-  "total_unfiltered_results": 150,
-  "filtered_directories": ["dir1", "dir2"],
-  "filtered_file_paths": ["/path/to/file1.pdf", "/path/to/file2.txt"],
   "results": [
     {
-      "id": "uuid-string",
-      "text": "ドキュメントの⼀部テキスト...",
-      "score": 0.95,
+      "id": "doc-123-chunk-5",
+      "text": "ドキュメントの一部テキスト...",
+      "score": 0.92,
       "metadata": {
-        "source": "document.pdf",
-        "directory": "/path/to/docs",
-        "file_path": "/full/path/to/document.pdf",
+        "file_path": "C:\\Docs\\Guides\\guide.pdf",
         "chunk_index": 5,
-        "page_range": "10-12",
-        "start_page": 10,
-        "end_page": 12,
-        "chunk_category": "PDF",
-        "document_id": "doc-uuid",
-        "vector_score": 0.95,
-        "text_score": 0.8,
-        "text_rank": 1.0
+        "page_range": "12-14",
+        "document_id": "550e8400-e29b-41d4-a716-446655440000"
       }
     }
   ]
 }
 ```
 
-- ヘルスチェック（GET `/iblink/v1/retriever/health`）
+2) ヘルス: GET `/retriever/health`  
+3) 情報: GET `/retriever/info`
 
-```json
-{
-  "status": "healthy",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "service": "retriever-api",
-  "version": "1.0.0",
-  "port": 6500,
-  "dependencies": {
-    "database": {
-      "status": "healthy",
-      "message": "Database connection healthy"
-    },
-    "embeddingApi": {
-      "status": "healthy",
-      "message": "Embedding API available",
-      "url": "http://localhost:5000"
-    }
-  }
-}
-```
+---
 
-- 情報エンドポイント（GET `/iblink/v1/retriever/info`）
-  - API の構成情報を返します。
-
-検索モード
-- ベクトル検索（デフォルト）: コサイン類似度。⾔い換えや類義語にも強い
-- ハイブリッド検索: 最終スコア = `(vector_score * vector_weight) + (text_score * text_weight)`（デフォルト 70/30）
-- ハイブリッド RRF 検索: `RRF_score = 1/(k + vector_rank) + 1/(k + text_rank)`（デフォルト k=60）
-
-テキスト検索処理
-- フレーズマッチング（近接/接頭辞）対応
-- 標準検索は AND + 接頭辞マッチ
-
-データベーススキーマ
-- `DocumentEmbeddings`（Id, Content, Embedding, FileName, FilePath, …）
-- pgvector によるベクトルインデックス利⽤
-
-設定
-- `appsettings.json` の設定例／環境変数でポートや DB 接続を上書き可能
-
-エラーハンドリング
-- エラー JSON の形式、種別（`invalid_request_error` / `service_unavailable` など）
-
-パフォーマンス
-- pgvector インデックス最適化
-- ハイブリッドで内部的に 3 倍の候補を取得
-- スコア閾値で低品質マッチを除外
-- 接続プール／埋め込みキャッシュ推奨
-
-セキュリティ
-- マルチテナントによる分離
-- パラメータ化クエリ・ログのサニタイズ・⼊⼒バリデーション
+#### 既存実装例（参照先）
+- D-Josys
+  - `manual/Dapp/d-josys/src/index.js`（Main側 `iblink:documentRetriever` は **無効化（501）**。DocumentsAPI の `searchDocuments`（`POST /documents/search`）を使用する方針）
+- Sales
+  - `manual/Dapp/d-sales/src/Tasks/cf/renderer.js`（検証用UI: `POST ${apiUrl}/iblink/v1/retriever`。`text`/`search_mode`/`files_directories`/`documents_id` を送信）
+- Retail / Medical
+  - 現時点の実装コードでは RetrieverAPI 呼び出しは未検出
 
 ---
 
