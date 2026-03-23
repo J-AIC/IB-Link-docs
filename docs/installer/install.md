@@ -113,14 +113,14 @@
 
 ---
 
-### 3.10 モデル設定（Gemma 3 4B）
+### 3.10 モデル設定（Qwen3-0.6B）
 
 ![モデルオプション](images/page-040_img-011.png)
 
 1. 「Model Options」画面で以下を確認します。
    - **Load model automatically on startup**：IB-Link 起動時に自動でモデルを読み込む（通常は ON 推奨）
-   - **Download Gemma 3 4B models during installation (main + vision)**：インストール時にモデルをダウンロード（推奨）
-2. 画面の案内どおり、モデル合計サイズは **約 3.4GB（main 約 2.5GB + vision 約 851MB）** です。ディスク容量と通信環境を確認してください。
+   - **Download Qwen3-0.6B model during installation**：インストール時にモデルをダウンロード（推奨）
+2. ディスク容量と通信環境を確認してください。
 3. **［Next］** をクリックします。
 
 ---
